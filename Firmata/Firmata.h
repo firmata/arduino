@@ -42,9 +42,12 @@
 #define END_SYSEX               0xF7 // end a MIDI Sysex message
 
 // extended command set using sysex (0-127/0x00-0x7F)
-/* 0x00-0x0F reserved for custom commands */
+/* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define FIRMATA_STRING          0x71 // a string message with 14-bits per char
+#define SYSEX_I2C_REQUEST       0x76 // send an I2C read/write request
+#define SYSEX_I2C_REPLY         0x77 // a reply to an I2C read request
+#define SYSEX_SAMPLING_INTERVAL 0x78 // set the poll rate of the main loop
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
@@ -55,7 +58,8 @@
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
-
+// 0x05
+#define I2C                     0x06 // pin included in I2C setup
 
 extern "C" {
 // callback function types
