@@ -18,6 +18,7 @@
  */
 
 #include <Firmata.h>
+#include <Servo.h>
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -36,7 +37,9 @@ byte portStatus[TOTAL_PORTS];
 /* timer variables */
 unsigned long currentMillis;     // store the current value from millis()
 unsigned long nextExecuteMillis; // for comparison with currentMillis
+int samplingInterval = 19;      // how often to run the main loop (in ms)
 
+Servo servos[2]; // the servo library can control servos on pins 9 and 10 only
 
 /*==============================================================================
  * FUNCTIONS
@@ -83,33 +86,48 @@ void setPinModeCallback(byte pin, int mode) {
   byte port = 0;
   byte offset = 0;
 
+  // TODO: abstract for different boards
   if (pin < 8) {
     port = 0;
     offset = 0;
   } else if (pin < 14) {
     port = 1;
-    offset = 8;     
+    offset = 8;
   } else if (pin < 22) {
     port = 2;
     offset = 14;
   }
   
   if(pin > 1) { // ignore RxTx (pins 0 and 1)
-    pinStatus[pin] = mode;
     switch(mode) {
     case INPUT:
+      pinStatus[pin] = mode;
       pinMode(pin, INPUT);
       portStatus[port] = portStatus[port] &~ (1 << (pin - offset));
       break;
     case OUTPUT:
-      digitalWrite(pin, LOW); // disable PWM
+      digitalWrite(pin, LOW); // disable PWM and fall thru to 'case PWM:' 
     case PWM:
+      pinStatus[pin] = mode;
       pinMode(pin, OUTPUT);
       portStatus[port] = portStatus[port] | (1 << (pin - offset));
       break;
-      //case ANALOG: // TODO figure this out
+    case ANALOG:
+      pinStatus[pin] = mode;
+      digitalWrite(pin, LOW); // disable PWM and internal pull-up resistors
+      break;
+    case SERVO:
+      if((pin == 9 || pin == 10))
+        pinStatus[pin] = mode;
+      else
+        Firmata.sendString("Servo only on pins 9 and 10");
+      break;
+    case I2C:
+      pinStatus[pin] = mode;
+      Firmata.sendString("I2C mode not yet supported");
+      break;
     default:
-      Firmata.sendString("");
+      Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
     }
     // TODO: save status to EEPROM here, if changed
   }
@@ -161,19 +179,48 @@ void reportDigitalCallback(byte port, int value)
 }
 
 /*==============================================================================
+ * SYSEX-BASED commands
+ *============================================================================*/
+
+void sysexCallback(byte command, byte argc, byte *argv)
+{
+  switch(command) {
+  case SERVO_CONFIG:
+    if(argc > 4) {
+      // these vars are here for clarity, they'll optimized away by the compiler
+      byte pin = argv[0] - 9; // servos are pins 9 and 10, so offset for array
+      int minPulse = argv[1] + (argv[2] << 7);
+      int maxPulse = argv[3] + (argv[4] << 7);
+      servos[pin].attach(argv[0], minPulse, maxPulse);
+      // TODO does the Servo have to be detach()ed before reconfiguring?
+      setPinModeCallback(pin, SERVO);
+    }
+    break;
+  case SYSEX_SAMPLING_INTERVAL:
+    if (argc > 1)
+      samplingInterval = argv[0] + (argv[1] << 7);
+    else
+      Firmata.sendString("Not enough data");
+    break;
+  }
+}
+
+
+/*==============================================================================
  * SETUP()
  *============================================================================*/
 void setup() 
 {
   byte i;
 
-  Firmata.setFirmwareVersion(2, 0);
+  Firmata.setFirmwareVersion(2, 1);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach(START_SYSEX, sysexCallback);
 
   portStatus[0] = B00000011;  // ignore Tx/RX pins
   portStatus[1] = B11000000;  // ignore 14/15 pins 
@@ -214,7 +261,7 @@ void loop()
   checkDigitalInputs();  
   currentMillis = millis();
   if(currentMillis > nextExecuteMillis) {  
-    nextExecuteMillis = currentMillis + 19; // run this every 20ms
+    nextExecuteMillis = currentMillis + samplingInterval;
     /* SERIALREAD - Serial.read() uses a 128 byte circular buffer, so handle
      * all serialReads at once, i.e. empty the buffer */
     while(Firmata.available())
