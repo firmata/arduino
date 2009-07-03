@@ -13,7 +13,7 @@
 
 
 /* 
- * TODO: add Servo support using setPinMode(pin, SERVO);
+ * TODO: add Servo support using setPinModeCallback(pin, SERVO);
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
@@ -99,7 +99,10 @@ void setPinModeCallback(byte pin, int mode) {
   }
   
   if(pin > 1) { // ignore RxTx (pins 0 and 1)
+    reportAnalogCallback(pin - 14, mode == ANALOG ? 1 : 0); // turn on/off reporting
     switch(mode) {
+    case ANALOG:
+      digitalWrite(pin, LOW); // disable internal pull-ups and fall thru to 'case INPUT:'
     case INPUT:
       pinStatus[pin] = mode;
       pinMode(pin, INPUT);
@@ -111,10 +114,6 @@ void setPinModeCallback(byte pin, int mode) {
       pinStatus[pin] = mode;
       pinMode(pin, OUTPUT);
       portStatus[port] = portStatus[port] | (1 << (pin - offset));
-      break;
-    case ANALOG:
-      pinStatus[pin] = mode;
-      digitalWrite(pin, LOW); // disable PWM and internal pull-up resistors
       break;
     case SERVO:
       if((pin == 9 || pin == 10))
@@ -150,7 +149,12 @@ void digitalWriteCallback(byte port, int value)
     PORTB = (byte)value;
     break;
   case 2: // analog pins used as digital
-    PORTC = (byte)value;
+    byte pin;
+    byte pinModeMask;
+    for(pin=0; pin<8; pin++)
+      if(pinStatus[pin] == OUTPUT)
+        pinModeMask += 1 << pin;
+    PORTC = (byte)value & pinModeMask;
     break;
   }
 }
@@ -167,6 +171,7 @@ void reportAnalogCallback(byte pin, int value)
   }
   else { // everything but 0 enables reporting of that pin
     analogInputsToReport = analogInputsToReport | (1 << pin);
+    setPinModeCallback(pin, ANALOG);
   }
   // TODO: save status to EEPROM here, if changed
 }
@@ -226,8 +231,7 @@ void setup()
   portStatus[1] = B11000000;  // ignore 14/15 pins 
   portStatus[2] = B00000000;
 
-  //    for(i=0; i<TOTAL_DIGITAL_PINS; ++i) { // TODO make this work with analogs
-  for(i=0; i<14; ++i) {
+  for(i=0; i<TOTAL_DIGITAL_PINS; ++i) { // TODO make this work with analogs
     setPinModeCallback(i,OUTPUT);
   }
   // set all outputs to 0 to make sure internal pull-up resistors are off
@@ -248,7 +252,7 @@ void setup()
   if(reportPINs[1]) outputPort(1, PINB);
   if(reportPINs[ANALOG_PORT]) outputPort(ANALOG_PORT, PINC);
 
-  Firmata.begin();
+  Firmata.begin(57600);
 }
 
 /*==============================================================================
