@@ -175,7 +175,7 @@ void setup()
 
   /* I2C data is not reliable at higher baud rates, you'll need to change the
      baud rate on the host computer as well.  To get a firmware running with
-     minimal effort, you can try using the default baud rate (115200) */
+     minimal effort, you can try using the default baud rate (57600) */
   Firmata.begin(38400);
   Wire.begin();
 }

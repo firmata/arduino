@@ -27,7 +27,7 @@ void setup()
     Firmata.setFirmwareVersion(0, 1);
     Firmata.attach(FIRMATA_STRING, stringCallback);
     Firmata.attach(START_SYSEX, sysexCallback);
-    Firmata.begin();
+    Firmata.begin(57600);
 }
 
 void loop()
