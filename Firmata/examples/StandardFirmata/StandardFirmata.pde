@@ -134,8 +134,15 @@ void setPinModeCallback(byte pin, int mode) {
 
 void analogWriteCallback(byte pin, int value)
 {
-  setPinModeCallback(pin,PWM);
-  analogWrite(pin, value);
+  switch(pinStatus[pin]) {
+  case SERVO:
+    if(pin == 9)  servos[0].write(value);
+    if(pin == 10) servos[1].write(value);
+    break;
+  case PWM:
+    analogWrite(pin, value);
+    break;
+  }
 }
 
 void digitalWriteCallback(byte port, int value)
