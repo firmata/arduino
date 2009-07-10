@@ -22,7 +22,7 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   0 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   1 // for backwards compatible changes
 #define VERSION_BLINK_PIN       13 // digital pin to blink version on
 
 #define MAX_DATA_BYTES 32 // max number of data bytes in non-Sysex messages
@@ -45,6 +45,7 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define FIRMATA_STRING          0x71 // a string message with 14-bits per char
+#define SYSEX_SHIFT             0x75 // a bitstream to/from a shift register
 #define SYSEX_I2C_REQUEST       0x76 // send an I2C read/write request
 #define SYSEX_I2C_REPLY         0x77 // a reply to an I2C read request
 #define SYSEX_SAMPLING_INTERVAL 0x78 // set the poll rate of the main loop
@@ -58,7 +59,7 @@
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
-// 0x05
+#define SHIFT                   0x05 // shiftIn/shiftOut mode
 #define I2C                     0x06 // pin included in I2C setup
 
 extern "C" {
