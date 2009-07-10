@@ -4,11 +4,21 @@ complete documentation, see the Firmata web page:
 
 http://firmata.org
 
-To install Firmata, unzip the Firmata zip file, then move the included
-"Firmata" folder into your Arduino installation.  Do not move the whole
-"Pduino-0.4beta2" folder, just the "Firmata" folder.  Here are some typical
-locations based on OS:
+To install Firmata into Arduino, you'll need to delete the included one and
+replace it with this one.  First find the existing 'Firmata' library and
+either delete or rename it.  Here are some typical locations based on OS:
 
 GNU/Linux: ~/Desktop/arduino-0011/hardware/libraries
 Mac OS X:  /Applications/arduino-0011/hardware/libraries
 Windows:   C:\Program Files\arduino-0011\hardware\libraries
+
+0 delete the existing 'Firmata' library in the above location
+1 unzip the Firmata zip file
+2 move the included "Firmata" folder into your Arduino installation.  (Do not
+  move the whole "Firmata-2.1beta0" folder, just the "Firmata" folder.)
+
+
+Now you can launch Arduino and install a Firmata example firmware.
+'StandardFirmata' is probably the best place to start.  You can tell if the
+above update succeeded because you'll see the new 'I2CFirmata' example firmata
+in with the Firmata examples.
