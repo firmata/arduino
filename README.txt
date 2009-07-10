@@ -12,11 +12,10 @@ GNU/Linux: ~/Desktop/arduino-0011/hardware/libraries
 Mac OS X:  /Applications/arduino-0011/hardware/libraries
 Windows:   C:\Program Files\arduino-0011\hardware\libraries
 
-0 delete the existing 'Firmata' library in the above location
-1 unzip the Firmata zip file
-2 move the included "Firmata" folder into your Arduino installation.  (Do not
-  move the whole "Firmata-2.1beta0" folder, just the "Firmata" folder.)
-
+ 0. delete the existing 'Firmata' library in the above location
+ 1. unzip the Firmata zip file
+ 2. move the included "Firmata" folder into your Arduino installation.  (Do not
+    move the whole "Firmata-2.1beta0" folder, just the included "Firmata" folder.)
 
 Now you can launch Arduino and install a Firmata example firmware.
 'StandardFirmata' is probably the best place to start.  You can tell if the
