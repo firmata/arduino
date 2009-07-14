@@ -45,11 +45,11 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define FIRMATA_STRING          0x71 // a string message with 14-bits per char
-#define SYSEX_SHIFT             0x75 // a bitstream to/from a shift register
 #define SYSEX_I2C_REQUEST       0x76 // send an I2C read/write request
 #define SYSEX_I2C_REPLY         0x77 // a reply to an I2C read request
-#define SYSEX_SAMPLING_INTERVAL 0x78 // set the poll rate of the main loop
+#define I2C_CONFIG				0x78 // config I2C settings such as delay times and power pins
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
+#define SYSEX_SAMPLING_INTERVAL 0x7A // set the poll rate of the main loop
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 
