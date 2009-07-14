@@ -208,7 +208,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       setPinModeCallback(pin, SERVO);
     }
     break;
-  case SYSEX_SAMPLING_INTERVAL:
+  case SAMPLING_INTERVAL:
     if (argc > 1)
       samplingInterval = argv[0] + (argv[1] << 7);
     else

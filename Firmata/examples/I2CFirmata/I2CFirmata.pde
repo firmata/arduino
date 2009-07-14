@@ -66,7 +66,7 @@ void readAndReportData(byte address, int theRegister, byte numBytes)
       i2cRxData[2 + i] = Wire.receive();
     }
     // send slave address, register and received bytes
-    Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
+    Firmata.sendSysex(I2C_REPLY, numBytes + 2, i2cRxData);
   }
   else {
     if(numBytes > Wire.available()) {
@@ -86,7 +86,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   byte data;
   int  delayTime;
 
-  if (command == SYSEX_I2C_REQUEST) {
+  if (command == I2C_REQUEST) {
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
     slaveAddress = argv[0];
 
@@ -133,7 +133,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       break;
     }
   }
-  else if (command == SYSEX_SAMPLING_INTERVAL) {
+  else if (command == SAMPLING_INTERVAL) {
     samplingInterval = argv[0] + (argv[1] << 7);
 
     if (samplingInterval < MINIMUM_SAMPLING_INTERVAL) {

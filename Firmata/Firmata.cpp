@@ -154,7 +154,7 @@ void FirmataClass::processSysexMessage(void)
   case REPORT_FIRMWARE:
     printFirmwareVersion();
     break;
-  case FIRMATA_STRING:
+  case STRING_DATA:
     if(currentStringCallback) {
       byte bufferLength = (sysexBytesRead - 1) / 2;
       char *buffer = (char*)malloc(bufferLength * sizeof(char));
@@ -327,7 +327,7 @@ void FirmataClass::sendString(byte command, const char* string)
 // send a string as the protocol string type
 void FirmataClass::sendString(const char* string) 
 {
-  sendString(FIRMATA_STRING, string);
+  sendString(STRING_DATA, string);
 }
 
 
@@ -355,7 +355,7 @@ void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
 void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
 {
   switch(command) {
-  case FIRMATA_STRING: currentStringCallback = newFunction; break;
+  case STRING_DATA: currentStringCallback = newFunction; break;
   }
 }
 
@@ -368,7 +368,7 @@ void FirmataClass::detach(byte command)
 {
   switch(command) {
   case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
-  case FIRMATA_STRING: currentStringCallback = NULL; break;
+  case STRING_DATA: currentStringCallback = NULL; break;
   case START_SYSEX: currentSysexCallback = NULL; break;
   default:
     attach(command, (callbackFunction)NULL);
