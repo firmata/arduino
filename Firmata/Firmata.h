@@ -156,6 +156,11 @@ extern FirmataClass Firmata;
 #define TOTAL_DIGITAL_PINS      20 // 14 digital + 6 analog
 #define TOTAL_PORTS             3  // total number of ports for the board
 #define ANALOG_PORT             2  // port# of analog used as digital
+#elif defined(__AVR_ATmega1280__)// Arduino Mega
+#define TOTAL_ANALOG_PINS       16
+#define TOTAL_DIGITAL_PINS      54
+#define TOTAL_PORTS             8 // total number of ports for the board
+#define ANALOG_PORT             2 // port# of analog used as digital
 #elif defined(__AVR_ATmega128__)// Wiring
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_DIGITAL_PINS      51
