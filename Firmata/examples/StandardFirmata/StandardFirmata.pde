@@ -99,6 +99,8 @@ void setPinModeCallback(byte pin, int mode) {
   }
   
   if(pin > 1) { // ignore RxTx (pins 0 and 1)
+    if(pin == 9  && servos[0].attached()) servos[0].detach();
+    if(pin == 10 && servos[1].attached()) servos[1].detach();
     if(pin > 13) 
       reportAnalogCallback(pin - 14, mode == ANALOG ? 1 : 0); // turn on/off reporting
     switch(mode) {
@@ -117,9 +119,10 @@ void setPinModeCallback(byte pin, int mode) {
       portStatus[port] = portStatus[port] | (1 << (pin - offset));
       break;
     case SERVO:
-      if((pin == 9 || pin == 10))
-        pinStatus[pin] = mode;
-      else
+      if((pin == 9 || pin == 10)) {
+        pinStatus[pin] = mode; 	
+        servos[pin-9].attach(pin);
+      } else
         Firmata.sendString("Servo only on pins 9 and 10");
       break;
     case I2C:
