@@ -11,9 +11,7 @@
   formatted using the GNU C formatting and indenting
 */
 
-
 /* 
- * TODO: add Servo support using setPinModeCallback(pin, SERVO);
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
@@ -242,7 +240,7 @@ void setup()
   portStatus[1] = B11000000;  // ignore 14/15 pins 
   portStatus[2] = B00000000;
 
-  for(i=0; i<TOTAL_DIGITAL_PINS; ++i) { // TODO make this work with analogs
+  for(i=0; i < FIRST_ANALOG_PIN; ++i) {
     setPinModeCallback(i,OUTPUT);
   }
   // set all outputs to 0 to make sure internal pull-up resistors are off
