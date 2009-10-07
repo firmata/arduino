@@ -180,7 +180,7 @@ void reportAnalogCallback(byte pin, int value)
   }
   else { // everything but 0 enables reporting of that pin
     analogInputsToReport = analogInputsToReport | (1 << pin);
-    setPinModeCallback(pin, ANALOG);
+    setPinModeCallback(pin + FIRST_ANALOG_PIN, ANALOG);
   }
   // TODO: save status to EEPROM here, if changed
 }
