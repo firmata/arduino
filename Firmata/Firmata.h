@@ -158,6 +158,7 @@ extern FirmataClass Firmata;
 #define ANALOG_PORT             2 // port# of analog used as digital
 #define FIRST_ANALOG_PIN        14 // pin# corresponding to analog 0
 #define VERSION_BLINK_PIN       13 // digital pin to blink version on
+#define FIRST_SERVO_PIN         2 // pin# of the first servo pin
 #elif defined(__AVR_ATmega8__)  // old Arduinos
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_DIGITAL_PINS      20 // 14 digital + 6 analog
@@ -165,6 +166,7 @@ extern FirmataClass Firmata;
 #define ANALOG_PORT             2  // port# of analog used as digital
 #define FIRST_ANALOG_PIN        14 // pin# corresponding to analog 0
 #define VERSION_BLINK_PIN       13 // digital pin to blink version on
+#define FIRST_SERVO_PIN         2 // pin# of the first servo pin
 #elif defined(__AVR_ATmega1280__)// Arduino Mega
 #define TOTAL_ANALOG_PINS       16
 #define TOTAL_DIGITAL_PINS      70 // 54 digital + 16 analog
@@ -172,6 +174,7 @@ extern FirmataClass Firmata;
 #define ANALOG_PORT             8 // port# of analog used as digital
 #define FIRST_ANALOG_PIN        54 // pin# corresponding to analog 0
 #define VERSION_BLINK_PIN       13 // digital pin to blink version on
+#define FIRST_SERVO_PIN         2 // pin# of the first servo pin
 #elif defined(__AVR_ATmega128__)// Wiring
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_DIGITAL_PINS      51
