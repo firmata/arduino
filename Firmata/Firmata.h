@@ -181,7 +181,8 @@ extern FirmataClass Firmata;
 #define TOTAL_PORTS             7 // total number of ports for the board
 #define ANALOG_PORT             5 // port# of analog used as digital
 #define FIRST_ANALOG_PIN        40 // pin# corresponding to analog 0
-#define VERSION_BLINK_PIN       13 // digital pin to blink version on
+#define VERSION_BLINK_PIN       48 // digital pin to blink version on
+#define FIRST_SERVO_PIN         8 // pin# of the first servo pin
 #elif defined(__AVR_AT90USB162__) // Teensy
 #define TOTAL_ANALOG_PINS       0
 #define TOTAL_DIGITAL_PINS      21 // 21 digital + no analog
