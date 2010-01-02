@@ -49,7 +49,6 @@ void outputPort(byte portNumber, byte portValue)
   if(previousPINs[portNumber] != portValue) {
     Firmata.sendDigitalPort(portNumber, portValue);
     previousPINs[portNumber] = portValue;
-    Firmata.sendDigitalPort(portNumber, portValue);
   }
 }
 
