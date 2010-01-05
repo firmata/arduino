@@ -1,4 +1,6 @@
-/* Supports as many analog inputs and analog PWM outputs as possible.
+/* 
+ * This firmware reads all inputs and sends them as fast as it can.  It was
+ * inspired by the ease-of-use of the Arduino4Max program.
  *
  * This example code is in the public domain.
  */
