@@ -10,8 +10,10 @@
  */
 
 /* 
- * TODO: add Servo support using setPinMode(pin, SERVO);
- * TODO: use Program Control to load stored profiles from EEPROM
+ * This is an old version of StandardFirmata (v2.0).  It is kept here because
+ * its the last version that works on an ATMEGA8 chip.  Also, it can be used
+ * for host software that has not been updated to a newer version of the
+ * protocol.  It also uses the old baud rate of 115200 rather than 57600.
  */
 
 #include <EEPROM.h>
