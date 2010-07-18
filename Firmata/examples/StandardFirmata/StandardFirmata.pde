@@ -236,7 +236,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // servos are pins from 2 to 13, so offset for array
         if (servos[PIN_TO_SERVO(pin)].attached())
           servos[PIN_TO_SERVO(pin)].detach();
-        servos[PIN_TO_SERVO(pin)].attach(pin, minPulse, maxPulse);
+        servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
         setPinModeCallback(pin, SERVO);
       }
     }
