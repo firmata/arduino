@@ -247,6 +247,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
     else
       Firmata.sendString("Not enough data");
     break;
+  case EXT_ANALOG_WRITE:
+    if (argc > 1) {
+      int val = argv[1];
+      if (argc > 2) val |= (argv[2] << 7);
+      if (argc > 3) val |= (argv[3] << 14);
+      analogWriteCallback(argv[0], val);
+    }
+    break;
   }
 }
 

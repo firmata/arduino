@@ -47,7 +47,10 @@
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
-#define I2C_CONFIG				0x78 // config I2C settings such as delay times and power pins
+#define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
+#define EXT_ANALOG_WRITE        0x6F // analog write (PWM, Servo, etc) to any pin
+#define PIN_MODE_QUERY          0x72 // ask for current and supported pin modes
+#define PIN_MODE_RESPONSE       0x73 // reply with current and supported pin modes
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
