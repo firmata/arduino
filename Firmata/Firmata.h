@@ -48,9 +48,13 @@
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
-#define EXT_ANALOG_WRITE        0x6F // analog write (PWM, Servo, etc) to any pin
-#define PIN_MODE_QUERY          0x72 // ask for current and supported pin modes
-#define PIN_MODE_RESPONSE       0x73 // reply with current and supported pin modes
+#define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
+#define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
+#define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
+#define CAPABILITY_QUERY        0x6B // ask for supported modes and resolution of all pins
+#define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution
+#define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers
+#define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages

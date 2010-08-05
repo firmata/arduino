@@ -32,6 +32,7 @@ byte previousPINs[TOTAL_PORTS];     // previous 8 bits sent
 /* pins configuration */
 byte pinConfig[TOTAL_PINS];         // configuration of every pin
 byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
+int pinState[TOTAL_PINS];           // any value that has been written
 
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
@@ -100,6 +101,7 @@ void setPinModeCallback(byte pin, int mode)
       portConfigInputs[pin/8] &= ~(1 << (pin & 7));
     }
   }
+  pinState[pin] = 0;
   switch(mode) {
   case ANALOG:
     if (IS_PIN_ANALOG(pin)) {
@@ -127,6 +129,7 @@ void setPinModeCallback(byte pin, int mode)
   case PWM:
     if (IS_PIN_PWM(pin)) {
       pinMode(PIN_TO_PWM(pin), OUTPUT);
+      analogWrite(PIN_TO_PWM(pin), 0);
       pinConfig[pin] = PWM;
     }
     break;
@@ -157,10 +160,12 @@ void analogWriteCallback(byte pin, int value)
     case SERVO:
       if (IS_PIN_SERVO(pin))
         servos[PIN_TO_SERVO(pin)].write(value);
+        pinState[pin] = value;
       break;
     case PWM:
       if (IS_PIN_PWM(pin))
         analogWrite(PIN_TO_PWM(pin), value);
+        pinState[pin] = value;
       break;
     }
   }
@@ -181,6 +186,7 @@ void digitalWriteCallback(byte port, int value)
         // do not touch pins in PWM, ANALOG, SERVO or other modes
         if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
           pinWriteMask |= mask;
+          pinState[pin] = ((byte)value & mask) ? 1 : 0;
         }
       }
       mask = mask << 1;
@@ -209,7 +215,9 @@ void reportAnalogCallback(byte analogPin, int value)
 
 void reportDigitalCallback(byte port, int value)
 {
-  reportPINs[port] = (byte)value;
+  if (port < TOTAL_PORTS) {
+    reportPINs[port] = (byte)value;
+  }
   // do not disable analog reporting on these 8 pins, to allow some
   // pins used for digital, others analog.  Instead, allow both types
   // of reporting to be enabled, but check if the pin is configured
@@ -247,13 +255,62 @@ void sysexCallback(byte command, byte argc, byte *argv)
     else
       Firmata.sendString("Not enough data");
     break;
-  case EXT_ANALOG_WRITE:
+  case EXTENDED_ANALOG:
     if (argc > 1) {
       int val = argv[1];
       if (argc > 2) val |= (argv[2] << 7);
       if (argc > 3) val |= (argv[3] << 14);
       analogWriteCallback(argv[0], val);
     }
+    break;
+  case CAPABILITY_QUERY:
+    Serial.write(START_SYSEX);
+    Serial.write(CAPABILITY_RESPONSE);
+    for (byte pin=0; pin < TOTAL_PINS; pin++) {
+      if (IS_PIN_DIGITAL(pin)) {
+        Serial.write((byte)INPUT);
+        Serial.write(1);
+        Serial.write((byte)OUTPUT);
+        Serial.write(1);
+      }
+      if (IS_PIN_ANALOG(pin)) {
+        Serial.write(ANALOG);
+        Serial.write(10);
+      }
+      if (IS_PIN_PWM(pin)) {
+        Serial.write(PWM);
+        Serial.write(8);
+      }
+      if (IS_PIN_SERVO(pin)) {
+        Serial.write(SERVO);
+        Serial.write(14);
+      }
+      Serial.write(127);
+    }
+    Serial.write(END_SYSEX);
+    break;
+  case PIN_STATE_QUERY:
+    if (argc > 0) {
+      byte pin=argv[0];
+      Serial.write(START_SYSEX);
+      Serial.write(PIN_STATE_RESPONSE);
+      Serial.write(pin);
+      if (pin < TOTAL_PINS) {
+        Serial.write((byte)pinConfig[pin]);
+	Serial.write((byte)pinState[pin] & 0x7F);
+	if (pinState[pin] & 0xFF80) Serial.write((byte)(pinState[pin] >> 7) & 0x7F);
+	if (pinState[pin] & 0xC000) Serial.write((byte)(pinState[pin] >> 14) & 0x7F);
+      }
+      Serial.write(END_SYSEX);
+    }
+    break;
+  case ANALOG_MAPPING_QUERY:
+    Serial.write(START_SYSEX);
+    Serial.write(ANALOG_MAPPING_RESPONSE);
+    for (byte pin=0; pin < TOTAL_PINS; pin++) {
+      Serial.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+    }
+    Serial.write(END_SYSEX);
     break;
   }
 }
@@ -266,7 +323,7 @@ void setup()
 {
   byte i;
 
-  Firmata.setFirmwareVersion(2, 1);
+  Firmata.setFirmwareVersion(2, 2);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
