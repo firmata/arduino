@@ -13,9 +13,7 @@
 #ifndef Firmata_h
 #define Firmata_h
 
-#include <WProgram.h>
-#include <inttypes.h>
-
+#include "Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.  This number can be queried so that host
@@ -89,10 +87,11 @@ extern "C" {
 class FirmataClass
 {
 public:
-	FirmataClass();
+	FirmataClass(Stream &s);
 /* Arduino constructors */
     void begin();
     void begin(long);
+    void begin(Stream &s);
 /* querying functions */
 	void printVersion(void);
     void blinkVersion(void);
@@ -117,6 +116,7 @@ public:
     void detach(byte command);
 
 private:
+    Stream &FirmataSerial;
 /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
@@ -142,6 +142,9 @@ private:
     void processSysexMessage(void);
 	void systemReset(void);
     void pin13strobe(int count, int onInterval, int offInterval);
+    void sendValueAsTwo7bitBytes(int value);
+    void startSysex(void);
+    void endSysex(void);
 };
 
 extern FirmataClass Firmata;
@@ -155,9 +158,6 @@ extern FirmataClass Firmata;
  * firmware source file rather than the library source file.
  */
 #define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
-
-/* Hardware Abstraction Layer */
-#include "Boards.h"
 
 #endif /* Firmata_h */
 

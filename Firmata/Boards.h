@@ -3,7 +3,13 @@
 #ifndef Firmata_Boards_h
 #define Firmata_Boards_h
 
-#include <WProgram.h>	// for digitalRead, digitalWrite, etc
+#include <inttypes.h>
+
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"	// for digitalRead, digitalWrite, etc
+#else
+#include "WProgram.h"
+#endif
 
 // Normally Servo.h must be included before Firmata.h (which then includes
 // this file).  If Servo.h wasn't included, this allows the code to still
@@ -135,6 +141,20 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define ARDUINO_PINOUT_OPTIMIZE 1
 
 
+// Wiring (and board)
+#elif defined(WIRING)
+#define VERSION_BLINK_PIN       WLED
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= FIRST_ANALOG_PIN && (p) < (FIRST_ANALOG_PIN+TOTAL_ANALOG_PINS))
+#define IS_PIN_PWM(p)           IS_PIN_DIGITAL(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           (0)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - FIRST_ANALOG_PIN)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) 
+
+
 // old Arduinos
 #elif defined(__AVR_ATmega8__)
 #define TOTAL_ANALOG_PINS       6
@@ -166,14 +186,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 54)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-
-
-// Wiring
-#elif defined(__AVR_ATmega128__)
-#define TOTAL_ANALOG_PINS       8
-#define TOTAL_PINS              51
-#define VERSION_BLINK_PIN       48
-// TODO: hardware abstraction for wiring board
 
 
 // Teensy 1.0
