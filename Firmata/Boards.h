@@ -126,16 +126,21 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 // Arduino Duemilanove, Diecimila, and NG
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+#if defined(NUM_ANALOG_INPUTS) && NUM_ANALOG_INPUTS == 6
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              20 // 14 digital + 6 analog
+#else
 #define TOTAL_ANALOG_PINS       8
-#define TOTAL_PINS              24 // 14 digital + 2 unused + 8 analog
+#define TOTAL_PINS              22 // 14 digital + 8 analog
+#endif
 #define VERSION_BLINK_PIN       13
-#define IS_PIN_DIGITAL(p)       (((p) >= 2 && (p) <= 13) || ((p) >= 16 && (p) <= 21))
-#define IS_PIN_ANALOG(p)        ((p) >= 16 && (p) <= 23)
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 19)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
 #define IS_PIN_PWM(p)           IS_PIN_DIGITAL(p)
-#define IS_PIN_SERVO(p)         ((p) >= 2 && (p) <= 13 && (p) - 2 < MAX_SERVOS)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           (0)
-#define PIN_TO_DIGITAL(p)       (((p) < 16) ? (p) : (p) - 2)
-#define PIN_TO_ANALOG(p)        ((p) - 16)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 #define ARDUINO_PINOUT_OPTIMIZE 1
@@ -158,15 +163,15 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // old Arduinos
 #elif defined(__AVR_ATmega8__)
 #define TOTAL_ANALOG_PINS       6
-#define TOTAL_PINS              22 // 14 digital + 2 unused + 6 analog
+#define TOTAL_PINS              20 // 14 digital + 6 analog
 #define VERSION_BLINK_PIN       13
-#define IS_PIN_DIGITAL(p)       (((p) >= 2 && (p) <= 13) || ((p) >= 16 && (p) <= 21))
-#define IS_PIN_ANALOG(p)        ((p) >= 16 && (p) <= 21)
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 19)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) <= 19)
 #define IS_PIN_PWM(p)           IS_PIN_DIGITAL(p)
-#define IS_PIN_SERVO(p)         ((p) >= 2 && (p) <= 13 && (p) - 2 < MAX_SERVOS)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           (0)
-#define PIN_TO_DIGITAL(p)       (((p) < 16) ? (p) : (p) - 2)
-#define PIN_TO_ANALOG(p)        ((p) - 16)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 #define ARDUINO_PINOUT_OPTIMIZE 1
@@ -282,9 +287,9 @@ static inline unsigned char readPort(byte, byte) __attribute__((always_inline, u
 static inline unsigned char readPort(byte port, byte bitmask)
 {
 #if defined(ARDUINO_PINOUT_OPTIMIZE)
-	if (port == 0) return PIND & B11111100 & bitmask; // ignore Rx/Tx 0/1
-	if (port == 1) return PINB & B00111111 & bitmask; // pins 8-13 (14,15 are disabled for the crystal)
-	if (port == 2) return PINC & bitmask;
+	if (port == 0) return (PIND & 0xFC) & bitmask; // ignore Rx/Tx 0/1
+	if (port == 1) return ((PINB & 0x3F) | ((PINC & 0x03) << 6)) & bitmask;
+	if (port == 2) return ((PINC & 0x3C) >> 2) & bitmask;
 	return 0;
 #else
 	unsigned char out=0, pin=port*8;
@@ -309,17 +314,27 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 {
 #if defined(ARDUINO_PINOUT_OPTIMIZE)
 	if (port == 0) {
-		bitmask = bitmask & 0xFC;  // Tx & Rx pins
+		bitmask = bitmask & 0xFC;  // do not touch Tx & Rx pins
+		byte valD = value & bitmask;
+		byte maskD = ~bitmask;
 		cli();
-		PORTD = (PORTD & ~bitmask) | (bitmask & value);
+		PORTD = (PORTD & maskD) | valD;
 		sei();
 	} else if (port == 1) {
+		byte valB = (value & bitmask) & 0x3F;
+		byte valC = (value & bitmask) >> 6;
+		byte maskB = ~(bitmask & 0x3F);
+		byte maskC = ~((bitmask & 0xC0) >> 6);
 		cli();
-		PORTB = (PORTB & ~bitmask) | (bitmask & value);
+		PORTB = (PORTB & maskB) | valB;
+		PORTC = (PORTC & maskC) | valC;
 		sei();
 	} else if (port == 2) {
+		bitmask = bitmask & 0x0F;
+		byte valC = (value & bitmask) << 2;
+		byte maskC = ~(bitmask << 2);
 		cli();
-		PORTC = (PORTC & ~bitmask) | (bitmask & value);
+		PORTC = (PORTC & maskC) | valC;
 		sei();
 	}
 #else
