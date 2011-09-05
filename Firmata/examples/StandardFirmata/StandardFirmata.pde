@@ -78,9 +78,8 @@ struct i2c_device_info {
 i2c_device_info query[MAX_QUERIES];
 
 byte i2cRxData[32];
-boolean readingContinuously = false;
 boolean isI2CEnabled = false;
-byte queryIndex = 0;
+signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
@@ -174,12 +173,10 @@ void checkDigitalInputs(void)
  */
 void setPinModeCallback(byte pin, int mode)
 {
-  if (pinConfig[pin] == I2C && mode != I2C) {
-    isI2CEnabled = false;
-    // uncomment the following once end() method is added to Wire library
-    // Wire.end();
-    Firmata.sendString("Once I2C is enabled, the I2C pins cannot be changed to another mode");
-    return;  
+  if (pinConfig[pin] == I2C && isI2CEnabled && mode != I2C) {
+    // disable i2c so pins can be used for other functions
+    // the following if statements should reconfigure the pins properly
+    disableI2CPins();
   }
   if (IS_PIN_SERVO(pin) && mode != SERVO && servos[PIN_TO_SERVO(pin)].attached()) {
     servos[PIN_TO_SERVO(pin)].detach();
@@ -238,9 +235,9 @@ void setPinModeCallback(byte pin, int mode)
     break;
   case I2C:
     if (IS_PIN_I2C(pin)) {
+      // mark the pin as i2c
+      // the user must call I2C_CONFIG to enable I2C for a device
       pinConfig[pin] = I2C;
-      // TODO: if not enabled call enableI2CPins()?
-      // or does user have to call I2C config again in order to reenable I2C?
     }
     break;
   default:
@@ -378,30 +375,47 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Firmata.sendString("too many queries");
         break;
       }
+      queryIndex++;
       query[queryIndex].addr = slaveAddress;
       query[queryIndex].reg = argv[2] + (argv[3] << 7);
       query[queryIndex].bytes = argv[4] + (argv[5] << 7);
-      readingContinuously = true;
-      queryIndex++;
       break;
     case I2C_STOP_READING:
-      readingContinuously = false;
-      queryIndex = 0;
+	  byte queryIndexToSkip;      
+      // if read continuous mode is enabled for only 1 i2c device, disable
+      // read continuous reporting for that device
+      if (queryIndex <= 0) {
+        queryIndex = -1;        
+      } else {
+        // if read continuous mode is enabled for multiple devices,
+        // determine which device to stop reading and remove it's data from
+        // the array, shifiting other array data to fill the space
+        for (byte i = 0; i < queryIndex + 1; i++) {
+          if (query[i].addr = slaveAddress) {
+            queryIndexToSkip = i;
+            break;
+          }
+        }
+        
+        for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
+          if (i < MAX_QUERIES) {
+            query[i].addr = query[i+1].addr;
+            query[i].reg = query[i+1].addr;
+            query[i].bytes = query[i+1].bytes; 
+          }
+        }
+        queryIndex--;
+      }
       break;
     default:
       break;
     }
     break;
   case I2C_CONFIG:
-    delayTime = (argv[4] + (argv[5] << 7));                        // MSB
-    delayTime = (delayTime << 8) + (argv[2] + (argv[3] << 7));     // add LSB
+    delayTime = (argv[0] + (argv[1] << 7));
 
     if(delayTime > 0) {
       i2cReadDelayTime = delayTime;
-    }
-
-    if(argc > 6) {
-      // If you extend I2C_Config, handle your data here
     }
 
     if (!isI2CEnabled) {
@@ -516,11 +530,20 @@ void enableI2CPins()
   Wire.begin();
 }
 
+/* disable the i2c pins so they can be used for other functions */
+void disableI2CPins() {
+    isI2CEnabled = false;
+    // disable read continuous mode for all devices
+    queryIndex = -1;
+    // uncomment the following if or when the end() method is added to Wire library
+    // Wire.end();
+}
+
 void systemResetCallback()
 {
-  // clear i2c read continuous data
-  readingContinuously = false;
-  queryIndex = 0;
+  if (isI2CEnabled) {
+  	disableI2CPins();
+  }
 }
 
 
@@ -603,9 +626,9 @@ void loop()
         }
       }
     }
-    // report i2c data if read continuous mode is enabled
-    if (readingContinuously) {
-      for (byte i = 0; i < queryIndex; i++) {
+    // report i2c data for all device with read continuous mode enabled
+    if (queryIndex > -1) {
+      for (byte i = 0; i < queryIndex + 1; i++) {
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
       }
     }
