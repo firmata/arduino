@@ -539,21 +539,49 @@ void disableI2CPins() {
     // Wire.end();
 }
 
-void systemResetCallback()
-{
-  if (isI2CEnabled) {
-  	disableI2CPins();
-  }
-}
-
-
 /*==============================================================================
  * SETUP()
  *============================================================================*/
+
+void systemResetCallback()
+{
+  // initialize a defalt state
+  // TODO: option to load config from EEPROM instead of default
+  if (isI2CEnabled) {
+  	disableI2CPins();
+  }
+  for (byte i=0; i < TOTAL_PORTS; i++) {
+    reportPINs[i] = false;      // by default, reporting off
+    portConfigInputs[i] = 0;	// until activated
+    previousPINs[i] = 0;
+  }
+  // pins with analog capability default to analog input
+  // otherwise, pins default to digital output
+  for (byte i=0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_ANALOG(i)) {
+      // turns off pullup, configures everything
+      setPinModeCallback(i, ANALOG);
+    } else {
+      // sets the output to 0, configures portConfigInputs
+      setPinModeCallback(i, OUTPUT);
+    }
+  }
+  // by default, do not report any analog inputs
+  analogInputsToReport = 0;
+
+  /* send digital inputs to set the initial state on the host computer,
+   * since once in the loop(), this firmware will only send on change */
+  /*
+  TODO: this can never execute, since no pins default to digital input
+        but it will be needed when/if we support EEPROM stored config
+  for (byte i=0; i < TOTAL_PORTS; i++) {
+    outputPort(i, readPort(i, portConfigInputs[i]), true);
+  }
+  */
+}
+
 void setup() 
 {
-  byte i;
-
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
@@ -564,34 +592,8 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // TODO: load state from EEPROM here
-
-  /* these are initialized to zero by the compiler startup code
-  for (i=0; i < TOTAL_PORTS; i++) {
-    reportPINs[i] = false;
-    portConfigInputs[i] = 0;
-    previousPINs[i] = 0;
-  }
-  */
-  for (i=0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
-      // turns off pullup, configures everything
-      setPinModeCallback(i, ANALOG);
-    } else {
-      // sets the output to 0, configures portConfigInputs
-      setPinModeCallback(i, OUTPUT);
-    }
-  }
-  // by defult, do not report any analog inputs
-  analogInputsToReport = 0;
-
   Firmata.begin(57600);
-  
-  /* send digital inputs to set the initial state on the host computer,
-   * since once in the loop(), this firmware will only send on change */
-  for (i=0; i < TOTAL_PORTS; i++) {
-    outputPort(i, readPort(i, portConfigInputs[i]), true);
-  }
+  systemResetCallback();  // reset to default config
 }
 
 /*==============================================================================
