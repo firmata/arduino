@@ -228,8 +228,6 @@ void setPinModeCallback(byte pin, int mode)
       pinConfig[pin] = SERVO;
       if (!servos[PIN_TO_SERVO(pin)].attached()) {
           servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin));
-      } else {
-        Firmata.sendString("Servo only on pins from 2 to 13");
       }
     }
     break;
