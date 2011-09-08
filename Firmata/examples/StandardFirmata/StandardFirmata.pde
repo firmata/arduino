@@ -429,7 +429,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
       int maxPulse = argv[3] + (argv[4] << 7);
 
       if (IS_PIN_SERVO(pin)) {
-        // servos are pins from 2 to 13, so offset for array
         if (servos[PIN_TO_SERVO(pin)].attached())
           servos[PIN_TO_SERVO(pin)].detach();
         servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
