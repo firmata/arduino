@@ -437,13 +437,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
   case SAMPLING_INTERVAL:
-    if (argc > 1)
+    if (argc > 1) {
       samplingInterval = argv[0] + (argv[1] << 7);
       if (samplingInterval < MINIMUM_SAMPLING_INTERVAL) {
         samplingInterval = MINIMUM_SAMPLING_INTERVAL;
       }      
-    else
-      Firmata.sendString("Not enough data");
+    } else {
+      //Firmata.sendString("Not enough data");
+    }
     break;
   case EXTENDED_ANALOG:
     if (argc > 1) {
