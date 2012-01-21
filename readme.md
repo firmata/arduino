@@ -35,9 +35,9 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://www.imagitronics.org/projects/firmatanet/]
 * Flash/AS3
   * [http://funnel.cc]
-  * [http://http://code.google.com/p/as3glue/]
+  * [http://code.google.com/p/as3glue/]
 
-Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. 
+Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
 The version of firmata in the arduino IDE contains the latest stable version of firmata (Arduino 1.0 includes Firmata 2.3).  If you need to use any updates made to this repository just clone the repo into the location of firmata in the arduino IDE.
