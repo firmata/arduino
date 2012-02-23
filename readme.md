@@ -28,6 +28,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [https://github.com/nakkaya/clodiuno]
 * javascript 
   * [https://github.com/jgautier/firmata]
+  * [http://breakoutjs.com]
 * java 
   * [https://github.com/4ntoine/Firmata]
   * [https://github.com/shigeodayo/Javarduino]
