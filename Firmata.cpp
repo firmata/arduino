@@ -120,7 +120,10 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
 
   // parse out ".cpp" and "applet/" that comes from using __FILE__
   extension = strstr(name, ".cpp");
-  filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
+  if (strrchr(name, '/') != NULL)
+    filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
+  else
+    filename = strrchr(name, '\\') + 1; //points to slash, +1 gets to start of filename
   // add two bytes for version numbers
   if(extension && filename) {
     firmwareVersionCount = extension - filename + 2;
@@ -327,6 +330,12 @@ void FirmataClass::sendString(byte command, const char* string)
 void FirmataClass::sendString(const char* string) 
 {
   sendString(STRING_DATA, string);
+}
+
+// expose the write method
+size_t FirmataClass::write(uint8_t c)
+{
+  FirmataSerial.write(c);
 }
 
 

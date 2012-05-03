@@ -21,7 +21,7 @@
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
 #define FIRMATA_MINOR_VERSION   3 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  1 // for bugfix releases
+#define FIRMATA_BUGFIX_VERSION  2 // for bugfix releases
 
 #define MAX_DATA_BYTES 32 // max number of data bytes in non-Sysex messages
 
@@ -108,6 +108,7 @@ public:
     void sendString(const char* string);
     void sendString(byte command, const char* string);
 	void sendSysex(byte command, byte bytec, byte* bytev);
+    size_t write(uint8_t);
 /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
     void attach(byte command, systemResetCallbackFunction newFunction);
@@ -116,7 +117,7 @@ public:
     void detach(byte command);
 
 private:
-    Stream &FirmataSerial;
+    Stream &FirmataSerial;    
 /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
