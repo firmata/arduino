@@ -130,6 +130,57 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
+/**
+ * @param argc Size of mesg
+ * @param mesg Array containing informations: data pin, clock pin, latch pin,
+ msbFirst and data bits.
+ */
+void shiftRegister_tx(byte argc, byte mesg[]) {
+  //Maximum value of latchPin: 64 (ATMega128 has 64 pins.)
+  if (argc < 4)
+    return;
+  static uint64_t already_conf_latch = 0;
+  static uint64_t already_conf_data = 0;
+  static uint64_t already_conf_clk = 0;
+  uint8_t i = 0, j = 0;
+  //Will be optimized by compiler.
+  byte dataPin = mesg[0];
+  byte clkPin = mesg[1];
+  byte latchPin = mesg[2];
+  byte msbFirst = mesg[3];
+  byte current = mesg[4];
+  j = 4;
+
+  if ((!!(already_conf_latch & (1 << (latchPin)))) &&
+      (!!(already_conf_data & (1 << (dataPin)))) &&
+      (!!(already_conf_clk & (1 << (clkPin))))){
+    already_conf_latch |= (1 << (latchPin));
+    already_conf_data |= (1 << (dataPin));
+    already_conf_clk |= (1 << (clkPin));
+    pinMode(latchPin, OUTPUT);
+    pinMode(dataPin, OUTPUT);
+    pinMode(clkPin, OUTPUT);
+  }
+
+  while (j < argc){
+    current = mesg[j];
+    if (msbFirst){
+      //Listen to clkPin
+      digitalWrite(latchPin, LOW);
+      digitalWrite(dataPin, LOW);
+      shiftOut(dataPin, clkPin, MSBFIRST,current);
+      digitalWrite(latchPin, HIGH);
+     } else{
+      //Listen to clkPin
+      digitalWrite(latchPin, LOW);
+      digitalWrite(dataPin, LOW);
+      shiftOut(dataPin, clkPin, LSBFIRST,current);
+      digitalWrite(latchPin, HIGH);
+    }
+    ++j;
+  }
+}
+
 void outputPort(byte portNumber, byte portValue, byte forceSend)
 {
   // pins not configured as INPUT are cleared to zeros
@@ -506,6 +557,17 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Serial.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
     }
     Serial.write(END_SYSEX);
+    break;
+  case SHIFT_DATA:
+      Serial.write(START_SYSEX);
+      Serial.write(SHIFT_DATA);
+      //If there are data bits it is a output message
+      if (argc > 4)
+        shiftRegister_tx(argc, argv);
+      //Otherwise it's a input message
+      //else
+        //shiftRegister_rx(argc, argv);
+      Serial.write(END_SYSEX);
     break;
   }
 }
