@@ -214,7 +214,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 
 // Teensy 2.0
-#elif defined(__AVR_ATmega32U4__)
+#elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 #define TOTAL_ANALOG_PINS       12
 #define TOTAL_PINS              25 // 11 digital + 12 analog
 #define VERSION_BLINK_PIN       11
@@ -243,6 +243,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 38)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
+
+
+// Leonardo
+#elif defined(__AVR_ATmega32U4__)
+#define TOTAL_ANALOG_PINS       12
+#define TOTAL_PINS              30 // 14 digital + 12 analog + 4 SPI (D14-D17 on ISP header)
+#define VERSION_BLINK_PIN       13
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 18 && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11 || (p) == 13)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 2 || (p) == 3)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p) - 18
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)  
 
 
 // Sanguino
