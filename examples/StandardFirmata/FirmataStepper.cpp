@@ -88,8 +88,10 @@ void FirmataStepper::config(byte interface, int number_of_steps, byte first_pin,
   this->number_of_steps = number_of_steps;
   this->interface = interface;
 
-  this->motor_pin_1 = first_pin; // direction pin or motor pin 1
-  this->motor_pin_2 = second_pin; // step pin or motor pin 2
+  this->motor_pin_1 = first_pin;
+  this->motor_pin_2 = second_pin;
+  this->dir_pin = first_pin;
+  this->step_pin = second_pin;  
 
   // setup the pins on the microcontroller:
   pinMode(this->motor_pin_1, OUTPUT);
