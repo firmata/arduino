@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2012 Jeff Hoefs.  All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
  */
 
 #include <Servo.h>
+#include "FirmataStepper.h"
 #include <Wire.h>
 #include <Firmata.h>
 
@@ -45,6 +46,12 @@
 #define MINIMUM_SAMPLING_INTERVAL 10
 
 #define REGISTER_NOT_SPECIFIED -1
+
+#define MAX_STEPPERS 6
+#define STEPPER 0x72  // move this to Firmata.h
+#define STEPPER_CONFIG 0
+#define STEPPER_STEP 1
+#define STEPPER_SPEED 2
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -83,6 +90,9 @@ signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
+FirmataStepper stepper[MAX_STEPPERS];
+byte numSteppers = 0;
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
@@ -99,7 +109,11 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
     Wire.send((byte)theRegister);
     #endif
     Wire.endTransmission();
-    delayMicroseconds(i2cReadDelayTime);  // delay is necessary for some devices such as WiiNunchuck
+    // do not set a value of 0
+    if (i2cReadDelayTime > 0) {
+      // delay is necessary for some devices such as WiiNunchuck
+      delayMicroseconds(i2cReadDelayTime);
+    }
   } else {
     theRegister = 0;  // fill the register with a dummy value
   }
@@ -436,6 +450,50 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
     }
     break;
+
+  /* testing stepper */
+  case STEPPER:
+    byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
+    byte motorPin3, motorPin4;
+    unsigned int stepsPerRev;
+    long numSteps;
+    int stepSpeed;
+
+    stepCommand = argv[0];
+    deviceNum = argv[1];
+
+    numSteppers = deviceNum + 1; // assumes steppers are added in order 0 -> 5
+
+    if (stepCommand == STEPPER_CONFIG) {
+      interface = argv[2];
+      stepsPerRev = (argv[3] + (argv[4] << 7));
+
+      directionPin = argv[5]; // or motorPin1 for TWO_WIRE or FOUR_WIRE interface
+      stepPin = argv[6]; // // or motorPin2 for TWO_WIRE or FOUR_WIRE interface
+      setPinModeCallback(directionPin, OUTPUT);
+      setPinModeCallback(stepPin, OUTPUT);      
+
+      if (interface == FirmataStepper::DRIVER || interface == FirmataStepper::TWO_WIRE) {
+        stepper[deviceNum].config(interface, stepsPerRev, directionPin, stepPin);
+      } else if (interface == FirmataStepper::FOUR_WIRE) {
+        motorPin3 = argv[7];
+        motorPin4 = argv[8];          
+        setPinModeCallback(motorPin3, OUTPUT);
+        setPinModeCallback(motorPin4, OUTPUT);
+        stepper[deviceNum].config(interface, stepsPerRev, directionPin, stepPin, motorPin3, motorPin4);
+      }
+    } else if (stepCommand == STEPPER_STEP) {
+      numSteps = (argv[2] + (argv[3] << 7));
+      stepDirection = argv[4];
+      if (stepDirection == 0) { numSteps *= -1; }
+      stepper[deviceNum].setNumSteps(numSteps);
+    } else if (stepCommand == STEPPER_SPEED) {
+      // speed in revs per minute
+      stepSpeed = (argv[2] + (argv[3] << 7));      
+      stepper[deviceNum].setSpeed(stepSpeed);
+    }
+    break;
+
   case SAMPLING_INTERVAL:
     if (argc > 1) {
       samplingInterval = argv[0] + (argv[1] << 7);
@@ -613,6 +671,21 @@ void loop()
   /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
    * 60 bytes. use a timer to sending an event character every 4 ms to
    * trigger the buffer to dump. */
+
+  // if one or more stepper motors are used, update their position
+  if (numSteppers > 0) {
+    for (int i=0; i<numSteppers; i++) {
+      bool done = stepper[i].update();
+
+      // send command to client application when stepping is complete
+      if (done) {
+        Serial.write(START_SYSEX);
+        Serial.write(STEPPER);
+        Serial.write(i);
+        Serial.write(END_SYSEX);
+      }
+    }
+  }
 
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
