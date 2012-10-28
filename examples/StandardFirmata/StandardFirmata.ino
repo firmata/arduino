@@ -47,11 +47,10 @@
 
 #define REGISTER_NOT_SPECIFIED -1
 
-#define MAX_STEPPERS 6
+#define MAX_STEPPERS 6 // arbitrary value... may need to adjust
 #define STEPPER 0x72  // move this to Firmata.h
 #define STEPPER_CONFIG 0
 #define STEPPER_STEP 1
-#define STEPPER_SPEED 2
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -90,7 +89,7 @@ signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
-FirmataStepper stepper[MAX_STEPPERS];
+FirmataStepper *stepper[MAX_STEPPERS];
 byte numSteppers = 0;
 
 /*==============================================================================
@@ -451,13 +450,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
 
-  /* testing stepper */
   case STEPPER:
     byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
     byte motorPin3, motorPin4;
     unsigned int stepsPerRev;
     long numSteps;
     int stepSpeed;
+    int accel;
+    int decel;
 
     stepCommand = argv[0];
     deviceNum = argv[1];
@@ -474,24 +474,33 @@ void sysexCallback(byte command, byte argc, byte *argv)
       setPinModeCallback(stepPin, OUTPUT);      
 
       if (interface == FirmataStepper::DRIVER || interface == FirmataStepper::TWO_WIRE) {
-        stepper[deviceNum].config(interface, stepsPerRev, directionPin, stepPin);
+        stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin);
       } else if (interface == FirmataStepper::FOUR_WIRE) {
         motorPin3 = argv[7];
         motorPin4 = argv[8];          
         setPinModeCallback(motorPin3, OUTPUT);
         setPinModeCallback(motorPin4, OUTPUT);
-        stepper[deviceNum].config(interface, stepsPerRev, directionPin, stepPin, motorPin3, motorPin4);
+        stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin, motorPin3, motorPin4);
       }
-    } else if (stepCommand == STEPPER_STEP) {
-      numSteps = (argv[2] + (argv[3] << 7));
-      stepDirection = argv[4];
-      if (stepDirection == 0) { numSteps *= -1; }
-      stepper[deviceNum].setNumSteps(numSteps);
-    } else if (stepCommand == STEPPER_SPEED) {
-      // speed in revs per minute
-      stepSpeed = (argv[2] + (argv[3] << 7));      
-      stepper[deviceNum].setSpeed(stepSpeed);
     }
+    else if (stepCommand == STEPPER_STEP) {
+      stepDirection = argv[2];
+      numSteps = (long)argv[3] | ((long)argv[4] << 7) | ((long)argv[5] << 14);
+      stepSpeed = (argv[6] + (argv[7] << 7));
+
+      if (stepDirection == 0) { numSteps *= -1; }
+
+      if (argc >= 8 && argc < 12) {
+        // num steps, speed (0.01*rad/sec)
+        stepper[deviceNum]->setStepsToMove(numSteps, stepSpeed); 
+      } else if (argc == 12) {
+        accel = (argv[8] + (argv[9] << 7));
+        decel = (argv[10] + (argv[11] << 7));
+        // num steps, speed (0.01*rad/sec), accel (0.01*rad/sec^2), decel (0.01*rad/sec^2)
+        stepper[deviceNum]->setStepsToMove(numSteps, stepSpeed, accel, decel);
+      }
+    }     
+
     break;
 
   case SAMPLING_INTERVAL:
@@ -675,7 +684,7 @@ void loop()
   // if one or more stepper motors are used, update their position
   if (numSteppers > 0) {
     for (int i=0; i<numSteppers; i++) {
-      bool done = stepper[i].update();
+      bool done = stepper[i]->update();
 
       // send command to client application when stepping is complete
       if (done) {
