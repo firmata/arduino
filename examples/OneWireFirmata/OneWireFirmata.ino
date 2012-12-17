@@ -49,6 +49,16 @@
 byte pinConfig[TOTAL_PINS];         // configuration of every pin
 int pinState[TOTAL_PINS];           // any value that has been written. (Does this make sense for OneWire?)
 
+void sendValueAsTwo7bitBytes(int value) // is private in Firmata...
+{
+  Serial.write(value & B01111111); // LSB
+  Serial.write(value >> 7 & B01111111); // MSB
+}
+
+int getValueFromTwo7bitBytes(byte *argv) {
+  return (argv[0] & B01111111) | (argv[1] << 7);
+}
+
 struct ow_device_info {
   OneWire* device;
   byte addr[8];
@@ -94,8 +104,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             byte addrArray[8];
             while (device->search(addrArray)) {
               for (int i=0;i<8;i++) {
-                Serial.write(addrArray[i] & 0b01111111);
-                Serial.write((byte)((addrArray[i] << 7) & 0b01110000));
+                sendValueAsTwo7bitBytes(addrArray[i]);
               }
             }
             Serial.write(END_SYSEX);
@@ -109,8 +118,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
           break;
         case ONEWIRE_SELECT:
           if (argc >= 18) {
-            for (int i=0;i<8;i++) {
-              info->addr[i]= (argv[i<<1+2] & 0b01111111 + argv[i<<1+3] << 7) & 0b11111111;
+            for (int i=2;i<18;i+=2) {
+              info->addr[i]= getValueFromTwo7bitBytes(&argv[i]) & 0xFF;
             }
             device->select(info->addr);
           }
@@ -123,29 +132,27 @@ void sysexCallback(byte command, byte argc, byte *argv)
           break;
         case ONEWIRE_WRITE:
           for (int i=2;i<argc;i+=2) {
-            byte value = (argv[i] & 0x7F + argv[i+1] << 7) & 0xFF;
+            byte value = getValueFromTwo7bitBytes(&argv[i]) & 0xFF;
             device->write(value,info->power);
           }
           break;
         case ONEWIRE_READ: 
           {
-            int numBytes = (argv[2] & 0x7F + argv[3] << 7) & 0x3FFF;
-            Serial.write(START_SYSEX);
-            Serial.write(ONEWIRE_REPLY);
-            Serial.write(pin);
-            Serial.write(ONEWIRE_READ);
-            for (int i=0;i<8;i++) {
-              byte addr = info->addr[i];
-              Serial.write(addr & 0b01111111);
-              Serial.write((byte)((addr << 7) & 0b01111111));
+            if (argc>2) {
+              int numBytes = getValueFromTwo7bitBytes(&argv[2]) & 0x3FFF;
+              Serial.write(START_SYSEX);
+              Serial.write(ONEWIRE_REPLY);
+              Serial.write(pin);
+              Serial.write(ONEWIRE_READ);
+              for (int i=0;i<8;i++) {
+                sendValueAsTwo7bitBytes(info->addr[i]);
+              }
+              for (int i=0;i<numBytes;i++) {
+                sendValueAsTwo7bitBytes(device->read());
+              }  
+              Serial.write(END_SYSEX);
+              break;
             }
-            for (int i=0;i<numBytes;i++) {
-              byte value = device->read();
-              Serial.write(value & 0b01111111);
-              Serial.write((byte)((value << 7) & 0b01111111));
-            }  
-            Serial.write(END_SYSEX);
-            break;
           }
         }
       }
@@ -173,7 +180,6 @@ void setPinModeCallback(byte pin, int mode)
   default:
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
-  // TODO: save status to EEPROM here, if changed
 }
 
 void systemResetCallback() {
@@ -198,23 +204,15 @@ void setup()
 
   Firmata.begin(57600);
   systemResetCallback();  // reset to default config
-  //setPinModeCallback(10,ONEWIRE);
-  //oneWireConfig(10,1);
-  //ow_device_info info = pinOneWire[10];
-  //info.device = &ds;
-  //info.power = 1;
 }
 
 void loop()
 {
-  //byte sysexSearch[2];
-  //sysexSearch[0] = 10;
-  //sysexSearch[1] = ONEWIRE_SEARCH;
-  //sysexCallback(ONEWIRE_REQUEST,2,sysexSearch);
   while (Firmata.available()) {
-     Firmata.processInput();
+    Firmata.processInput();
   }
 }
+
 
 
 
