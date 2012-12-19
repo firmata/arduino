@@ -24,22 +24,26 @@
 #include <OneWire.h>
 #include <Boards.h>
 #include <Firmata.h>
+#include "OneWireFirmata.h"
 
 #define ONEWIRE_REQUEST 0x60
 #define ONEWIRE_REPLY 0x61
-#define ONEWIRE_CONFIG 0x62
 
 #define ONEWIRE_SEARCH 0
-#define ONEWIRE_RESET 1
-#define ONEWIRE_SELECT 2
-#define ONEWIRE_SKIP 3
-#define ONEWIRE_WRITE 4
+#define ONEWIRE_SKIP_AND_WRITE 1
+#define ONEWIRE_SKIP_AND_READ 2
+#define ONEWIRE_SELECT_AND_WRITE 3
+#define ONEWIRE_SELECT_AND_READ 4
 #define ONEWIRE_READ 5
+#define ONEWIRE_CONFIG 6
+#define ONEWIRE_REPORT_CONFIG 7
 
 #define POWER 1
 
 // 1-Wire Pinmode
 #define ONEWIRE 0x07
+
+#define MAX_OW_QUERY 10
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -56,28 +60,49 @@ void sendValueAsTwo7bitBytes(int value) // is private in Firmata...
 }
 
 int getValueFromTwo7bitBytes(byte *argv) {
-  return (argv[0] & B01111111) | (argv[1] << 7);
+  return (argv[0] & B01111111) + (argv[1] << 7);
 }
 
-struct ow_device_info {
-  OneWire* device;
-  byte addr[8];
-  boolean power;
-};
-
-ow_device_info pinOneWire[TOTAL_PINS];
+ow_pin_config pinOneWire[TOTAL_PINS];
+ow_report_config *owQueries[MAX_OW_QUERY];
+int owQueryIndex = -1;
+long previousMillis;
+long samplingInterval = 5000; // defaults to 5 sec for now
 
 void oneWireConfig(byte pin, boolean power) {
   pinConfig[pin] = ONEWIRE;
-  ow_device_info *owInfo = &pinOneWire[pin];
-  if (owInfo->device==NULL) {
-    owInfo->device = new OneWire(pin);
+  ow_pin_config *owInfo = &pinOneWire[pin];
+  if (owInfo->ow==NULL) {
+    owInfo->ow = new OneWire(pin);
   }
-  for (int i=0;i<8;i++) {
-    owInfo->addr[i]=0x0;
-  }
+  owInfo->pin = pin;
   owInfo->power = power;
-}
+};
+
+void readAddress14Bit(byte *newAddress, byte *data) {
+  for (byte i=0;i<8;i++) {
+    newAddress[i] = getValueFromTwo7bitBytes(&data[i<<1]);
+  }
+};
+
+void readAndReportOWData(byte pin, byte *addr, OneWire *ow, int numBytes) {
+  Serial.write(START_SYSEX);
+  Serial.write(ONEWIRE_REPLY);
+  Serial.write(pin);
+  Serial.write(ONEWIRE_READ);
+  for (int i=0;i<8;i++) {
+    if (addr) {
+      sendValueAsTwo7bitBytes(addr[i]);
+    } 
+    else {
+      Serial.write(0x00);
+    }
+  }
+  for (int i=0;i<numBytes;i++) {
+    sendValueAsTwo7bitBytes(ow->read());
+  }  
+  Serial.write(END_SYSEX);
+};
 
 /*==============================================================================
  * SYSEX-BASED commands
@@ -89,20 +114,20 @@ void sysexCallback(byte command, byte argc, byte *argv)
   case ONEWIRE_REQUEST: 
     {
       byte pin = argv[0];
-      ow_device_info *info = &pinOneWire[pin];
+      ow_pin_config *pinConfig = &pinOneWire[pin];
       byte owCommand = argv[1];
-      OneWire *device = info->device;
-      if (device) {
+      OneWire *ow = pinConfig->ow;
+      if (ow) {
         switch(owCommand) {
         case ONEWIRE_SEARCH: 
           {
-            device->reset_search();
+            ow->reset_search();
             Serial.write(START_SYSEX);
             Serial.write(ONEWIRE_REPLY);
             Serial.write(pin);
             Serial.write((byte)ONEWIRE_SEARCH);
             byte addrArray[8];
-            while (device->search(addrArray)) {
+            while (ow->search(addrArray)) {
               for (int i=0;i<8;i++) {
                 sendValueAsTwo7bitBytes(addrArray[i]);
               }
@@ -110,65 +135,93 @@ void sysexCallback(byte command, byte argc, byte *argv)
             Serial.write(END_SYSEX);
             break;
           }
-        case ONEWIRE_RESET:
-          device->reset();
-          for (int i=0;i<8;i++) {
-            info->addr[i]=0x0;
-          }
-          break;
-        case ONEWIRE_SELECT:
-          if (argc >= 18) {
-            for (int i=2;i<18;i+=2) {
-              info->addr[i]= getValueFromTwo7bitBytes(&argv[i]) & 0xFF;
-            }
-            device->select(info->addr);
-          }
-          break;
-        case ONEWIRE_SKIP:
-          for (int i=0;i<8;i++) {
-            info->addr[i]=0x0;
-          }
-          device->skip();
-          break;
-        case ONEWIRE_WRITE:
-          for (int i=2;i<argc;i+=2) {
-            byte value = getValueFromTwo7bitBytes(&argv[i]) & 0xFF;
-            device->write(value,info->power);
-          }
-          break;
-        case ONEWIRE_READ: 
+        case ONEWIRE_SKIP_AND_WRITE:
           {
-            if (argc>2) {
+            if (argc >= 5) {
+              ow->reset();
+              ow->skip();
               int numBytes = getValueFromTwo7bitBytes(&argv[2]) & 0x3FFF;
-              Serial.write(START_SYSEX);
-              Serial.write(ONEWIRE_REPLY);
-              Serial.write(pin);
-              Serial.write(ONEWIRE_READ);
-              for (int i=0;i<8;i++) {
-                sendValueAsTwo7bitBytes(info->addr[i]);
-              }
               for (int i=0;i<numBytes;i++) {
-                sendValueAsTwo7bitBytes(device->read());
-              }  
-              Serial.write(END_SYSEX);
-              break;
+                ow->write(getValueFromTwo7bitBytes(&argv[(i<<1)+4]) & 0xFF,pinConfig->power);
+              }
+            }
+            break;
+          }
+        case ONEWIRE_SKIP_AND_READ:
+          {
+            if (argc>= 6) {
+              byte readCommand = getValueFromTwo7bitBytes(&argv[2]) &0xFF;
+              int numBytes = getValueFromTwo7bitBytes(&argv[4]) & 0x3FFF;
+              ow->reset();
+              ow->skip();
+              ow->write(readCommand,pinConfig->power);
+              readAndReportOWData(pin, NULL, ow, numBytes);
+            }
+            break;
+          }
+        case ONEWIRE_SELECT_AND_WRITE: // PIN,COMMAND,ADDRESS,NUMBYTES,DATA
+          {
+            if (argc >= 20) {
+              byte addr[8];
+              readAddress14Bit(addr,&argv[2]); //2-17
+              int numBytes = getValueFromTwo7bitBytes(&argv[18]) & 0x3FFF; //18-19
+              ow->reset();
+              ow->select(addr);
+              for (int i=0;i<numBytes;i++) { //20...
+                ow->write(getValueFromTwo7bitBytes(&argv[(i<<1)+20]) & 0xFF,pinConfig->power);
+              }
+            }
+            break;
+          }
+        case ONEWIRE_SELECT_AND_READ: // PIN,COMMAND,ADDRESS,READCOMMAND,NUMBYTES
+          {
+            if (argc>= 22) {
+              byte addr[8];
+              readAddress14Bit(addr,&argv[2]); //2-17
+              byte readCommand = getValueFromTwo7bitBytes(&argv[18]) &0xFF; //18-19
+              int numBytes = getValueFromTwo7bitBytes(&argv[20]) & 0x3FFF; //20-21
+              ow->reset();
+              ow->select(addr);
+              ow->write(readCommand,pinConfig->power);
+              readAndReportOWData(pin, addr, ow, numBytes);
+            }
+            break;
+          }
+        case ONEWIRE_CONFIG: 
+          {
+            boolean power = argv[2];
+            oneWireConfig(pin,power);
+            break;
+          }
+
+          // struct ow_report_config {
+          //   byte addr[8];
+          //   byte preReadCommand;
+          //   long readDelay;
+          //   byte readCommand;
+          //   int  numBytes;
+          //   ow_pin_config *pinConfig;
+          // }
+        case ONEWIRE_REPORT_CONFIG:
+          {
+            if (argc>=26) {
+              ow_report_config *config = new ow_report_config();
+              readAddress14Bit(config->addr,&argv[2]); //2-17
+              config->preReadCommand = getValueFromTwo7bitBytes(&argv[18]) &0xFF; //18-19
+              config->readDelay = getValueFromTwo7bitBytes(&argv[20]) &0x3FFF; //20-21
+              config->readCommand = getValueFromTwo7bitBytes(&argv[22]) &0xFF; //22-23
+              config->numBytes = getValueFromTwo7bitBytes(&argv[24]) &0x3FFF; //24-25
+              config->pinConfig = pinConfig;
+              owQueries[owQueryIndex]=config;
+              owQueryIndex++;
             }
           }
         }
       }
-      break;
     }
-  case ONEWIRE_CONFIG: 
-    {
-      byte pin = argv[0];
-      boolean power = argv[1];
-      oneWireConfig(pin,power);
-      break;
-    }
+    break;
   }
 }
-
-
 
 void setPinModeCallback(byte pin, int mode)
 {
@@ -186,11 +239,18 @@ void systemResetCallback() {
   for (int i=0;i<TOTAL_PINS;i++) {
     pinConfig[i] = 0;
     pinState[i] = 0;
-    pinOneWire[i].device=NULL;
-    for (int j=0;j<8;j++) {
-      pinOneWire[i].addr[j]=0;
-    }
+    pinOneWire[i].ow=NULL;
     pinOneWire[i].power=false;
+  }
+  previousMillis = millis();
+  if (owQueryIndex>-1) {
+    for (byte i=0;i<=owQueryIndex;i++) {
+      if (owQueries[i]) {
+        delete owQueries[i];
+        owQueries[i]=NULL;
+      }
+    }
+    owQueryIndex=-1;
   }
 }
 
@@ -208,10 +268,33 @@ void setup()
 
 void loop()
 {
-  while (Firmata.available()) {
+  while (Firmata.available())
     Firmata.processInput();
+
+  long currentMillis = millis();
+  if (currentMillis - previousMillis > samplingInterval) {
+    previousMillis += samplingInterval;
+    // report OneWire data for all device with read continuous mode enabled
+    if (owQueryIndex > -1) {
+      for (byte i = 0; i <= owQueryIndex && i<MAX_OW_QUERY; i++) {
+        ow_report_config *owConfig = owQueries[i];
+        if (owConfig) {
+          ow_pin_config *pinConfig = owConfig->pinConfig;  
+          OneWire *ow = pinConfig->ow;
+          ow->reset();
+          ow->select(owConfig->addr);
+          ow->write(owConfig->preReadCommand,pinConfig->power);
+          delay(owConfig->readDelay); // TODO, this does block other tasks. Requires some basic scheduling (in Firmata?) to refactor
+          ow->reset();
+          ow->select(owConfig->addr);
+          ow->write(owConfig->readCommand,pinConfig->power);
+          readAndReportOWData(pinConfig->pin, owConfig->addr, ow, owConfig->numBytes);
+        }
+      }
+    }
   }
 }
+
 
 
 
