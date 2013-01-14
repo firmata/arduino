@@ -23,7 +23,7 @@
 #define FIRMATA_MINOR_VERSION   3 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  4 // for bugfix releases
 
-#define MAX_DATA_BYTES 32 // max number of data bytes in non-Sysex messages
+#define MAX_DATA_BYTES 64 // max number of data bytes in non-Sysex messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
@@ -72,7 +72,8 @@
 #define SERVO                   0x04 // digital pin in Servo output mode
 #define SHIFT                   0x05 // shiftIn/shiftOut mode
 #define I2C                     0x06 // pin included in I2C setup
-#define TOTAL_PIN_MODES         7
+#define ONEWIRE                 0x07 // pin configured for 1-wire
+#define TOTAL_PIN_MODES         8
 
 extern "C" {
 // callback function types
@@ -101,6 +102,8 @@ public:
 /* serial receive handling */
     int available(void);
     void processInput(void);
+    void parse(unsigned char value);
+    boolean isParsingMessage(void);
 /* serial send handling */
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this

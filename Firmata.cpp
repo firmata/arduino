@@ -177,7 +177,14 @@ void FirmataClass::processSysexMessage(void)
 
 void FirmataClass::processInput(void)
 {
-  int inputData = FirmataSerial->read(); // this is 'int' to handle -1 when no data
+  int inputData = FirmataSerial.read(); // this is 'int' to handle -1 when no data
+  if (inputData!=-1) {
+    parse(inputData);
+  }
+}
+
+void FirmataClass::parse(byte inputData)
+{
   int command;
     
   // TODO make sure it handles -1 properly
@@ -262,6 +269,10 @@ void FirmataClass::processInput(void)
   }
 }
 
+boolean FirmataClass::isParsingMessage(void)
+{
+  return (waitForData>0 || parsingSysex);
+}
 //------------------------------------------------------------------------------
 // Serial Send Handling
 
