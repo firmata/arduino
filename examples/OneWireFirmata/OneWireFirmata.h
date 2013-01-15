@@ -9,10 +9,6 @@
 #include "Encoder7Bit.h"
 #include "FirmataScheduler.h"
 
-//sysex commands:
-#define ONEWIRE_REQUEST         0x73 // send an OneWire read/write/reset/select/skip/search request
-#define ONEWIRE_REPLY           0x74 // reply to a OneWire read/search request
-
 //subcommands:
 #define ONEWIRE_SEARCH_REQUEST 0x40
 #define ONEWIRE_CONFIG_REQUEST 0x41

@@ -5,28 +5,28 @@
 #include "Firmata.h"
 #include "Encoder7Bit.h"
 
-//sysex commands
-#define SCHEDULER_REQUEST       0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
-#define SCHEDULER_REPLY         0x7C // a reply to a querytasks/querytask-request from the scheduler
 
 //subcommands
-#define CREATE_FIRMATA_TASK 0
-#define DELETE_FIRMATA_TASK 1
-#define ADD_TO_FIRMATA_TASK 3
-#define SCHEDULE_FIRMATA_TASK 4
+#define CREATE_FIRMATA_TASK     0
+#define DELETE_FIRMATA_TASK     1
+#define ADD_TO_FIRMATA_TASK     2
+#define DELAY_FIRMATA_TASK      3
+#define SCHEDULE_FIRMATA_TASK   4
 #define QUERY_ALL_FIRMATA_TASKS 5
-#define QUERY_FIRMATA_TASK 6
-#define RESET_FIRMATA_TASKS 7
-#define ERROR_FIRMATA_TASK 8
+#define QUERY_FIRMATA_TASK      6
+#define RESET_FIRMATA_TASKS     7
+#define ERROR_TASK_REPLY        8
+#define QUERY_ALL_TASKS_REPLY   9
+#define QUERY_TASK_REPLY	   10
 
 #define firmata_task_len(a)(sizeof(firmata_task)+(a)->len)
 
 struct firmata_task
 {
+  firmata_task *nextTask;
   byte id; //only 7bits used -> supports 127 tasks
   long time_ms;
   int len;
-  firmata_task *nextTask;
   int pos;
   byte messages[];
 };
