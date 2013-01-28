@@ -14,7 +14,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
-  Copyright (C) 2012-2013 Norbert Truchsess. All rig
+  Copyright (C) 2012-2013 Norbert Truchsess. All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -476,57 +476,59 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
   case CAPABILITY_QUERY:
-    Serial.write(START_SYSEX);
-    Serial.write(CAPABILITY_RESPONSE);
+    Firmata.write(START_SYSEX);
+    Firmata.write(CAPABILITY_RESPONSE);
     for (byte pin=0; pin < TOTAL_PINS; pin++) {
       if (IS_PIN_DIGITAL(pin)) {
-        Serial.write((byte)INPUT);
-        Serial.write(1);
-        Serial.write((byte)OUTPUT);
-        Serial.write(1);
+        Firmata.write((byte)INPUT);
+        Firmata.write(1);
+        Firmata.write((byte)OUTPUT);
+        Firmata.write(1);
+        Firmata.write((byte)ONEWIRE);
+        Firmata.write(1);
       }
       if (IS_PIN_ANALOG(pin)) {
-        Serial.write(ANALOG);
-        Serial.write(10);
+        Firmata.write(ANALOG);
+        Firmata.write(10);
       }
       if (IS_PIN_PWM(pin)) {
-        Serial.write(PWM);
-        Serial.write(8);
+        Firmata.write(PWM);
+        Firmata.write(8);
       }
       if (IS_PIN_SERVO(pin)) {
-        Serial.write(SERVO);
-        Serial.write(14);
+        Firmata.write(SERVO);
+        Firmata.write(14);
       }
       if (IS_PIN_I2C(pin)) {
-        Serial.write(I2C);
-        Serial.write(1);  // to do: determine appropriate value 
+        Firmata.write(I2C);
+        Firmata.write(1);  // to do: determine appropriate value 
       }
-      Serial.write(127);
+      Firmata.write(127);
     }
-    Serial.write(END_SYSEX);
+    Firmata.write(END_SYSEX);
     break;
   case PIN_STATE_QUERY:
     if (argc > 0) {
       byte pin=argv[0];
-      Serial.write(START_SYSEX);
-      Serial.write(PIN_STATE_RESPONSE);
-      Serial.write(pin);
+      Firmata.write(START_SYSEX);
+      Firmata.write(PIN_STATE_RESPONSE);
+      Firmata.write(pin);
       if (pin < TOTAL_PINS) {
-        Serial.write((byte)pinConfig[pin]);
-	Serial.write((byte)pinState[pin] & 0x7F);
-	if (pinState[pin] & 0xFF80) Serial.write((byte)(pinState[pin] >> 7) & 0x7F);
-	if (pinState[pin] & 0xC000) Serial.write((byte)(pinState[pin] >> 14) & 0x7F);
+        Firmata.write((byte)pinConfig[pin]);
+	Firmata.write((byte)pinState[pin] & 0x7F);
+	if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
+	if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
       }
-      Serial.write(END_SYSEX);
+      Firmata.write(END_SYSEX);
     }
     break;
   case ANALOG_MAPPING_QUERY:
-    Serial.write(START_SYSEX);
-    Serial.write(ANALOG_MAPPING_RESPONSE);
+    Firmata.write(START_SYSEX);
+    Firmata.write(ANALOG_MAPPING_RESPONSE);
     for (byte pin=0; pin < TOTAL_PINS; pin++) {
-      Serial.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
+      Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
     }
-    Serial.write(END_SYSEX);
+    Firmata.write(END_SYSEX);
     break;
   }
 }
@@ -633,8 +635,11 @@ void loop()
   while(Firmata.available()) {
     Firmata.processInput();
     if (!Firmata.isParsingMessage()) {
-      FirmataScheduler.runTasks();
+      goto runtasks;
     }
+  }
+  if (!Firmata.isParsingMessage()) {
+runtasks: FirmataScheduler.runTasks();
   }
 
   /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
