@@ -17,16 +17,18 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
   OneWire *device = info->device;
   if (device) {
     switch(subcommand) {
-    case ONEWIRE_SEARCH_REQUEST: 
+    case ONEWIRE_SEARCH_REQUEST:
+    case ONEWIRE_SEARCH_ALARMS_REQUEST:
       {
         device->reset_search();
         FirmataWrite(START_SYSEX);
         FirmataWrite(ONEWIRE_REPLY);
-        FirmataWrite((byte)ONEWIRE_SEARCH_REPLY);
+        boolean isAlarmSearch = (subcommand == ONEWIRE_SEARCH_ALARMS_REQUEST);
+        FirmataWrite(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
         FirmataWrite(pin);
         Encoder7Bit.startBinaryWrite();
         byte addrArray[8];
-        while (device->search(addrArray)) {
+        while (isAlarmSearch ? device->search_alarms(addrArray) : device->search(addrArray)) {
           for (int i=0;i<8;i++) {
             Encoder7Bit.writeBinary(addrArray[i]);
           }
