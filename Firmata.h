@@ -43,8 +43,7 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
-#define ONEWIRE_REQUEST         0x73 // send an OneWire read/write/reset/select/skip/search request
-#define ONEWIRE_REPLY           0x7D // reply to a OneWire read/search request
+#define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
@@ -58,8 +57,7 @@
 #define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
-#define SCHEDULER_REQUEST       0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
-#define SCHEDULER_REPLY         0x7C // a reply to a querytasks/querytask-request from the scheduler
+#define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 // these are DEPRECATED to make the naming more consistent
