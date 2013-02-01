@@ -56,6 +56,7 @@
 #define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
+#define CONFIG_EXT              0x7C // further arduino configuration not covered by pin_mode
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 // these are DEPRECATED to make the naming more consistent
