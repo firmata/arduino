@@ -447,12 +447,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
     }
     break;
-  case ONEWIRE_REQUEST: 
+  case ONEWIRE_DATA: 
     if (argc>0) {
       OneWireFirmata.handleOneWireRequest(argv[0],argc-1,argv+1);
     }
     break;
-  case SCHEDULER_REQUEST: 
+  case SCHEDULER_DATA: 
     if (argc>0) {
       FirmataScheduler.handleSchedulerRequest(argv[0],argc-1,argv+1);
     }
