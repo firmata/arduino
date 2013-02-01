@@ -11,20 +11,20 @@ void Encoder7BitClass::startBinaryWrite() {
 
 void Encoder7BitClass::endBinaryWrite() {
   if (shift > 0) {
-    FirmataWrite(previous);
+    Serial.write(previous);
   }
 }
 
 void Encoder7BitClass::writeBinary(byte data) {
   if (shift == 0) {
-    FirmataWrite(data & 0x7f);
+    Serial.write(data & 0x7f);
     shift++;
     previous = data >> 7;
   } 
   else {
-    FirmataWrite(((data << shift) & 0x7f) | previous);
+    Serial.write(((data << shift) & 0x7f) | previous);
     if (shift == 6) {
-      FirmataWrite(data >> 1);
+      Serial.write(data >> 1);
       shift = 0;
     } 
     else {
@@ -47,7 +47,7 @@ void Encoder7BitClass::writeBinary(int numBytes, byte *data) {
     if (shift > 1 && pos < (numBytes - 1)) {
       out |= (data[pos + 1] << (8 - shift)) & 0x7F;
     }
-    FirmataWrite(out);
+    Serial.write(out);
   }
 }
 
@@ -62,8 +62,8 @@ void Encoder7BitClass::readBinary(int outBytes,byte *inData, byte *outData) {
 
 void Encoder7BitClass::sendValueAsTwo7bitBytes(int value) // is private in Firmata...
 {
-  FirmataWrite(value & B01111111); // LSB
-  FirmataWrite(value >> 7 & B01111111); // MSB
+  Serial.write(value & B01111111); // LSB
+  Serial.write(value >> 7 & B01111111); // MSB
 };
 
 int Encoder7BitClass::getValueFromTwo7bitBytes(byte *argv) {

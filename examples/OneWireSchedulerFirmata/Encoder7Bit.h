@@ -1,7 +1,6 @@
 #ifndef Encoder7Bit_h
 #define Encoder7Bit_h
 #include "Arduino.h"
-#include "FirmataExt.h"
 
 #define num7BitOutbytes(a)(((a)*7)>>3)
 

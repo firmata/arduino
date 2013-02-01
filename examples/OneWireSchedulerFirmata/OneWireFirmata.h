@@ -3,7 +3,6 @@
 
 #include "OneWire.h"
 #include "Firmata.h"
-#include "FirmataExt.h"
 #include "Encoder7Bit.h"
 #include "FirmataScheduler.h"
 
