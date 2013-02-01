@@ -21,11 +21,11 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
     case ONEWIRE_SEARCH_ALARMS_REQUEST:
       {
         device->reset_search();
-        FirmataWrite(START_SYSEX);
-        FirmataWrite(ONEWIRE_DATA);
+        Serial.write(START_SYSEX);
+        Serial.write(ONEWIRE_DATA);
         boolean isAlarmSearch = (subcommand == ONEWIRE_SEARCH_ALARMS_REQUEST);
-        FirmataWrite(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
-        FirmataWrite(pin);
+        Serial.write(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
+        Serial.write(pin);
         Encoder7Bit.startBinaryWrite();
         byte addrArray[8];
         while (isAlarmSearch ? device->search_alarms(addrArray) : device->search(addrArray)) {
@@ -34,7 +34,7 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
           }
         }
         Encoder7Bit.endBinaryWrite();
-        FirmataWrite(END_SYSEX);
+        Serial.write(END_SYSEX);
         break;
       }
     case ONEWIRE_CONFIG_REQUEST:
@@ -95,10 +95,10 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
           }
 
           if (numReadBytes>0) {
-            FirmataWrite(START_SYSEX);
-            FirmataWrite(ONEWIRE_DATA);
-            FirmataWrite(ONEWIRE_READ_REPLY);
-            FirmataWrite(pin);
+            Serial.write(START_SYSEX);
+            Serial.write(ONEWIRE_DATA);
+            Serial.write(ONEWIRE_READ_REPLY);
+            Serial.write(pin);
             Encoder7Bit.startBinaryWrite();
             for (int i=0;i<8;i++) {
               Encoder7Bit.writeBinary(info->addr[i]);
@@ -107,7 +107,7 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
               Encoder7Bit.writeBinary(device->read());
             }
             Encoder7Bit.endBinaryWrite();
-            FirmataWrite(END_SYSEX);
+            Serial.write(END_SYSEX);
           }
         }
       }

@@ -141,15 +141,15 @@ void FirmataSchedulerClass::delayTask(long delay_ms) {
 }
 
 void FirmataSchedulerClass::queryAllTasks() {
-  FirmataWrite(START_SYSEX);
-  FirmataWrite(SCHEDULER_DATA);
-  FirmataWrite(QUERY_ALL_TASKS_REPLY);
+  Serial.write(START_SYSEX);
+  Serial.write(SCHEDULER_DATA);
+  Serial.write(QUERY_ALL_TASKS_REPLY);
   firmata_task *task = tasks;
   while(task) {
-    FirmataWrite(task->id);
+    Serial.write(task->id);
     task=task->nextTask;
   }
-  FirmataWrite(END_SYSEX);
+  Serial.write(END_SYSEX);
 };
 
 void FirmataSchedulerClass::queryTask(byte id) {
@@ -158,20 +158,20 @@ void FirmataSchedulerClass::queryTask(byte id) {
 }
 
 void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean error) {
-  FirmataWrite(START_SYSEX);
-  FirmataWrite(SCHEDULER_DATA);
+  Serial.write(START_SYSEX);
+  Serial.write(SCHEDULER_DATA);
   if (error) {
-    FirmataWrite(ERROR_TASK_REPLY);
+    Serial.write(ERROR_TASK_REPLY);
   } else {
-    FirmataWrite(QUERY_TASK_REPLY);
+    Serial.write(QUERY_TASK_REPLY);
   }
-  FirmataWrite(id);
+  Serial.write(id);
   if (task) {
     Encoder7Bit.startBinaryWrite();
     Encoder7Bit.writeBinary(firmata_task_len(task)-3,((byte *)task)+3); //don't write first 3 bytes (firmata_task*, byte); makes use of AVR byteorder (LSB first)
     Encoder7Bit.endBinaryWrite();
   }
-  FirmataWrite(END_SYSEX);
+  Serial.write(END_SYSEX);
 };
 
 void FirmataSchedulerClass::runTasks() {
