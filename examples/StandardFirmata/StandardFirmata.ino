@@ -450,6 +450,17 @@ void sysexCallback(byte command, byte argc, byte *argv)
       //Firmata.sendString("Not enough data");
     }
     break;
+  case CONFIG_EXT:
+	  if (argc > 1) {
+		  switch (argv[0]) {
+		  case 0: // analogReference request
+			  analogReference(argv[1]);
+			  break;
+		  case 1: // analogWriteResolution request
+			  analogWriteResolution(arg[1]);
+			  break;
+		  }
+	  }
   case EXTENDED_ANALOG:
     if (argc > 1) {
       int val = argv[1];
