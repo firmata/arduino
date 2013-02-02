@@ -451,16 +451,44 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
   case CONFIG_EXT:
-	  if (argc > 1) {
-		  switch (argv[0]) {
-		  case 0: // analogReference request
-			  analogReference(argv[1]);
-			  break;
-		  case 1: // analogWriteResolution request
-			  analogWriteResolution(arg[1]);
-			  break;
-		  }
-	  }
+    if (argc > 1) {
+      switch (argv[0]) {
+      case 0: // analogReference request
+        switch (argv[0]) {
+        case 0: // analogReference request
+          switch (argv[1]) {
+          case 0:
+            analogReference(DEFAULT);
+            break;
+          case 1:
+            analogReference(INTERNAL);
+            break;
+#ifdef INTERNAL1V1
+          case 2:
+            analogReference(INTERNAL1V1);
+            break;
+#endif
+#ifdef INTERNAL2V56
+          case 3:
+        	analogReference(INTERNAL2V56);
+            break;
+#endif
+          case 4:
+            analogReference(EXTERNAL);
+            break;
+          }
+          break;
+#if ARDUINO >= 150
+        case 1: // analogWriteResolution request
+          analogReadResolution(arg[1]);
+          break;
+        case 2: // analogWriteResolution request
+          analogWriteResolution(arg[1]);
+          break;
+#endif
+        }
+      }
+    }
   case EXTENDED_ANALOG:
     if (argc > 1) {
       int val = argv[1];
