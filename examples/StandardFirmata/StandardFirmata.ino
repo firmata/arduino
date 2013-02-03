@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2012 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -462,9 +462,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
     stepCommand = argv[0];
     deviceNum = argv[1];
 
-    numSteppers = deviceNum + 1; // assumes steppers are added in order 0 -> 5
-
     if (stepCommand == STEPPER_CONFIG) {
+      numSteppers++; // assumes steppers are added in order 0 -> 5
       interface = argv[2];
       stepsPerRev = (argv[3] + (argv[4] << 7));
 
@@ -551,7 +550,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     Serial.write(END_SYSEX);
     break;
-  case PIN_STATE_QUERY:
+  case PIN_STATE_QUERY:    
     if (argc > 0) {
       byte pin=argv[0];
       Serial.write(START_SYSEX);
@@ -633,6 +632,8 @@ void systemResetCallback()
   }
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
+
+  numSteppers = 0;
 
   /* send digital inputs to set the initial state on the host computer,
    * since once in the loop(), this firmware will only send on change */
