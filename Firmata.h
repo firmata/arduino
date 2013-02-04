@@ -87,13 +87,13 @@ extern "C" {
 class FirmataClass
 {
 public:
-	FirmataClass(Stream &s);
+    FirmataClass(Stream &s);
 /* Arduino constructors */
     void begin();
     void begin(long);
     void begin(Stream &s);
 /* querying functions */
-	void printVersion(void);
+    void printVersion(void);
     void blinkVersion(void);
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
@@ -102,13 +102,13 @@ public:
     int available(void);
     void processInput(void);
 /* serial send handling */
-	void sendAnalog(byte pin, int value);
-	void sendDigital(byte pin, int value); // TODO implement this
-	void sendDigitalPort(byte portNumber, int portData);
+    void sendAnalog(byte pin, int value);
+    void sendDigital(byte pin, int value); // TODO implement this
+    void sendDigitalPort(byte portNumber, int portData);
     void sendString(const char* string);
     void sendString(byte command, const char* string);
-	void sendSysex(byte command, byte bytec, byte* bytev);
-    size_t write(uint8_t);
+    void sendSysex(byte command, byte bytec, byte* bytev);
+    void write(byte c);
 /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
     void attach(byte command, systemResetCallbackFunction newFunction);
@@ -141,7 +141,7 @@ private:
 
 /* private methods ------------------------------ */
     void processSysexMessage(void);
-	void systemReset(void);
+    void systemReset(void);
     void pin13strobe(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);

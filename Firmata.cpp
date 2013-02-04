@@ -333,7 +333,7 @@ void FirmataClass::sendString(const char* string)
 }
 
 // expose the write method
-size_t FirmataClass::write(uint8_t c)
+void FirmataClass::write(byte c)
 {
   FirmataSerial.write(c);
 }
