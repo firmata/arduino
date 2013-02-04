@@ -329,6 +329,12 @@ void FirmataClass::sendString(const char* string)
   sendString(STRING_DATA, string);
 }
 
+// expose the write method
+void FirmataClass::write(byte c)
+{
+  FirmataSerial.write(c);
+}
+
 
 // Internal Actions/////////////////////////////////////////////////////////////
 
