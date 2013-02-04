@@ -117,7 +117,7 @@ public:
     void detach(byte command);
 
 private:
-    Stream &FirmataSerial;    
+    Stream *FirmataSerial;
 /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
