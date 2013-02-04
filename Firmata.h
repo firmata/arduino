@@ -87,7 +87,7 @@ extern "C" {
 class FirmataClass
 {
 public:
-    FirmataClass(Stream &s);
+    FirmataClass();
 /* Arduino constructors */
     void begin();
     void begin(long);
