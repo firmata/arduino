@@ -120,10 +120,7 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
 
   // parse out ".cpp" and "applet/" that comes from using __FILE__
   extension = strstr(name, ".cpp");
-  if (strrchr(name, '/') != NULL)
-    filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
-  else
-    filename = strrchr(name, '\\') + 1; //points to slash, +1 gets to start of filename
+  filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
   // add two bytes for version numbers
   if(extension && filename) {
     firmwareVersionCount = extension - filename + 2;
