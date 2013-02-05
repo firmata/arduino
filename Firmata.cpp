@@ -445,6 +445,6 @@ void FirmataClass::pin13strobe(int count, int onInterval, int offInterval)
 
 
 // make one instance for the user to use
-FirmataClass Firmata(Serial);
+FirmataClass Firmata;
 
 
