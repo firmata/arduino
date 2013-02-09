@@ -1,6 +1,6 @@
 #Firmata
 
-Firmata is a protocol for communicating with microcontrollers from software on a host computer. The protocol can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices.
+Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](http://firmata.org/wiki/Protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. See the [firmata wiki](http://firmata.org/wiki/Main_Page) for additional informataion. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
 ##Usage
 
@@ -42,23 +42,57 @@ Most of the time you will be interacting with arduino with a client library on t
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the arduino IDE contains the latest stable version of firmata (Arduino 1.0 includes Firmata 2.3).  If you need to use any updates made to this repository just clone the repo into the location of firmata in the arduino IDE.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
 
-Mac OSX:
+**Mac OSX**:
 
 ```
 rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 ```
 
-Windows:
+If you are downloading the latest tagged version of Firmata, rename it to "Firmata" and copy to /Applications/Arduino.app/Contents/Resources/Java/libraries/ overwriting the existing Firmata directory. Right-click (or conrol + click) on the Arduino application and choose "Show Package Contents" and navigate to the libraries directory.
+
+**Windows**:
+
+Using the Git Shell application installed with [GitHub for Windows](http://windows.github.com/) (set default shell in options to Git Bash) or other command line based git tool:
 
 ```
-TODO
+# update the path and arduino version as necessary
+rm -r c:/Program\ Files/arduino-1.x/libraries/Firmata
+git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino-1.x/libraries/Firmata
 ```
 
-Linux:
+Note: If you use GitHub for Windows, you must clone the firmata/arduino repository using the Git Shell application as described above. You can use the Github for Windows GUI only after you have cloned the repository. Drag the Firmata file into the Github for Windows GUI to track it.
+
+**Linux**:
 
 ```
-TODO
+# update the path and arduino version as necessary
+rm -r ~/arduino-1.x/libraries/Firmata
+git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
 ```
+
+<a name="contributing" />
+##Contributing
+
+If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/arduino/issues?sort=created&state=open). Due to the limited memory of standard Arduino boards we cannot add every requested feature to StandardFirmata. Requests to add new features to StandardFirmata will be evaluated by the Firmata developers. However it is still possible to add new features to other Firmata implementations (Firmata is a protocol whereas StandardFirmata is just one of many possible implementations).
+
+To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch.
+
+If you would like to contribute but don't have a specific bugfix or new feature to contribute, you can take on an existing issue, see issues labeled "pull-request-encouraged". Add a comment to the issue to express your intent to begin work and/or to get any additional information about the issue.
+
+You must thorougly test your contributed code. In your pull request, describe tests performed to ensure that no existing code is broken and that any changes maintain backwards compatibility with the existing api. Test on multiple Arduino board variants if possible. We hope to enable some form of automated (or at least semi-automated) testing in the future, but for now any tests will need to be executed manually by the contributor and reviewsers.
+
+Maintain the existing code style:
+
+- Indentation is 2 spaces
+- Use spaces instead of tabs
+- Document functions (specific doc style is TBD... for now just be sure to document)
+- Insert first block bracket on line following the function definition:
+
+<pre>void someFunction()
+{
+  // do something
+}
+</pre>
