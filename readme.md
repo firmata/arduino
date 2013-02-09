@@ -90,6 +90,7 @@ Maintain the existing code style:
 - Use spaces instead of tabs
 - Document functions (specific doc style is TBD... for now just be sure to document)
 - Insert first block bracket on line following the function definition:
+
 ```void someFunction()
 {
   // do something
