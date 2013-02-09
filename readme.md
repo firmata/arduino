@@ -69,8 +69,8 @@ Note: If you use GitHub for Windows, you must clone the firmata/arduino reposito
 
 ```
 # update the path and arduino version as necessary
-rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
-git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
+rm -r ~/arduino-1.x/libraries/Firmata
+git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
 ```
 
 <a name="contributing" />
