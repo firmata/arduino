@@ -91,8 +91,8 @@ Maintain the existing code style:
 - Document functions (specific doc style is TBD... for now just be sure to document)
 - Insert first block bracket on line following the function definition:
 
-```void someFunction()
+<pre>void someFunction()
 {
   // do something
 }
-```
+</pre>
