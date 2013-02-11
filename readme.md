@@ -19,7 +19,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [https://github.com/lupeke/python-firmata]
   * [https://github.com/tino/pyFirmata]
 * perl
-  * [https://github.com/amimoto/perl-firmata]
+  * [https://github.com/ntruchsess/perl-firmata]
   * [https://github.com/rcaputo/rx-firmata]
 * ruby 
   * [https://github.com/hardbap/firmata]
