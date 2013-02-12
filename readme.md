@@ -89,6 +89,7 @@ Maintain the existing code style:
 
 - Indentation is 2 spaces
 - Use spaces instead of tabs
+- Use camel case for both private and public properties and methods
 - Document functions (specific doc style is TBD... for now just be sure to document)
 - Insert first block bracket on line following the function definition:
 
