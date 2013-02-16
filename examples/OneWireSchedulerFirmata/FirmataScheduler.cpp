@@ -3,12 +3,14 @@
 #include "FirmataScheduler.h"
 #include <Firmata.h>
 
-FirmataSchedulerClass::FirmataSchedulerClass() {
+FirmataSchedulerClass::FirmataSchedulerClass()
+{
   tasks = NULL;
   running = NULL;
 }
 
-void FirmataSchedulerClass::handleSchedulerRequest(byte subcommand, byte argc, byte*argv) {
+void FirmataSchedulerClass::handleSchedulerRequest(byte subcommand, byte argc, byte*argv)
+{
   switch(subcommand) {
   case CREATE_FIRMATA_TASK: 
     {
@@ -68,7 +70,8 @@ void FirmataSchedulerClass::handleSchedulerRequest(byte subcommand, byte argc, b
   }
 };
 
-void FirmataSchedulerClass::createTask(byte id,int len) {
+void FirmataSchedulerClass::createTask(byte id,int len)
+{
   firmata_task *existing = findTask(id);
   if (existing) {
     reportTask(id,existing,true);
@@ -84,7 +87,8 @@ void FirmataSchedulerClass::createTask(byte id,int len) {
   }
 };
 
-void FirmataSchedulerClass::deleteTask(byte id) {
+void FirmataSchedulerClass::deleteTask(byte id)
+{
   firmata_task *current = tasks;
   firmata_task *previous = NULL;
   while (current) {
@@ -105,7 +109,8 @@ void FirmataSchedulerClass::deleteTask(byte id) {
   }
 };
 
-void FirmataSchedulerClass::addToTask(byte id, int additionalBytes, byte *message) {
+void FirmataSchedulerClass::addToTask(byte id, int additionalBytes, byte *message)
+{
   firmata_task *existing = findTask(id);
   if (existing) { //task exists and has not been fully loaded yet
     if (existing->pos+additionalBytes<=existing->len) {
@@ -119,7 +124,8 @@ void FirmataSchedulerClass::addToTask(byte id, int additionalBytes, byte *messag
   }
 };
 
-void FirmataSchedulerClass::schedule(byte id,long delay_ms) {
+void FirmataSchedulerClass::schedule(byte id,long delay_ms)
+{
   firmata_task *existing = findTask(id);
   if (existing) {
     existing->pos = 0;
@@ -130,7 +136,8 @@ void FirmataSchedulerClass::schedule(byte id,long delay_ms) {
   }
 };
 
-void FirmataSchedulerClass::delayTask(long delay_ms) {
+void FirmataSchedulerClass::delayTask(long delay_ms)
+{
   if (running) {
     long now = millis();
     running->time_ms += delay_ms;
@@ -140,7 +147,8 @@ void FirmataSchedulerClass::delayTask(long delay_ms) {
   }
 }
 
-void FirmataSchedulerClass::queryAllTasks() {
+void FirmataSchedulerClass::queryAllTasks()
+{
   Firmata.write(START_SYSEX);
   Firmata.write(SCHEDULER_DATA);
   Firmata.write(QUERY_ALL_TASKS_REPLY);
@@ -152,12 +160,14 @@ void FirmataSchedulerClass::queryAllTasks() {
   Firmata.write(END_SYSEX);
 };
 
-void FirmataSchedulerClass::queryTask(byte id) {
+void FirmataSchedulerClass::queryTask(byte id)
+{
   firmata_task *task = findTask(id);
   reportTask(id,task,false);
 }
 
-void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean error) {
+void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean error)
+{
   Firmata.write(START_SYSEX);
   Firmata.write(SCHEDULER_DATA);
   if (error) {
@@ -174,7 +184,8 @@ void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean erro
   Firmata.write(END_SYSEX);
 };
 
-void FirmataSchedulerClass::runTasks() {
+void FirmataSchedulerClass::runTasks()
+{
   if (tasks) {
     long now = millis();
     firmata_task *current = tasks;
@@ -205,7 +216,8 @@ void FirmataSchedulerClass::runTasks() {
   }
 };
 
-void FirmataSchedulerClass::reset() {
+void FirmataSchedulerClass::reset()
+{
   while (tasks) {
     firmata_task *nextTask = tasks->nextTask;
     free(tasks);
