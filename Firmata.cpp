@@ -177,7 +177,7 @@ void FirmataClass::processSysexMessage(void)
 
 void FirmataClass::processInput(void)
 {
-  int inputData = FirmataSerial.read(); // this is 'int' to handle -1 when no data
+  int inputData = FirmataSerial->read(); // this is 'int' to handle -1 when no data
   if (inputData!=-1) {
     parse(inputData);
   }

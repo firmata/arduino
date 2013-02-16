@@ -1,30 +1,35 @@
 #include "Encoder7Bit.h"
+#include <Firmata.h>
 
-Encoder7BitClass::Encoder7BitClass() {
+Encoder7BitClass::Encoder7BitClass()
+{
   previous = 0;
   shift = 0;
 }
 
-void Encoder7BitClass::startBinaryWrite() {
+void Encoder7BitClass::startBinaryWrite()
+{
   shift = 0;
 }
 
-void Encoder7BitClass::endBinaryWrite() {
+void Encoder7BitClass::endBinaryWrite()
+{
   if (shift > 0) {
-    Serial.write(previous);
+    Firmata.write(previous);
   }
 }
 
-void Encoder7BitClass::writeBinary(byte data) {
+void Encoder7BitClass::writeBinary(byte data)
+{
   if (shift == 0) {
-    Serial.write(data & 0x7f);
+    Firmata.write(data & 0x7f);
     shift++;
     previous = data >> 7;
   } 
   else {
-    Serial.write(((data << shift) & 0x7f) | previous);
+    Firmata.write(((data << shift) & 0x7f) | previous);
     if (shift == 6) {
-      Serial.write(data >> 1);
+      Firmata.write(data >> 1);
       shift = 0;
     } 
     else {
@@ -34,7 +39,8 @@ void Encoder7BitClass::writeBinary(byte data) {
   }
 }
 
-void Encoder7BitClass::writeBinary(int numBytes, byte *data) {
+void Encoder7BitClass::writeBinary(int numBytes, byte *data)
+{
   int messageSize = (numBytes << 3) / 7;
   if (((numBytes << 3) % 7) > 0) {
     messageSize++;
@@ -47,11 +53,12 @@ void Encoder7BitClass::writeBinary(int numBytes, byte *data) {
     if (shift > 1 && pos < (numBytes - 1)) {
       out |= (data[pos + 1] << (8 - shift)) & 0x7F;
     }
-    Serial.write(out);
+    Firmata.write(out);
   }
 }
 
-void Encoder7BitClass::readBinary(int outBytes,byte *inData, byte *outData) {
+void Encoder7BitClass::readBinary(int outBytes,byte *inData, byte *outData)
+{
   for (int i=0;i<outBytes;i++) {
     int j=i<<3;
     int pos=j/7;
@@ -62,8 +69,8 @@ void Encoder7BitClass::readBinary(int outBytes,byte *inData, byte *outData) {
 
 void Encoder7BitClass::sendValueAsTwo7bitBytes(int value) // is private in Firmata...
 {
-  Serial.write(value & B01111111); // LSB
-  Serial.write(value >> 7 & B01111111); // MSB
+  Firmata.write(value & B01111111); // LSB
+  Firmata.write(value >> 7 & B01111111); // MSB
 };
 
 int Encoder7BitClass::getValueFromTwo7bitBytes(byte *argv) {

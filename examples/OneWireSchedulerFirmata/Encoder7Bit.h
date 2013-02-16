@@ -4,7 +4,8 @@
 
 #define num7BitOutbytes(a)(((a)*7)>>3)
 
-class Encoder7BitClass {
+class Encoder7BitClass
+{
 public:
   Encoder7BitClass();
   void startBinaryWrite();

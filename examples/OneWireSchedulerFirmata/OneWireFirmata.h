@@ -2,9 +2,6 @@
 #define OneWireFirmata_h
 
 #include "OneWire.h"
-#include "Firmata.h"
-#include "Encoder7Bit.h"
-#include "FirmataScheduler.h"
 
 //subcommands:
 #define ONEWIRE_SEARCH_REQUEST 0x40
@@ -28,14 +25,15 @@
 //default value for power:
 #define ONEWIRE_POWER 1
 
-struct ow_device_info {
+struct ow_device_info
+{
   OneWire* device;
   byte addr[8];
   boolean power;
 };
 
-class OneWireFirmataClass {
-
+class OneWireFirmataClass
+{
 public:
 
   void handleOneWireRequest(byte command, byte argc, byte *argv);

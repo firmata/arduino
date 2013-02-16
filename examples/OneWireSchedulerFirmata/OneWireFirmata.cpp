@@ -1,6 +1,10 @@
+#include <Firmata.h>
 #include "OneWireFirmata.h"
+#include "Encoder7Bit.h"
+#include "FirmataScheduler.h"
 
-void OneWireFirmataClass::oneWireConfig(byte pin, boolean power) {
+void OneWireFirmataClass::oneWireConfig(byte pin, boolean power)
+{
   ow_device_info *info = &pinOneWire[pin];
   if (info->device==NULL) {
     info->device = new OneWire(pin);
@@ -11,7 +15,8 @@ void OneWireFirmataClass::oneWireConfig(byte pin, boolean power) {
   info->power = power;
 }
 
-void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte *argv) {
+void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte *argv)
+{
   byte pin = argv[0];
   ow_device_info *info = &pinOneWire[pin];
   OneWire *device = info->device;
@@ -21,11 +26,11 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
     case ONEWIRE_SEARCH_ALARMS_REQUEST:
       {
         device->reset_search();
-        Serial.write(START_SYSEX);
-        Serial.write(ONEWIRE_DATA);
+        Firmata.write(START_SYSEX);
+        Firmata.write(ONEWIRE_DATA);
         boolean isAlarmSearch = (subcommand == ONEWIRE_SEARCH_ALARMS_REQUEST);
-        Serial.write(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
-        Serial.write(pin);
+        Firmata.write(isAlarmSearch ? (byte)ONEWIRE_SEARCH_ALARMS_REPLY : (byte)ONEWIRE_SEARCH_REPLY);
+        Firmata.write(pin);
         Encoder7Bit.startBinaryWrite();
         byte addrArray[8];
         while (isAlarmSearch ? device->search_alarms(addrArray) : device->search(addrArray)) {
@@ -34,7 +39,7 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
           }
         }
         Encoder7Bit.endBinaryWrite();
-        Serial.write(END_SYSEX);
+        Firmata.write(END_SYSEX);
         break;
       }
     case ONEWIRE_CONFIG_REQUEST:
@@ -95,10 +100,10 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
           }
 
           if (numReadBytes>0) {
-            Serial.write(START_SYSEX);
-            Serial.write(ONEWIRE_DATA);
-            Serial.write(ONEWIRE_READ_REPLY);
-            Serial.write(pin);
+            Firmata.write(START_SYSEX);
+            Firmata.write(ONEWIRE_DATA);
+            Firmata.write(ONEWIRE_READ_REPLY);
+            Firmata.write(pin);
             Encoder7Bit.startBinaryWrite();
             for (int i=0;i<8;i++) {
               Encoder7Bit.writeBinary(info->addr[i]);
@@ -107,7 +112,7 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
               Encoder7Bit.writeBinary(device->read());
             }
             Encoder7Bit.endBinaryWrite();
-            Serial.write(END_SYSEX);
+            Firmata.write(END_SYSEX);
           }
         }
       }
@@ -115,7 +120,8 @@ void OneWireFirmataClass::handleOneWireRequest(byte subcommand, byte argc, byte 
   }
 }
 
-void OneWireFirmataClass::reset() {
+void OneWireFirmataClass::reset()
+{
   for (int i=0;i<TOTAL_PINS;i++) {
     if (pinOneWire[i].device) {
       free(pinOneWire[i].device);

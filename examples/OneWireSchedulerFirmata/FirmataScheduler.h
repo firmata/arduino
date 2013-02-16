@@ -2,9 +2,7 @@
 #define FirmataScheduler_h
 
 #include "Arduino.h"
-#include "Firmata.h"
 #include "Encoder7Bit.h"
-
 
 //subcommands
 #define CREATE_FIRMATA_TASK     0
