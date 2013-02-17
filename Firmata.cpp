@@ -56,7 +56,7 @@ FirmataClass::FirmataClass()
 //* Public Methods
 //******************************************************************************
 
-/* begin method for overriding default serial bitrate */
+/* begin method with default serial bitrate */
 void FirmataClass::begin(void)
 {
   begin(57600);
@@ -66,16 +66,14 @@ void FirmataClass::begin(void)
 void FirmataClass::begin(long speed)
 {
   Serial.begin(speed);
-  FirmataSerial = &Serial;
-  blinkVersion();
-  printVersion();
-  printFirmwareVersion();
+  begin(Serial);
 }
 
+/* begin method for overriding default stream */
 void FirmataClass::begin(Stream &s)
 {
   FirmataSerial = &s;
-  systemReset();
+  blinkVersion();
   printVersion();
   printFirmwareVersion();
 }
