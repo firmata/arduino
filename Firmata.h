@@ -140,6 +140,7 @@ private:
     sysexCallbackFunction currentSysexCallback;
 
 /* private methods ------------------------------ */
+    void init(void);
     void processSysexMessage(void);
     void systemReset(void);
     void pin13strobe(int count, int onInterval, int offInterval);
