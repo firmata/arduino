@@ -33,66 +33,65 @@ void FirmataClass::sendValueAsTwo7bitBytes(int value)
 }
 
 static uint8_t Int2PowTable[] = {
-	1,
-	2,
-	4,
-	8,
-	16,
-	32,
-	64,
-	128,
-	0
+  1,
+  2,
+  4,
+  8,
+  16,
+  32,
+  64,
+  128,
+  0
 };
 
 byte* FirmataClass::serializeBitStream(const byte* src, byte* length, byte fromBit, byte toBit)
 {
-	uint8_t uiSize = (uint8_t)ceil(*length * ((float)fromBit)/toBit);
+  uint8_t uiSize = (uint8_t)ceil(*length * ((float)fromBit)/toBit);
 
-	byte* Dest = (byte*)malloc(uiSize);
-	memset(Dest,0,uiSize);
+  byte* Dest = (byte*)malloc(uiSize);
+  memset(Dest,0,uiSize);
 
-	byte takeByte = 0;
-	byte takePos = 0;
-	byte setByte = 0;
-	byte setLength = toBit;
-	byte setPos = 0;
+  byte takeByte = 0;
+  byte takePos = 0;
+  byte setByte = 0;
+  byte setLength = toBit;
+  byte setPos = 0;
 
-	for (byte set = 0; set < (byte)( *length * fromBit ); )
-	{
-		Dest[setByte] |= ( (( src[takeByte] & ((Int2PowTable[setLength] - 1) << takePos) ) >> takePos) << setPos );
+  for (byte set = 0; set < (byte)( *length * fromBit ); )
+  {
+    Dest[setByte] |= ( (( src[takeByte] & ((Int2PowTable[setLength] - 1) << takePos) ) >> takePos) << setPos );
 
-		set += setLength;
-		setPos = setLength;
+    set += setLength;
+    setPos = setLength;
 
-		if (set % fromBit == 0)
-		{
-			takeByte++;
-			takePos = 0;
-		}
-		else
-		{
-			takePos = setLength;
-		}
+    if (set % fromBit == 0)
+    {
+      takeByte++;
+      takePos = 0;
+    }
+    else
+    {
+      takePos = setLength;
+    }
 
-		if (set % toBit == 0)
-		{
-			setByte++;
+    if (set % toBit == 0)
+    {
+      setByte++;
+      setPos = 0;
 
-			setPos = 0;
+      if (takePos == 0 && setLength == toBit)
+        setLength = toBit;
+      else
+        setLength = (fromBit - setLength);
+    }
+    else
+    {
+      setLength = (toBit - setLength);
+    }
+  }
 
-			if (takePos == 0 && setLength == toBit)
-				setLength = toBit;
-			else
-				setLength = (fromBit - setLength);
-		}
-		else
-		{
-			setLength = (toBit - setLength);
-		}
-	}
-
-	*length = uiSize;
-	return Dest;
+  *length = uiSize;
+  return Dest;
 }
 
 void FirmataClass::startSysex(void)
@@ -287,7 +286,7 @@ void FirmataClass::processInput(void)
         break;
       }
       executeMultiByteCommand = 0;
-    }	
+    }  
   } else {
     // remove channel info from command byte if less than 0xF0
     if(inputData < 0xF0) {
@@ -325,49 +324,49 @@ void FirmataClass::processInput(void)
 
 byte* FirmataClass::deserializeBitStream(byte* src, byte length, byte fromBit, byte toBit)
 {
-	byte* Dest = (byte*)malloc(length);
-	memset(Dest,0,length);
+  byte* Dest = (byte*)malloc(length);
+  memset(Dest,0,length);
 
-	byte takeByte = 0;
-	byte takePos = 0;
-	byte setByte = 0;
-	byte setLength = fromBit;
-	byte setPos = 0;
+  byte takeByte = 0;
+  byte takePos = 0;
+  byte setByte = 0;
+  byte setLength = fromBit;
+  byte setPos = 0;
 
-	for (byte set = 0; set < ( length * toBit ); )
-	{
-		Dest[setByte] |= ( (( src[takeByte] & ((Int2PowTable[setLength] - 1) << takePos) ) >> takePos) << setPos );
+  for (byte set = 0; set < ( length * toBit ); )
+  {
+    Dest[setByte] |= ( (( src[takeByte] & ((Int2PowTable[setLength] - 1) << takePos) ) >> takePos) << setPos );
 
-		set += setLength;
-		setPos = setLength;
+    set += setLength;
+    setPos = setLength;
 
-		if (set % fromBit == 0)
-		{
-			takeByte++;
-			takePos = 0;
-		}
-		else
-		{
-			takePos = setLength;
-		}
+    if (set % fromBit == 0)
+    {
+      takeByte++;
+      takePos = 0;
+    }
+    else
+    {
+      takePos = setLength;
+    }
 
-		if (set % toBit == 0)
-		{
-			setByte++;
-			setPos = 0;
+    if (set % toBit == 0)
+    {
+      setByte++;
+      setPos = 0;
 
-			if (takePos == 0 && setLength == fromBit)
-				setLength = fromBit;
-			else
-				setLength = (fromBit - setLength);
-		}
-		else
-		{
-			setLength = (toBit - setLength);
-		}
-	}
+      if (takePos == 0 && setLength == fromBit)
+        setLength = fromBit;
+      else
+        setLength = (fromBit - setLength);
+    }
+    else
+    {
+      setLength = (toBit - setLength);
+    }
+  }
 
-	return Dest;
+  return Dest;
 }
 
 //------------------------------------------------------------------------------
@@ -415,26 +414,26 @@ void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 
 // send binary data as serial stream with 7 bits per bytes
 // optional: subheader for extra information
-void FirmataClass::sendSysexBinary( byte command, uint16_t bytec, byte* bytev, byte subcmdc, byte* subcmdv )
+void FirmataClass::sendSysexBinary( byte command, byte bytec, byte* bytev, byte subcmdc, byte* subcmdv )
 {
   startSysex();
   FirmataSerial->write(command);
   
   if( subcmdc != 0 )
   {
-	  while( subcmdc > 0 )
-	  {
-		  FirmataSerial->write(subcmdv[0]&0x7F);
-		  subcmdv++;
-		  subcmdc--;
-	  }
+    while( subcmdc > 0 )
+    {
+      FirmataSerial->write(subcmdv[0]&0x7F);
+      subcmdv++;
+      subcmdc--;
+    }
   }
 
   byte* pSerializedData = serializeBitStream(&bytev[0], &bytec);
 
   for( byte i=0; i < bytec; i++ )
   {
-	  FirmataSerial->write(pSerializedData[i]);
+    FirmataSerial->write(pSerializedData[i]);
   }
 
   free(pSerializedData);

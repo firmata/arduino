@@ -32,9 +32,11 @@ sendDigitalPort	KEYWORD2
 sendString	KEYWORD2
 sendString	KEYWORD2
 sendSysex	KEYWORD2
+sendSysexBinary KEYWORD2
 attach	KEYWORD2
 detach	KEYWORD2
 flush	KEYWORD2
+deserializeBitStream KEYWORD2
 
 
 #######################################
