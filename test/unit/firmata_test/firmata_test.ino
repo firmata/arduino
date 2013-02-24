@@ -13,54 +13,6 @@ void loop()
   suite.run();
 }
 
-class InMemoryStream : public Stream
-{
-public:
-  virtual ~InMemoryStream() 
-  {
-  }
-
-  size_t write(uint8_t val)
-  {
-    _bytesWritten += (char) val;
-
-    return size_t(1);
-  }
-
-  void flush() 
-  {
-  }
-
-  const String& bytesWritten() 
-  {
-    return _bytesWritten;
-  }
-
-  void nextByte(byte b)
-  {
-    _nextByte = b;
-  }
-
-  int available() 
-  {
-    return 1;
-  }
-
-  int read() 
-  {
-    return _nextByte;
-  }
-
-  int peek()
-  {
-    return _nextByte;
-  }
-
-private:
-  String _bytesWritten;
-  byte _nextByte;
-};
-
 void assertStringsEqual(Test& __test__, const char* expected, const String& actual)
 {
   size_t expectedLength = strlen(expected);
@@ -73,15 +25,15 @@ void assertStringsEqual(Test& __test__, const char* expected, const String& actu
 
 test(beginPrintsVersion)
 {
-  InMemoryStream stream;
+  FakeStream stream;
 
   Firmata.begin(stream);
 
   char expected[] = 
   {
-    0xF9, // Version reporting identifier 
-    2,    // Major version number
-    3,    // Minor version number
+    REPORT_VERSION,
+    FIRMATA_MAJOR_VERSION,
+    FIRMATA_MINOR_VERSION,
     0
   };
   assertStringsEqual(__test__, expected, stream.bytesWritten());
@@ -89,7 +41,7 @@ test(beginPrintsVersion)
 
 void processMessage(const byte* message, size_t length)
 {
-  InMemoryStream stream;
+  FakeStream stream;
   Firmata.begin(stream);
 
   for (size_t i = 0; i < length; i++)
@@ -178,3 +130,12 @@ test(specifiedDigitalWritePort)
   assertEquals(1, _digitalPort);
 }
 
+test(setFirmwareVersionDoesNotLeakMemory)
+{
+  Firmata.setFirmwareVersion(1, 0);
+  int initialMemory = freeMemory();
+
+  Firmata.setFirmwareVersion(1, 0);
+
+  assertEquals(0, initialMemory - freeMemory());
+}
