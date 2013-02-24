@@ -17,10 +17,22 @@ void assertStringsEqual(Test& __test__, const char* expected, const String& actu
 {
   size_t expectedLength = strlen(expected);
   assertEquals(expectedLength, actual.length());
-  for (size_t i = 0; i < strlen(expected); i++)
+  for (size_t i = 0; i < expectedLength; i++)
   {
     assertEquals(expected[i], actual[i]);
   }
+}
+
+test(setFirmwareVersionDoesNotLeakMemory)
+{
+  Firmata.setFirmwareVersion(1, 0);
+  int initialMemory = freeMemory();
+
+  Firmata.setFirmwareVersion(1, 0);
+
+  assertEquals(0, initialMemory - freeMemory());
+  
+  Firmata.unsetFirmwareVersion();
 }
 
 test(beginPrintsVersion)
@@ -59,8 +71,14 @@ void writeToDigitalPort(byte port, int value)
   _digitalPortValue = value;
 }
 
+void setupDigitalPort() {
+  _digitalPort = 0;
+  _digitalPortValue = 0;
+}
+
 test(processWriteDigital_0)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
@@ -71,6 +89,7 @@ test(processWriteDigital_0)
 
 test(processWriteDigital_127)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE, 127, 0 };
@@ -79,18 +98,9 @@ test(processWriteDigital_127)
   assertEquals(127, _digitalPortValue);
 }
 
-test(processWriteDigitalStripsTopBit)
-{
-  Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
-  byte message[] = { DIGITAL_MESSAGE, B11111111, 0 };
-  processMessage(message, 3);
-
-  assertEquals(B01111111, _digitalPortValue);
-}
-
 test(processWriteDigital_128)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE, 0, 1 };
@@ -101,6 +111,7 @@ test(processWriteDigital_128)
 
 test(processWriteLargestDigitalValue)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE, 0x7F, 0x7F };
@@ -112,6 +123,7 @@ test(processWriteLargestDigitalValue)
 
 test(defaultDigitalWritePortIsZero)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
@@ -122,6 +134,7 @@ test(defaultDigitalWritePortIsZero)
 
 test(specifiedDigitalWritePort)
 {
+  setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
   
   byte message[] = { DIGITAL_MESSAGE + 1, 0, 0 };
@@ -130,12 +143,3 @@ test(specifiedDigitalWritePort)
   assertEquals(1, _digitalPort);
 }
 
-test(setFirmwareVersionDoesNotLeakMemory)
-{
-  Firmata.setFirmwareVersion(1, 0);
-  int initialMemory = freeMemory();
-
-  Firmata.setFirmwareVersion(1, 0);
-
-  assertEquals(0, initialMemory - freeMemory());
-}

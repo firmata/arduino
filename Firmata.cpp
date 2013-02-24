@@ -49,6 +49,7 @@ void FirmataClass::endSysex(void)
 FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
+  firmwareVersionVector = 0;
   systemReset();
 }
 
@@ -126,6 +127,9 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
     firmwareVersionCount = strlen(name) + 2;
     filename = name;
   }
+
+  free(firmwareVersionVector);
+
   firmwareVersionVector = (byte *) malloc(firmwareVersionCount);
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
@@ -136,6 +140,13 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   //             (char)major, (char)minor, firmwareVersionVector);
 }
 
+void FirmataClass::unsetFirmwareVersion()
+{
+  firmwareVersionCount = 0;
+  free(firmwareVersionVector); 
+  firmwareVersionVector = 0;
+}
+ 
 //------------------------------------------------------------------------------
 // Serial Receive Handling
 
@@ -179,7 +190,7 @@ void FirmataClass::processInput(void)
   int command;
     
   // TODO make sure it handles -1 properly
-
+  
   if (parsingSysex) {
     if(inputData == END_SYSEX) {
       //stop sysex byte      
