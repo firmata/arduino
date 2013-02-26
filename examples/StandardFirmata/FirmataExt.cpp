@@ -65,8 +65,8 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
     if (capabilityFunction) {
       for (byte pin=0; pin < TOTAL_PINS; pin++) {
           capabilityFunction(pin);
+          Firmata.write(127);
       }
-      Firmata.write(127);
     }
     Firmata.write(END_SYSEX);
     break;

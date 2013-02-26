@@ -17,7 +17,7 @@
 #ifndef FirmataExt_h
 #define FirmataExt_h
 
-#include "FirmataConfig.h"
+#include <Firmata.h>
 
 extern "C" {
 // callback function types
