@@ -249,6 +249,9 @@ runtasks: FirmataScheduler.runTasks();
     // report i2c data for all device with read continuous mode enabled
     I2CFirmata.report();
 #endif
+#ifdef STEPPERFIRMATA
+    StepperFirmata.update();
+#endif
   }
 #endif
 }
