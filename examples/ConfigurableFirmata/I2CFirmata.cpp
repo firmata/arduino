@@ -213,7 +213,6 @@ void I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
-  isI2CEnabled = true;
   if(delayTime > 0) {
     i2cReadDelayTime = delayTime;
   }
