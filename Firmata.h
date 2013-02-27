@@ -62,6 +62,7 @@
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 // these are DEPRECATED to make the naming more consistent
 #define FIRMATA_STRING          0x71 // same as STRING_DATA
+#define STEPPER_DATA            0x72 // move this to Firmata.h
 #define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
 #define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
@@ -75,7 +76,8 @@
 #define SHIFT                   0x05 // shiftIn/shiftOut mode
 #define I2C                     0x06 // pin included in I2C setup
 #define ONEWIRE                 0x07 // pin configured for 1-wire
-#define TOTAL_PIN_MODES         8
+#define STEPPER                 0x08 // pin configured for stepper motor
+#define TOTAL_PIN_MODES         9
 
 extern "C" {
 // callback function types

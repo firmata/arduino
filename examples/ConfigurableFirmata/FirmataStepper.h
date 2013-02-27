@@ -67,74 +67,74 @@
 
 // library interface description
 class FirmataStepper {
-  public:
-    FirmataStepper(byte interface = FirmataStepper::DRIVER, 
-                    int steps_per_rev = 200, 
-                    byte pin1 = 2, 
-                    byte pin2 = 3, 
-                    byte pin3 = 3, 
-                    byte pin4 = 4);
+public:
+  FirmataStepper(byte interface = FirmataStepper::DRIVER,
+                  int steps_per_rev = 200,
+                  byte pin1 = 2,
+                  byte pin2 = 3,
+                  byte pin3 = 3,
+                  byte pin4 = 4);
 
-    enum Interface {
-      DRIVER = 1,
-      TWO_WIRE = 2,
-      FOUR_WIRE = 4
-    };
+  enum Interface {
+    DRIVER = 1,
+    TWO_WIRE = 2,
+    FOUR_WIRE = 4
+  };
 
-    enum RunState {
-      STOP = 0,
-      ACCEL = 1,
-      DECEL = 2,
-      RUN = 3
-    };
+  enum RunState {
+    STOP = 0,
+    ACCEL = 1,
+    DECEL = 2,
+    RUN = 3
+  };
 
-    enum Direction {
-      CCW = 0,
-      CW = 1
-    };
+  enum Direction {
+    CCW = 0,
+    CW = 1
+  };
 
-    void setStepsToMove(long steps_to_move, int speed, int accel=0, int decel=0);
+  void setStepsToMove(long steps_to_move, int speed, int accel=0, int decel=0);
 
-    // update the stepper position
-		bool update();
+  // update the stepper position
+  bool update();
 
-    byte version(void);
+  byte version(void);
 
-  private:
-    void stepMotor(byte step_num, byte direction);
-    void updateStepPosition();
-    bool running;
-    byte interface;     // Type of interface: DRIVER, TWO_WIRE or FOUR_WIRE
-    byte direction;        // Direction of rotation
-    unsigned long step_delay;    // delay between steps, in microseconds
-    int steps_per_rev;      // number of steps to make one revolution
-    long step_number;        // which step the motor is on
-    long steps_to_move;   // total number of teps to move
+private:
+  void stepMotor(byte step_num, byte direction);
+  void updateStepPosition();
+  bool running;
+  byte interface;     // Type of interface: DRIVER, TWO_WIRE or FOUR_WIRE
+  byte direction;        // Direction of rotation
+  unsigned long step_delay;    // delay between steps, in microseconds
+  int steps_per_rev;      // number of steps to make one revolution
+  long step_number;        // which step the motor is on
+  long steps_to_move;   // total number of teps to move
 
-    byte run_state;
-    int accel_count;
-    long min_delay;
-    long decel_start;
-    int decel_val;
+  byte run_state;
+  int accel_count;
+  long min_delay;
+  long decel_start;
+  int decel_val;
 
-    long lastAccelDelay;
-    unsigned long stepCount;
-    unsigned int rest;    
+  long lastAccelDelay;
+  unsigned long stepCount;
+  unsigned int rest;
 
-    float alpha;  // PI * 2 / steps_per_rev
-    long at_x100;  // alpha * T1_FREQ * 100
-    long ax20000;  // alph a* 20000
-    float alpha_x2;  // alpha * 2
-    
-    // motor pin numbers:
-    byte dir_pin;
-    byte step_pin;
-    byte motor_pin_1;
-    byte motor_pin_2;
-    byte motor_pin_3;
-    byte motor_pin_4;
-    
-    unsigned long last_step_time; // time stamp in microseconds of when the last step was taken
+  float alpha;  // PI * 2 / steps_per_rev
+  long at_x100;  // alpha * T1_FREQ * 100
+  long ax20000;  // alph a* 20000
+  float alpha_x2;  // alpha * 2
+
+  // motor pin numbers:
+  byte dir_pin;
+  byte step_pin;
+  byte motor_pin_1;
+  byte motor_pin_2;
+  byte motor_pin_3;
+  byte motor_pin_4;
+
+  unsigned long last_step_time; // time stamp in microseconds of when the last step was taken
 };
 
 #endif

@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -26,17 +26,33 @@
   formatted using the GNU C formatting and indenting
 */
 
-#ifndef FirmataConfig_h
-#define FirmataConfig_h
+/*
+ * TODO: use Program Control to load stored profiles from EEPROM
+ */
 
-#define FIRMATAEXT
-#define FIRMATAREPORTING
-#define FIRMATASCHEDULER
+#ifndef StepperFirmata_h
+#define StepperFirmata_h
 
-#define DIGITALFIRMATA
-#define ANALOGFIRMATA
-#define SERVOFIRMATA
-#define I2CFIRMATA
-#define ONEWIREFIRMATA
-#define STEPPERFIRMATA
+#include "FirmataStepper.h"
+#include <Firmata.h>
+
+#define MAX_STEPPERS 6 // arbitrary value... may need to adjust
+#define STEPPER_CONFIG 0
+#define STEPPER_STEP 1
+
+class StepperFirmataClass
+{
+public:
+  boolean handlePinMode(byte pin, int mode);
+  void handleCapability(byte pin);
+  boolean handleSysex(byte command, byte argc, byte *argv);
+  void update();
+  void reset();
+private:
+  FirmataStepper *stepper[MAX_STEPPERS];
+  byte numSteppers;
+};
+
+extern StepperFirmataClass StepperFirmata;
+
 #endif

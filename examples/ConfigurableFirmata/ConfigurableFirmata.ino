@@ -53,6 +53,9 @@
 #ifdef ONEWIREFIRMATA
 #include "OneWireFirmata.h"
 #endif
+#ifdef STEPPERFIRMATA
+#include "StepperFirmata.h"
+#endif
 
 #ifdef FIRMATAEXT
 #include "FirmataExt.h"
@@ -90,6 +93,9 @@ void setPinModeCallback(byte pin, int mode)
 #ifdef ONEWIREFIRMATA
   known |= OneWireFirmata.handlePinMode(pin,mode);
 #endif
+#ifdef STEPPERFIRMATA
+  known |= StepperFirmata.handlePinMode(pin,mode);
+#endif
   if (!known) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
@@ -117,6 +123,9 @@ void capabilityQueryCallback(byte pin)
 #endif
 #ifdef ONEWIREFIRMATA
   OneWireFirmata.handleCapability(pin);
+#endif
+#ifdef STEPPERFIRMATA
+  StepperFirmata.handleCapability(pin);
 #endif
 }
 #endif
