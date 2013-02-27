@@ -43,6 +43,7 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
+#define STEPPER_DATA            0x72 // control a stepper motor
 #define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
 #define I2C_REQUEST             0x76 // send an I2C read/write request
@@ -62,7 +63,6 @@
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 // these are DEPRECATED to make the naming more consistent
 #define FIRMATA_STRING          0x71 // same as STRING_DATA
-#define STEPPER_DATA            0x72 // move this to Firmata.h
 #define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
 #define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
