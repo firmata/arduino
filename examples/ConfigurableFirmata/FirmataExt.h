@@ -27,21 +27,11 @@ extern "C" {
 class FirmataExtClass
 {
 public:
-/* access pin config */
-  byte getPinConfig(byte pin);
-  void setPinConfig(byte pin, byte config);
-/* access pin state */
-  int getPinState(byte pin);
-  void setPinState(byte pin, int state);
-
   boolean handleSysex(byte command, byte argc, byte* argv);
 
   void attach(capabilityCallbackFunction callback);
 
 private:
-/* pins configuration */
-  byte pinConfig[TOTAL_PINS];         // configuration of every pin
-  int pinState[TOTAL_PINS];           // any value that has been written
   capabilityCallbackFunction capabilityFunction;
 };
 

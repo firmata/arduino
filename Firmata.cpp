@@ -391,6 +391,29 @@ void FirmataClass::detach(byte command)
   }
 }
 
+/* access pin config */
+byte FirmataClass::getPinConfig(byte pin)
+{
+  return pinConfig[pin];
+}
+
+void FirmataClass::setPinConfig(byte pin, byte config)
+{
+  pinConfig[pin] = config;
+}
+
+/* access pin state */
+int FirmataClass::getPinState(byte pin)
+{
+  return pinState[pin];
+}
+
+void FirmataClass::setPinState(byte pin, int state)
+{
+  pinState[pin] = state;
+}
+
+
 // sysex callbacks
 /*
  * this is too complicated for analogReceive, but maybe for Sysex?

@@ -17,9 +17,6 @@
 #include "FirmataConfig.h"
 #include <Firmata.h>
 #include "AnalogFirmata.h"
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
 
 // -----------------------------------------------------------------------------
 /* sets bits in a bit array (int) to toggle the reporting of the analogIns
@@ -58,9 +55,7 @@ boolean AnalogFirmataClass::handlePinMode(byte pin, int mode)
   if (IS_PIN_ANALOG(pin)) {
     reportAnalog(PIN_TO_ANALOG(pin), mode == ANALOG ? 1 : 0); // turn on/off reporting
   }
-#ifdef FIRMATAEXT
-  FirmataExt.setPinState(pin,0);
-#endif
+  Firmata.setPinState(pin,0);
   switch(mode) {
   case ANALOG:
     if (IS_PIN_ANALOG(pin)) {
@@ -68,18 +63,14 @@ boolean AnalogFirmataClass::handlePinMode(byte pin, int mode)
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       }
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,ANALOG);
-#endif
+      Firmata.setPinConfig(pin,ANALOG);
     }
     return true;
   case PWM:
     if (IS_PIN_PWM(pin)) {
       pinMode(PIN_TO_PWM(pin), OUTPUT);
       analogWrite(PIN_TO_PWM(pin), 0);
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,PWM);
-#endif
+      Firmata.setPinConfig(pin,PWM);
     }
     return true;
   }
@@ -154,16 +145,12 @@ void AnalogFirmataClass::report()
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for(pin=0; pin<TOTAL_PINS; pin++) {
     if (IS_PIN_ANALOG(pin)) {
-#ifdef FIRMATAEXT
-      if(FirmataExt.getPinConfig(pin) == ANALOG) {
-#endif
+      if(Firmata.getPinConfig(pin) == ANALOG) {
         analogPin = PIN_TO_ANALOG(pin);
         if (analogInputsToReport & (1 << analogPin)) {
           Firmata.sendAnalog(analogPin, analogRead(analogPin));
         }
-#ifdef FIRMATAEXT
       }
-#endif
     }
   }
 }

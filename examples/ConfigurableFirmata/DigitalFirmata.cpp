@@ -18,10 +18,6 @@
 #include <Firmata.h>
 #include "DigitalFirmata.h"
 
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
-
 void digitalWriteCallback(byte port, int value)
 {
   DigitalFirmata.digitalWrite(port,value);
@@ -80,17 +76,13 @@ void DigitalFirmataClass::digitalWrite(byte port, int value)
     for (pin=port*8; pin < lastPin; pin++) {
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
-#ifdef FIRMATAEXT
         // only write to OUTPUT and INPUT (enables pullup)
         // do not touch pins in PWM, ANALOG, SERVO or other modes
-        byte pinConfig = FirmataExt.getPinConfig(pin);
+        byte pinConfig = Firmata.getPinConfig(pin);
         if (pinConfig == OUTPUT || pinConfig == INPUT) {
-#endif
           pinWriteMask |= mask;
-#ifdef FIRMATAEXT
-          FirmataExt.setPinState(pin,((byte)value & mask) ? 1 : 0);
+          Firmata.setPinState(pin,((byte)value & mask) ? 1 : 0);
         }
-#endif
       }
       mask = mask << 1;
     }
@@ -119,23 +111,17 @@ boolean DigitalFirmataClass::handlePinMode(byte pin, int mode)
     } else {
       portConfigInputs[pin/8] &= ~(1 << (pin & 7));
     }
-#ifdef FIRMATAEXT
-    FirmataExt.setPinState(pin,0);
-#endif
+    Firmata.setPinState(pin,0);
   switch(mode) {
   case INPUT:
       pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,INPUT);
-#endif
+      Firmata.setPinConfig(pin,INPUT);
       return true;
   case OUTPUT:
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
       pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,OUTPUT);
-#endif
+      Firmata.setPinConfig(pin,OUTPUT);
       return true;
     }
   }

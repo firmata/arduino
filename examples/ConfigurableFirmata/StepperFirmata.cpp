@@ -33,9 +33,6 @@
 #include "FirmataConfig.h"
 #include "StepperFirmata.h"
 #include "FirmataStepper.h"
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
 #include <Firmata.h>
 
 boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
@@ -44,9 +41,7 @@ boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
     if (IS_PIN_DIGITAL(pin)) {
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
       pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,OUTPUT);
-#endif
+      Firmata.setPinConfig(pin,OUTPUT);
     }
     return true;
   }

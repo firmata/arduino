@@ -144,6 +144,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #ifdef ONEWIREFIRMATA
   if (OneWireFirmata.handleSysex(command,argc,argv)) return;
 #endif
+#ifdef STEPPERFIRMATA
+  if (StepperFirmata.handleSysex(command,argc,argv)) return;
+#endif
 #ifdef FIRMATASCHEDULER
   if (FirmataScheduler.handleSysex(command,argc,argv)) return;
 #endif
@@ -198,7 +201,7 @@ void setup()
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
 #endif
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
-#if defined ANALOGFIRMATA || defined SERVOFIRMATA || defined I2CFIRMATA || defined FIRMATAEXT || defined FIRMATAREPORTING
+#if defined ANALOGFIRMATA || defined SERVOFIRMATA || defined I2CFIRMATA || defined FIRMATAEXT || defined FIRMATAREPORTING || defined STEPPERFIRMATA
   Firmata.attach(START_SYSEX, sysexCallback);
 #endif
 #ifdef FIRMATAEXT

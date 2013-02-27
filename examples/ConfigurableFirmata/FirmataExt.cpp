@@ -18,28 +18,6 @@
 #include <Firmata.h>
 #include "FirmataExt.h"
 
-/* access pin config */
-byte FirmataExtClass::getPinConfig(byte pin)
-{
-  return pinConfig[pin];
-}
-
-void FirmataExtClass::setPinConfig(byte pin, byte config)
-{
-  pinConfig[pin] = config;
-}
-
-/* access pin state */
-int FirmataExtClass::getPinState(byte pin)
-{
-  return pinState[pin];
-}
-
-void FirmataExtClass::setPinState(byte pin, int state)
-{
-  pinState[pin] = state;
-}
-
 boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
@@ -51,10 +29,11 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
       Firmata.write(PIN_STATE_RESPONSE);
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
-        Firmata.write(pinConfig[pin]);
-        Firmata.write((byte)pinState[pin] & 0x7F);
-        if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-        if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+        Firmata.write(Firmata.getPinConfig(pin));
+        int pinState = Firmata.getPinState(pin);
+        Firmata.write((byte)pinState & 0x7F);
+        if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
+        if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
       }
       Firmata.write(END_SYSEX);
     }

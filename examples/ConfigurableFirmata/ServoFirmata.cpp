@@ -18,10 +18,6 @@
 #include <Firmata.h>
 #include "ServoFirmata.h"
 
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
-
 boolean ServoFirmataClass::analogWrite(byte pin, int value)
 {
   servos[PIN_TO_SERVO(pin)].write(value);
@@ -31,9 +27,7 @@ boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_SERVO(pin)) {
     if (mode==SERVO) {
-#ifdef FIRMATAEXT
-      FirmataExt.setPinConfig(pin,SERVO);
-#endif
+      Firmata.setPinConfig(pin,SERVO);
       if (!servos[PIN_TO_SERVO(pin)].attached()) {
         servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin));
       }
@@ -66,9 +60,7 @@ boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
         if (servos[PIN_TO_SERVO(pin)].attached())
           servos[PIN_TO_SERVO(pin)].detach();
         servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
-#ifdef FIRMATAEXT
-        FirmataExt.setPinConfig(pin, SERVO);
-#endif
+        Firmata.setPinConfig(pin, SERVO);
       }
     }
     return true;

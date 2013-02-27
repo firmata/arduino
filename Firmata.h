@@ -122,6 +122,13 @@ public:
     void attach(byte command, stringCallbackFunction newFunction);
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
+    /* access pin config */
+    byte getPinConfig(byte pin);
+    void setPinConfig(byte pin, byte config);
+    /* access pin state */
+    int getPinState(byte pin);
+    void setPinState(byte pin, int state);
+
 
 private:
     Stream *FirmataSerial;
@@ -136,6 +143,10 @@ private:
 /* sysex */
     boolean parsingSysex;
     int sysexBytesRead;
+/* pins configuration */
+    byte pinConfig[TOTAL_PINS];         // configuration of every pin
+    int pinState[TOTAL_PINS];           // any value that has been written
+
 /* callback functions */
     callbackFunction currentAnalogCallback;
     callbackFunction currentDigitalCallback;
@@ -145,12 +156,12 @@ private:
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
-    void sendValueAsTwo7bitBytes(int value);
 
 /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
     void pin13strobe(int count, int onInterval, int offInterval);
+    void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
     void endSysex(void);
 };

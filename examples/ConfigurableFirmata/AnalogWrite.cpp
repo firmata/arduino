@@ -20,13 +20,6 @@
 
 #if (defined ANALOGFIRMATA || defined SERVOFIRMATA)
 
-#if defined ANALOGFIRMATA && defined SERVOFIRMATA && !defined FIRMATAEXT
-#error "AnalogFirmata.h and ServoFirmata.h are both included. FirmataExt.h required!"
-#endif
-
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
 #ifdef ANALOGFIRMATA
 #include "AnalogFirmata.h"
 #endif
@@ -37,13 +30,12 @@
 void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
-#ifdef FIRMATAEXT
-    switch(FirmataExt.getPinConfig(pin)) {
+    switch(Firmata.getPinConfig(pin)) {
 #ifdef SERVOFIRMATA
     case SERVO:
       if (IS_PIN_SERVO(pin)) {
         ServoFirmata.analogWrite(pin,value);
-        FirmataExt.setPinState(pin,value);
+        Firmata.setPinState(pin,value);
       }
       break;
 #endif
@@ -51,23 +43,11 @@ void analogWriteCallback(byte pin, int value)
     case PWM:
       if (IS_PIN_PWM(pin)) {
         analogWrite(PIN_TO_PWM(pin), value);
-        FirmataExt.setPinState(pin,value);
+        Firmata.setPinState(pin,value);
       }
       break;
 #endif
     }
-#else
-#ifdef SERVOFIRMATA
-    if (IS_PIN_SERVO(pin)) {
-      ServoFirmata.analogWrite(pin,value);
-    }
-#endif
-#ifdef ANALOGFIRMATA
-    if (IS_PIN_PWM(pin)) {
-      analogWrite(PIN_TO_PWM(pin), value);
-    }
-#endif
-#endif
   }
 }
 

@@ -17,9 +17,6 @@
 #ifdef FIRMATASCHEDULER
 #include "FirmataScheduler.h"
 #endif
-#ifdef FIRMATAEXT
-#include "FirmataExt.h"
-#endif
 
 boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
 {
@@ -48,9 +45,7 @@ void OneWireFirmataClass::oneWireConfig(byte pin, boolean power)
     info->addr[i]=0x0;
   }
   info->power = power;
-#ifdef FIRMATAEXT
-  FirmataExt.setPinConfig(pin,ONEWIRE);
-#endif
+  Firmata.setPinConfig(pin,ONEWIRE);
 }
 
 boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
