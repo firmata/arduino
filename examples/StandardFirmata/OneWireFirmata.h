@@ -35,13 +35,14 @@ struct ow_device_info
 class OneWireFirmataClass
 {
 public:
-
-  void handleOneWireRequest(byte command, byte argc, byte *argv);
-  void oneWireConfig(byte pin, boolean power);
+  boolean handlePinMode(byte pin, int mode);
+  void handleCapability(byte pin);
+  boolean handleSysex(byte command, byte argc, byte* argv);
   void reset();
   
 private:
   ow_device_info pinOneWire[TOTAL_PINS];
+  void oneWireConfig(byte pin, boolean power);
 };
 
 extern OneWireFirmataClass OneWireFirmata;

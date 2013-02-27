@@ -34,7 +34,7 @@ class FirmataSchedulerClass
   public:
   
   FirmataSchedulerClass();
-  void handleSchedulerRequest(byte subcommand, byte argc, byte*argv);
+  boolean handleSysex(byte command, byte argc, byte* argv);
   void runTasks();
   void reset();
   void createTask(byte id,int len);

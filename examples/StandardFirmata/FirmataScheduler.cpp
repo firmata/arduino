@@ -9,65 +9,72 @@ FirmataSchedulerClass::FirmataSchedulerClass()
   running = NULL;
 }
 
-void FirmataSchedulerClass::handleSchedulerRequest(byte subcommand, byte argc, byte*argv)
+boolean FirmataSchedulerClass::handleSysex(byte command, byte argc, byte* argv)
 {
-  switch(subcommand) {
-  case CREATE_FIRMATA_TASK: 
-    {
-      if (argc==3) {
-        createTask(argv[0],argv[1] | argv[2]<<7);
+  if (command == SCHEDULER_DATA) {
+    if (argc>0) {
+      switch(argv[0]) {
+      case CREATE_FIRMATA_TASK:
+        {
+          if (argc==4) {
+            createTask(argv[1],argv[2] | argv[3]<<7);
+          }
+          break;
+        }
+      case DELETE_FIRMATA_TASK:
+        {
+          if (argc==2) {
+            deleteTask(argv[1]);
+          }
+          break;
+        }
+      case ADD_TO_FIRMATA_TASK:
+        {
+          if (argc>2) {
+            int len = num7BitOutbytes(argc-2);
+            Encoder7Bit.readBinary(len,argv+2, argv+2); //decode inplace
+            addToTask(argv[1],len,argv+2); //addToTask copies data...
+          }
+          break;
+        }
+      case DELAY_FIRMATA_TASK:
+        {
+          if (argc==6) {
+            argv++;
+            Encoder7Bit.readBinary(4,argv,argv); //decode inplace
+            delayTask(*(long*)((byte*)argv));
+          }
+          break;
+        }
+      case SCHEDULE_FIRMATA_TASK:
+        {
+          if (argc==7) { //one byte taskid, 5 bytes to encode 4 bytes of long
+            Encoder7Bit.readBinary(4,argv+2, argv+2); //decode inplace
+            schedule(argv[1],*(long*)((byte*)argv+2)); //argv[1] | argv[2]<<8 | argv[3]<<16 | argv[4]<<24
+          }
+          break;
+        }
+      case QUERY_ALL_FIRMATA_TASKS:
+        {
+          queryAllTasks();
+          break;
+        }
+      case QUERY_FIRMATA_TASK:
+        {
+          if (argc==2) {
+            queryTask(argv[1]);
+          }
+          break;
+        }
+      case RESET_FIRMATA_TASKS:
+        {
+          reset();
+        }
       }
-      break;
     }
-  case DELETE_FIRMATA_TASK: 
-    {
-      if (argc==1) {
-        deleteTask(argv[0]);
-      }
-      break;
-    }
-  case ADD_TO_FIRMATA_TASK: 
-    {
-      if (argc>1) {
-        int len = num7BitOutbytes(argc-1);
-        Encoder7Bit.readBinary(len,argv+1, argv+1); //decode inplace
-        addToTask(argv[0],len,argv+1); //addToTask copies data...
-      }
-      break;
-    }
-  case DELAY_FIRMATA_TASK:
-    {
-      if (argc==5) {
-        Encoder7Bit.readBinary(4,argv,argv); //decode inplace
-        delayTask(*(long*)((byte*)argv));
-      }
-      break;
-    }
-  case SCHEDULE_FIRMATA_TASK: 
-    {
-      if (argc==6) { //one byte taskid, 5 bytes to encode 4 bytes of long
-        Encoder7Bit.readBinary(4,argv+1, argv+1); //decode inplace
-        schedule(argv[0],*(long*)((byte*)argv+1)); //argv[1] | argv[2]<<8 | argv[3]<<16 | argv[4]<<24
-      }
-      break;
-    }
-  case QUERY_ALL_FIRMATA_TASKS: 
-    {
-      queryAllTasks();
-      break;
-    }
-  case QUERY_FIRMATA_TASK: 
-    {
-      if (argc==1) {
-        queryTask(argv[0]);
-      }
-      break;
-    }
-  case RESET_FIRMATA_TASKS:
-    {
-      reset();
-    }
+    return true;
   }
+  return false;
 };
 
 void FirmataSchedulerClass::createTask(byte id,int len)

@@ -50,12 +50,18 @@
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include "I2CFirmata.h"
 #endif
+#ifdef ONEWIREFIRMATA
+#include "OneWireFirmata.h"
+#endif
 
 #ifdef FIRMATAEXT
 #include "FirmataExt.h"
 #endif
 #ifdef FIRMATAREPORTING
 #include "FirmataReporting.h"
+#endif
+#ifdef FIRMATASCHEDULER
+#include "FirmataScheduler.h"
 #endif
 
 /*==============================================================================
@@ -80,6 +86,9 @@ void setPinModeCallback(byte pin, int mode)
 #endif
 #ifdef I2CFIRMATA
   known |= I2CFirmata.handlePinMode(pin,mode);
+#endif
+#ifdef ONEWIREFIRMATA
+  known |= OneWireFirmata.handlePinMode(pin,mode);
 #endif
   if (!known) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
@@ -106,6 +115,9 @@ void capabilityQueryCallback(byte pin)
 #ifdef I2CFIRMATA
   I2CFirmata.handleCapability(pin);
 #endif
+#ifdef ONEWIREFIRMATA
+  OneWireFirmata.handleCapability(pin);
+#endif
 }
 #endif
 
@@ -119,6 +131,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #endif
 #ifdef I2CFIRMATA
   if (I2CFirmata.handleSysex(command,argc,argv)) return;
+#endif
+#ifdef ONEWIREFIRMATA
+  if (OneWireFirmata.handleSysex(command,argc,argv)) return;
+#endif
+#ifdef FIRMATASCHEDULER
+  if (FirmataScheduler.handleSysex(command,argc,argv)) return;
 #endif
 #ifdef FIRMATAEXT
   if (FirmataExt.handleSysex(command,argc,argv)) return;
@@ -146,7 +164,12 @@ void systemResetCallback()
 #ifdef ANALOGFIRMATA
   AnalogFirmata.reset();
 #endif
-
+#ifdef ONEWIREFIRMATA
+  OneWireFirmata.reset();
+#endif
+#ifdef FIRMATASCHEDULER
+  FirmataScheduler.reset();
+#endif
 }
 
 void setup() 
@@ -191,8 +214,17 @@ void loop()
 
   /* SERIALREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
-  while(Firmata.available())
+  while(Firmata.available()) {
     Firmata.processInput();
+#ifdef FIRMATASCHEDULER
+    if (!Firmata.isParsingMessage()) {
+      goto runtasks;
+    }
+  }
+  if (!Firmata.isParsingMessage()) {
+runtasks: FirmataScheduler.runTasks();
+#endif
+  }
 
   /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
    * 60 bytes. use a timer to sending an event character every 4 ms to
