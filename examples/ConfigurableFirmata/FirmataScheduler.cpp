@@ -197,7 +197,9 @@ void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean erro
   Firmata.write(id);
   if (task) {
     Encoder7Bit.startBinaryWrite();
-    Encoder7Bit.writeBinary(firmata_task_len(task)-3,((byte *)task)+3); //don't write first 3 bytes (firmata_task*, byte); makes use of AVR byteorder (LSB first)
+    for (int i=3;i<firmata_task_len(task);i++) {
+      Encoder7Bit.writeBinary(((byte *)task)[i]); //don't write first 3 bytes (firmata_task*, byte); makes use of AVR byteorder (LSB first)
+    }
     Encoder7Bit.endBinaryWrite();
   }
   Firmata.write(END_SYSEX);

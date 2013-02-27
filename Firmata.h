@@ -145,12 +145,12 @@ private:
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
+    void sendValueAsTwo7bitBytes(int value);
 
 /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
     void pin13strobe(int count, int onInterval, int offInterval);
-    void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
     void endSysex(void);
 };

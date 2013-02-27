@@ -23,11 +23,8 @@ public:
   void startBinaryWrite();
   void endBinaryWrite();
   void writeBinary(byte data);
-  void writeBinary(int numBytes, byte *data);
   int calculateOutbytes(int inBytes);
   void readBinary(int outBytes,byte *inData, byte *outData);
-  void sendValueAsTwo7bitBytes(int value); //this is private in Firmata
-  int getValueFromTwo7bitBytes(byte *argv);
 
 private:
   byte previous;
