@@ -220,8 +220,7 @@ void FirmataClass::parse(byte inputData)
         }
         break;
       case SET_PIN_MODE:
-        if(currentPinModeCallback)
-          (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
+        setPinMode(storedInputData[1], storedInputData[0]);
         break;
       case REPORT_ANALOG:
         if(currentReportAnalogCallback)
