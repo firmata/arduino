@@ -14,17 +14,18 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
+#ifndef AnalogWrite_h
+#define AnalogWrite_h
+
 #include <Firmata.h>
-#include "AnalogWrite.h"
 
 #if (defined ANALOGFIRMATA || defined SERVOFIRMATA)
 
 #ifdef ANALOGFIRMATA
-#include "AnalogFirmata.h"
+#include <AnalogFirmata.h>
 #endif
 #ifdef SERVOFIRMATA
-#include "ServoFirmata.h"
+#include <ServoFirmata.h>
 #endif
 
 void analogWriteCallback(byte pin, int value)
@@ -51,4 +52,5 @@ void analogWriteCallback(byte pin, int value)
   }
 }
 
+#endif
 #endif

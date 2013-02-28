@@ -14,9 +14,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
-#include "ServoFirmata.h"
+#include <ServoFirmata.h>
 
 boolean ServoFirmataClass::analogWrite(byte pin, int value)
 {

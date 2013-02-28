@@ -13,8 +13,8 @@
 #ifndef FirmataScheduler_h
 #define FirmataScheduler_h
 
-#include "Arduino.h"
-#include "Encoder7Bit.h"
+#include <Arduino.h>
+#include <Encoder7Bit.h>
 
 //subcommands
 #define CREATE_FIRMATA_TASK     0
@@ -30,6 +30,8 @@
 #define QUERY_TASK_REPLY	   10
 
 #define firmata_task_len(a)(sizeof(firmata_task)+(a)->len)
+
+void delayTaskCallback(long delay);
 
 struct firmata_task
 {

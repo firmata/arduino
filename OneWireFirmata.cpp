@@ -10,12 +10,11 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
-#include "OneWireFirmata.h"
-#include "Encoder7Bit.h"
+#include <OneWireFirmata.h>
+#include <Encoder7Bit.h>
 #ifdef FIRMATASCHEDULER
-#include "FirmataScheduler.h"
+#include <FirmataScheduler.h>
 #endif
 
 boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
@@ -124,9 +123,7 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
 
               if (subcommand & ONEWIRE_DELAY_REQUEST_BIT) {
                 if (numBytes<4) break;
-#ifdef FIRMATASCHEDULER
-                FirmataScheduler.delayTask(*((long*)argv));
-#endif
+                Firmata.delayTask(*((long*)argv));
                 argv+=4;
                 numBytes-=4;
               }

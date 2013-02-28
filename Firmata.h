@@ -85,6 +85,7 @@ extern "C" {
     typedef void (*systemResetCallbackFunction)(void);
     typedef void (*stringCallbackFunction)(char*);
     typedef void (*sysexCallbackFunction)(byte command, byte argc, byte*argv);
+    typedef void (*delayTaskCallbackFunction)(long delay);
 }
 
 
@@ -122,10 +123,13 @@ public:
     void attach(byte command, stringCallbackFunction newFunction);
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
-    /* access pin config */
+/* delegate to Scheduler (if any) */
+    void attach(delayTaskCallbackFunction newFunction);
+    void delayTask(long delay);
+/* access pin config */
     byte getPinMode(byte pin);
     void setPinMode(byte pin, byte config);
-    /* access pin state */
+/* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
 
@@ -156,6 +160,7 @@ private:
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
+    delayTaskCallbackFunction delayTaskCallback;
 
 /* private methods ------------------------------ */
     void processSysexMessage(void);

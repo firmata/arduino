@@ -14,9 +14,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
-#include "DigitalFirmata.h"
+#include <DigitalFirmata.h>
 
 void digitalWriteCallback(byte port, int value)
 {

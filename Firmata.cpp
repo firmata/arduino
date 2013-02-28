@@ -391,6 +391,18 @@ void FirmataClass::detach(byte command)
   }
 }
 
+void FirmataClass::attach(delayTaskCallbackFunction newFunction)
+{
+  delayTaskCallback = newFunction;
+}
+
+void FirmataClass::delayTask(long delay)
+{
+  if (delayTaskCallback) {
+    (*delayTaskCallback)(delay);
+  }
+}
+
 /* access pin config */
 byte FirmataClass::getPinMode(byte pin)
 {

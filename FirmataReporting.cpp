@@ -14,9 +14,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
-#include "FirmataReporting.h"
+#include <FirmataReporting.h>
 
 FirmataReportingClass::FirmataReportingClass()
 {

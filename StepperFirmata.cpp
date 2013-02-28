@@ -30,9 +30,8 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
-#include "FirmataConfig.h"
-#include "StepperFirmata.h"
-#include "FirmataStepper.h"
+#include <StepperFirmata.h>
+#include <FirmataStepper.h>
 #include <Firmata.h>
 
 boolean StepperFirmataClass::handlePinMode(byte pin, int mode)

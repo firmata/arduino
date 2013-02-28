@@ -34,37 +34,37 @@
 #include <Firmata.h>
 
 #ifdef DIGITALFIRMATA
-#include "DigitalFirmata.h"
+#include <DigitalFirmata.h>
 #endif
 #ifdef ANALOGFIRMATA
-#include "AnalogFirmata.h"
+#include <AnalogFirmata.h>
 #endif
 #ifdef SERVOFIRMATA
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
-#include "ServoFirmata.h"
+#include <ServoFirmata.h>
 #endif
 #if defined ANALOGFIRMATA || defined SERVOFIRMATA
-#include "AnalogWrite.h"
+#include <AnalogWrite.h>
 #endif
 #ifdef I2CFIRMATA
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
-#include "I2CFirmata.h"
+#include <I2CFirmata.h>
 #endif
 #ifdef ONEWIREFIRMATA
-#include "OneWireFirmata.h"
+#include <OneWireFirmata.h>
 #endif
 #ifdef STEPPERFIRMATA
-#include "StepperFirmata.h"
+#include <StepperFirmata.h>
 #endif
 
 #ifdef FIRMATAEXT
-#include "FirmataExt.h"
+#include <FirmataExt.h>
 #endif
 #ifdef FIRMATAREPORTING
-#include "FirmataReporting.h"
+#include <FirmataReporting.h>
 #endif
 #ifdef FIRMATASCHEDULER
-#include "FirmataScheduler.h"
+#include <FirmataScheduler.h>
 #endif
 
 /*==============================================================================
@@ -207,24 +207,36 @@ void setup()
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
 #ifdef DIGITALFIRMATA
+  /* digitalWriteCallback is declared in DigitalFirmata.h */
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
 #ifdef FIRMATAREPORTING
+  /* reportDigitalCallback is declared in DigitalFirmata.h */
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
 #endif
 #endif
 #if defined ANALOGFIRMATA || defined SERVOFIRMATA
+  /* analogWriteCallback is declared in AnalogWrite.h */
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 #endif
 #if defined ANALOGFIRMATA && defined FIRMATAREPORTING
+  /* reportAnalogCallback is declared in AnalogFirmata.h */
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
 #endif
+  /* setPinModeCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
 #if defined ANALOGFIRMATA || defined SERVOFIRMATA || defined I2CFIRMATA || defined FIRMATAEXT || defined FIRMATAREPORTING || defined STEPPERFIRMATA
+  /* sysexCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(START_SYSEX, sysexCallback);
 #endif
 #ifdef FIRMATAEXT
+  /* capabilityQueryCallback is declared here (in ConfigurableFirmata.ino) */
   FirmataExt.attach(capabilityQueryCallback);
 #endif
+#ifdef FIRMATASCHEDULER
+  /* delayTaskCallback is declared in FirmataScheduler.h */
+  Firmata.attach(delayTaskCallback);
+#endif
+  /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
   Firmata.begin(57600);

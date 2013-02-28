@@ -15,6 +15,11 @@
 #include "FirmataScheduler.h"
 #include <Firmata.h>
 
+void delayTaskCallback(long delay)
+{
+  FirmataScheduler.delayTask(delay);
+}
+
 FirmataSchedulerClass::FirmataSchedulerClass()
 {
   tasks = NULL;

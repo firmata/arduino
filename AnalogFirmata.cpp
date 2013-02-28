@@ -14,9 +14,8 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
-#include "AnalogFirmata.h"
+#include <AnalogFirmata.h>
 
 // -----------------------------------------------------------------------------
 /* sets bits in a bit array (int) to toggle the reporting of the analogIns
