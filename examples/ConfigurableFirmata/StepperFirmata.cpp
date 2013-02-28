@@ -41,7 +41,6 @@ boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
     if (IS_PIN_DIGITAL(pin)) {
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
       pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-      Firmata.setPinConfig(pin,STEPPER);
     }
     return true;
   }
@@ -124,6 +123,9 @@ void StepperFirmataClass::reset()
 {
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
+  for (byte i=0;i<numSteppers++;i++) {
+      free(stepper[i]);
+  }
   numSteppers = 0;
 }
 

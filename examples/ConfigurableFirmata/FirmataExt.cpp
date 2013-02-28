@@ -29,7 +29,7 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
       Firmata.write(PIN_STATE_RESPONSE);
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
-        Firmata.write(Firmata.getPinConfig(pin));
+        Firmata.write(Firmata.getPinMode(pin));
         int pinState = Firmata.getPinState(pin);
         Firmata.write((byte)pinState & 0x7F);
         if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);

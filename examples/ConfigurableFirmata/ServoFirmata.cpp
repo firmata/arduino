@@ -20,21 +20,22 @@
 
 boolean ServoFirmataClass::analogWrite(byte pin, int value)
 {
-  servos[PIN_TO_SERVO(pin)].write(value);
+  if (IS_PIN_SERVO(pin)) {
+    Servo *servo = servos[PIN_TO_SERVO(pin)];
+    if (servo)
+      servo->write(value);
+  }
 }
 
 boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_SERVO(pin)) {
     if (mode==SERVO) {
-      Firmata.setPinConfig(pin,SERVO);
-      if (!servos[PIN_TO_SERVO(pin)].attached()) {
-        servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin));
-      }
-      return true;
-    } else if (servos[PIN_TO_SERVO(pin)].attached()) {
-      servos[PIN_TO_SERVO(pin)].detach();
+      attach(pin,-1,-1);
+    } else {
+      detach(pin);
     }
+    return true;
   }
   return false;
 }
@@ -43,7 +44,7 @@ void ServoFirmataClass::handleCapability(byte pin)
 {
   if (IS_PIN_SERVO(pin)) {
     Firmata.write(SERVO);
-    Firmata.write(14);
+    Firmata.write(14); //14 bit resolution (Servo takes int as argument)
   }
 }
 
@@ -55,12 +56,9 @@ boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
       byte pin = argv[0];
       int minPulse = argv[1] + (argv[2] << 7);
       int maxPulse = argv[3] + (argv[4] << 7);
-
       if (IS_PIN_SERVO(pin)) {
-        if (servos[PIN_TO_SERVO(pin)].attached())
-          servos[PIN_TO_SERVO(pin)].detach();
-        servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
-        Firmata.setPinConfig(pin, SERVO);
+        Firmata.setPinMode(pin, SERVO);
+        attach(pin, minPulse, maxPulse);
       }
     }
     return true;
@@ -68,15 +66,37 @@ boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-boolean ServoFirmataClass::handlePinState(byte pin, byte pinConfig)
+void ServoFirmataClass::attach(byte pin, int minPulse, int maxPulse)
 {
-  if (pinConfig==SERVO) {
-    Firmata.write((byte)pinState[pin] & 0x7F);
-    if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-    if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
-    return true;
+  Servo *servo = servos[PIN_TO_SERVO(pin)];
+  if (!servo) {
+    servo = new Servo();
+    servos[PIN_TO_SERVO(pin)] = servo;
   }
-  return false;
+  if (servo->attached())
+    servo->detach();
+  if (minPulse>0 || maxPulse>0)
+    servo->attach(PIN_TO_DIGITAL(pin),minPulse,maxPulse);
+  else
+    servo->attach(PIN_TO_DIGITAL(pin));
+}
+
+void ServoFirmataClass::detach(byte pin)
+{
+  Servo *servo = servos[PIN_TO_SERVO(pin)];
+  if (servo) {
+    if (servo->attached())
+      servo->detach();
+    free(servo);
+    servos[PIN_TO_SERVO(pin)]=NULL;
+  }
+}
+
+void ServoFirmataClass::reset()
+{
+  for (byte i=0;i<MAX_SERVOS;i++) {
+    detach(i);
+  }
 }
 
 ServoFirmataClass ServoFirmata;

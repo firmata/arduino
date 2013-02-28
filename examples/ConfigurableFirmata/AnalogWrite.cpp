@@ -30,7 +30,7 @@
 void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
-    switch(Firmata.getPinConfig(pin)) {
+    switch(Firmata.getPinMode(pin)) {
 #ifdef SERVOFIRMATA
     case SERVO:
       if (IS_PIN_SERVO(pin)) {

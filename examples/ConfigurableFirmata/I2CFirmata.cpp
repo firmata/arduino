@@ -77,14 +77,12 @@ boolean I2CFirmataClass::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
     if (mode==I2C) {
-      // mark the pin as i2c
       // the user must call I2C_CONFIG to enable I2C for a device
-      Firmata.setPinConfig(pin,I2C);
       return true;
     } else if (isI2CEnabled) {
       // disable i2c so pins can be used for other functions
       // the following if statements should reconfigure the pins properly
-      if (Firmata.getPinConfig(pin) == I2C) {
+      if (Firmata.getPinMode(pin) == I2C) {
         disableI2CPins();
       }
     }
@@ -220,7 +218,7 @@ void I2CFirmataClass::enableI2CPins()
   for (i=0; i < TOTAL_PINS; i++) {
     if(IS_PIN_I2C(i)) {
       // mark pins as i2c so they are ignore in non i2c data requests
-      Firmata.setPinConfig(i, I2C);
+      Firmata.setPinMode(i, I2C);
       pinMode(i, I2C);
     }
   }

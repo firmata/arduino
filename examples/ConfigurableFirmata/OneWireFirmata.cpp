@@ -45,7 +45,6 @@ void OneWireFirmataClass::oneWireConfig(byte pin, boolean power)
     info->addr[i]=0x0;
   }
   info->power = power;
-  Firmata.setPinConfig(pin,ONEWIRE);
 }
 
 boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
@@ -81,7 +80,8 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
         case ONEWIRE_CONFIG_REQUEST:
           {
             if (argc==3) {
-              oneWireConfig(pin, argv[2]);
+              Firmata.setPinMode(pin,ONEWIRE);
+              oneWireConfig(pin, argv[2]); // this calls oneWireConfig again, this time setting the correct config (which doesn't cause harm though)
             }
             break;
           }

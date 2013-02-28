@@ -25,12 +25,13 @@ class ServoFirmataClass
 public:
   boolean analogWrite(byte pin, int value);
   boolean handlePinMode(byte pin, int mode);
-  boolean handlePinState(byte pin, byte pinConfig);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte* argv);
+  void reset();
 private:
-  Servo servos[MAX_SERVOS];
-  int pinState[TOTAL_PINS];           // any value that has been written
+  Servo *servos[MAX_SERVOS];
+  void attach(byte pin, int minPulse, int maxPulse);
+  void detach(byte pin);
 };
 
 extern ServoFirmataClass ServoFirmata;

@@ -55,7 +55,6 @@ boolean AnalogFirmataClass::handlePinMode(byte pin, int mode)
   if (IS_PIN_ANALOG(pin)) {
     reportAnalog(PIN_TO_ANALOG(pin), mode == ANALOG ? 1 : 0); // turn on/off reporting
   }
-  Firmata.setPinState(pin,0);
   switch(mode) {
   case ANALOG:
     if (IS_PIN_ANALOG(pin)) {
@@ -63,14 +62,12 @@ boolean AnalogFirmataClass::handlePinMode(byte pin, int mode)
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       }
-      Firmata.setPinConfig(pin,ANALOG);
     }
     return true;
   case PWM:
     if (IS_PIN_PWM(pin)) {
       pinMode(PIN_TO_PWM(pin), OUTPUT);
       analogWrite(PIN_TO_PWM(pin), 0);
-      Firmata.setPinConfig(pin,PWM);
     }
     return true;
   }
@@ -124,17 +121,6 @@ void AnalogFirmataClass::handleAnalogMappingQuery()
 
 void AnalogFirmataClass::reset()
 {
-  // pins with analog capability default to analog input
-  // otherwise, pins default to digital output
-  for (byte i=0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
-      // turns off pullup, configures everything
-      handlePinMode(i, ANALOG);
-    } else {
-      // sets the output to 0, configures portConfigInputs
-      handlePinMode     (i, OUTPUT);
-    }
-  }
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
 }
@@ -144,12 +130,10 @@ void AnalogFirmataClass::report()
   byte pin,analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
   for(pin=0; pin<TOTAL_PINS; pin++) {
-    if (IS_PIN_ANALOG(pin)) {
-      if(Firmata.getPinConfig(pin) == ANALOG) {
-        analogPin = PIN_TO_ANALOG(pin);
-        if (analogInputsToReport & (1 << analogPin)) {
-          Firmata.sendAnalog(analogPin, analogRead(analogPin));
-        }
+    if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == ANALOG) {
+      analogPin = PIN_TO_ANALOG(pin);
+      if (analogInputsToReport & (1 << analogPin)) {
+        Firmata.sendAnalog(analogPin, analogRead(analogPin));
       }
     }
   }

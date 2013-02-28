@@ -78,8 +78,8 @@ void DigitalFirmataClass::digitalWrite(byte port, int value)
       if (IS_PIN_DIGITAL(pin)) {
         // only write to OUTPUT and INPUT (enables pullup)
         // do not touch pins in PWM, ANALOG, SERVO or other modes
-        byte pinConfig = Firmata.getPinConfig(pin);
-        if (pinConfig == OUTPUT || pinConfig == INPUT) {
+        byte pinMode = Firmata.getPinMode(pin);
+        if (pinMode == OUTPUT || pinMode == INPUT) {
           pinWriteMask |= mask;
           Firmata.setPinState(pin,((byte)value & mask) ? 1 : 0);
         }
@@ -111,17 +111,14 @@ boolean DigitalFirmataClass::handlePinMode(byte pin, int mode)
     } else {
       portConfigInputs[pin/8] &= ~(1 << (pin & 7));
     }
-    Firmata.setPinState(pin,0);
   switch(mode) {
   case INPUT:
       pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
-      Firmata.setPinConfig(pin,INPUT);
       return true;
   case OUTPUT:
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
       pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-      Firmata.setPinConfig(pin,OUTPUT);
       return true;
     }
   }
@@ -144,17 +141,6 @@ void DigitalFirmataClass::reset()
     reportPINs[i] = false;      // by default, reporting off
     portConfigInputs[i] = 0;    // until activated
     previousPINs[i] = 0;
-  }
-  // pins with analog capability default to analog input
-  // otherwise, pins default to digital output
-  for (byte i=0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
-      // turns off pullup, configures everything
-      handlePinMode(i, ANALOG);
-    } else {
-      // sets the output to 0, configures portConfigInputs
-      handlePinMode     (i, OUTPUT);
-    }
   }
 }
 

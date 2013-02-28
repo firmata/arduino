@@ -123,8 +123,8 @@ public:
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
     /* access pin config */
-    byte getPinConfig(byte pin);
-    void setPinConfig(byte pin, byte config);
+    byte getPinMode(byte pin);
+    void setPinMode(byte pin, byte config);
     /* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);

@@ -176,12 +176,30 @@ void systemResetCallback()
 #ifdef ANALOGFIRMATA
   AnalogFirmata.reset();
 #endif
+#ifdef SERVOFIRMATA
+  ServoFirmata.reset();
+#endif
 #ifdef ONEWIREFIRMATA
   OneWireFirmata.reset();
 #endif
 #ifdef FIRMATASCHEDULER
   FirmataScheduler.reset();
 #endif
+  // pins with analog capability default to analog input
+  // otherwise, pins default to digital output
+  for (byte i=0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_ANALOG(i)) {
+#ifdef ANALOGFIRMATA
+      // turns off pullup, configures everything
+      Firmata.setPinMode(i, ANALOG);
+#endif
+    } else {
+#ifdef DIGITALFIRMATA
+      // sets the output to 0, configures portConfigInputs
+      Firmata.setPinMode(i, OUTPUT);
+#endif
+    }
+  }
 }
 
 void setup() 

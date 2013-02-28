@@ -392,14 +392,17 @@ void FirmataClass::detach(byte command)
 }
 
 /* access pin config */
-byte FirmataClass::getPinConfig(byte pin)
+byte FirmataClass::getPinMode(byte pin)
 {
   return pinConfig[pin];
 }
 
-void FirmataClass::setPinConfig(byte pin, byte config)
+void FirmataClass::setPinMode(byte pin, byte config)
 {
+  pinState[pin] = 0;
   pinConfig[pin] = config;
+  if(currentPinModeCallback)
+    (*currentPinModeCallback)(pin, config);
 }
 
 /* access pin state */
