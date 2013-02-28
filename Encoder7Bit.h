@@ -12,7 +12,7 @@
 
 #ifndef Encoder7Bit_h
 #define Encoder7Bit_h
-#include "Arduino.h"
+#include <Arduino.h>
 
 #define num7BitOutbytes(a)(((a)*7)>>3)
 
@@ -23,7 +23,6 @@ public:
   void startBinaryWrite();
   void endBinaryWrite();
   void writeBinary(byte data);
-  int calculateOutbytes(int inBytes);
   void readBinary(int outBytes,byte *inData, byte *outData);
 
 private:
