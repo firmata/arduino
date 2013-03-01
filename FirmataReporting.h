@@ -25,8 +25,10 @@ class FirmataReportingClass
 {
 public:
   FirmataReportingClass();
+  void setSamplingInterval(int interval);
   boolean handleSysex(byte command, byte argc, byte* argv);
   boolean elapsed();
+  void reset();
 private:
   /* timer variables */
   unsigned long currentMillis;        // store the current value from millis()

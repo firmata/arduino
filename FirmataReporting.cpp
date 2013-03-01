@@ -19,7 +19,12 @@
 
 FirmataReportingClass::FirmataReportingClass()
 {
-  samplingInterval = 19;
+  reset();
+}
+
+void FirmataReportingClass::setSamplingInterval(int interval)
+{
+  samplingInterval = interval;
 }
 
 boolean FirmataReportingClass::handleSysex(byte command, byte argc, byte* argv)
@@ -30,10 +35,8 @@ boolean FirmataReportingClass::handleSysex(byte command, byte argc, byte* argv)
       if (samplingInterval < MINIMUM_SAMPLING_INTERVAL) {
         samplingInterval = MINIMUM_SAMPLING_INTERVAL;
       }
-    } else {
-      //Firmata.sendString("Not enough data");
+      return true;
     }
-    return true;
   }
   return false;
 }
@@ -43,9 +46,16 @@ boolean FirmataReportingClass::elapsed()
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
     previousMillis += samplingInterval;
+    if (currentMillis - previousMillis > samplingInterval)
+      previousMillis = currentMillis-samplingInterval;
     return true;
   }
   return false;
 }
 
+void FirmataReportingClass::reset()
+{
+  previousMillis = millis();
+  samplingInterval = 19;
+}
 FirmataReportingClass FirmataReporting;
