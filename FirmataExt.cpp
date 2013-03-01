@@ -24,19 +24,20 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
   case PIN_STATE_QUERY:
     if (argc > 0) {
       byte pin=argv[0];
-      Firmata.write(START_SYSEX);
-      Firmata.write(PIN_STATE_RESPONSE);
-      Firmata.write(pin);
       if (pin < TOTAL_PINS) {
+        Firmata.write(START_SYSEX);
+        Firmata.write(PIN_STATE_RESPONSE);
+        Firmata.write(pin);
         Firmata.write(Firmata.getPinMode(pin));
         int pinState = Firmata.getPinState(pin);
         Firmata.write((byte)pinState & 0x7F);
         if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
         if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
+        Firmata.write(END_SYSEX);
+        return true;
       }
-      Firmata.write(END_SYSEX);
     }
-    return true;
+    break;
   case CAPABILITY_QUERY:
     Firmata.write(START_SYSEX);
     Firmata.write(CAPABILITY_RESPONSE);
@@ -47,8 +48,9 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
       }
     }
     Firmata.write(END_SYSEX);
-    break;
+    return true;
   }
+  return false;
 }
 
 void FirmataExtClass::attach(capabilityCallbackFunction function)
