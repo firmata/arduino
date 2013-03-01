@@ -34,37 +34,37 @@
 #include <Firmata.h>
 
 #ifdef DIGITALFIRMATA
-#include <DigitalFirmata.h>
+#include <utility/DigitalFirmata.h>
 #endif
 #ifdef ANALOGFIRMATA
-#include <AnalogFirmata.h>
+#include <utility/AnalogFirmata.h>
 #endif
 #ifdef SERVOFIRMATA
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
-#include <ServoFirmata.h>
+#include <utility/ServoFirmata.h>
 #endif
 #if defined ANALOGFIRMATA || defined SERVOFIRMATA
-#include <AnalogWrite.h>
+#include <utility/AnalogWrite.h>
 #endif
 #ifdef I2CFIRMATA
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
-#include <I2CFirmata.h>
+#include <utility/I2CFirmata.h>
 #endif
 #ifdef ONEWIREFIRMATA
-#include <OneWireFirmata.h>
+#include <utility/OneWireFirmata.h>
 #endif
 #ifdef STEPPERFIRMATA
-#include <StepperFirmata.h>
+#include <utility/StepperFirmata.h>
 #endif
 
 #ifdef FIRMATAEXT
-#include <FirmataExt.h>
+#include <utility/FirmataExt.h>
 #endif
 #ifdef FIRMATAREPORTING
-#include <FirmataReporting.h>
+#include <utility/FirmataReporting.h>
 #endif
 #ifdef FIRMATASCHEDULER
-#include <FirmataScheduler.h>
+#include <utility/FirmataScheduler.h>
 #endif
 
 /*==============================================================================
