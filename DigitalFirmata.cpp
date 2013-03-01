@@ -126,7 +126,7 @@ boolean DigitalFirmataClass::handlePinMode(byte pin, int mode)
 
 void DigitalFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_DIGITAL(pin)) {
+  if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin) != IGNORE) {
     Firmata.write((byte)INPUT);
     Firmata.write(1);
     Firmata.write((byte)OUTPUT);

@@ -31,17 +31,17 @@ boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
   if (IS_PIN_SERVO(pin)) {
     if (mode==SERVO) {
       attach(pin,-1,-1);
+      return true;
     } else {
       detach(pin);
     }
-    return true;
   }
   return false;
 }
 
 void ServoFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_SERVO(pin)) {
+  if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin) != IGNORE) {
     Firmata.write(SERVO);
     Firmata.write(14); //14 bit resolution (Servo takes int as argument)
   }
@@ -53,14 +53,14 @@ boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
     if (argc > 4) {
       // these vars are here for clarity, they'll optimized away by the compiler
       byte pin = argv[0];
-      int minPulse = argv[1] + (argv[2] << 7);
-      int maxPulse = argv[3] + (argv[4] << 7);
-      if (IS_PIN_SERVO(pin)) {
+      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin)!=IGNORE) {
+        int minPulse = argv[1] + (argv[2] << 7);
+        int maxPulse = argv[3] + (argv[4] << 7);
         Firmata.setPinMode(pin, SERVO);
         attach(pin, minPulse, maxPulse);
+        return true;
       }
     }
-    return true;
   }
   return false;
 }
@@ -74,7 +74,7 @@ void ServoFirmataClass::attach(byte pin, int minPulse, int maxPulse)
   }
   if (servo->attached())
     servo->detach();
-  if (minPulse>0 || maxPulse>0)
+  if (minPulse>=0 || maxPulse>=0)
     servo->attach(PIN_TO_DIGITAL(pin),minPulse,maxPulse);
   else
     servo->attach(PIN_TO_DIGITAL(pin));

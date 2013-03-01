@@ -13,9 +13,6 @@
 #include <Firmata.h>
 #include <OneWireFirmata.h>
 #include <Encoder7Bit.h>
-#ifdef FIRMATASCHEDULER
-#include <FirmataScheduler.h>
-#endif
 
 boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
 {
@@ -28,7 +25,7 @@ boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
 
 void OneWireFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_DIGITAL(pin)) {
+  if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin)!=IGNORE) {
     Firmata.write((byte)ONEWIRE);
     Firmata.write(1);
   }
@@ -54,7 +51,7 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
       byte pin = argv[1];
       ow_device_info *info = &pinOneWire[pin];
       OneWire *device = info->device;
-      if (device) {
+      if (device || subcommand == ONEWIRE_CONFIG_REQUEST) {
         switch(subcommand) {
         case ONEWIRE_SEARCH_REQUEST:
         case ONEWIRE_SEARCH_ALARMS_REQUEST:
@@ -78,9 +75,11 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
           }
         case ONEWIRE_CONFIG_REQUEST:
           {
-            if (argc==3) {
+            if (argc==3 && Firmata.getPinMode(pin)!=IGNORE) {
               Firmata.setPinMode(pin,ONEWIRE);
               oneWireConfig(pin, argv[2]); // this calls oneWireConfig again, this time setting the correct config (which doesn't cause harm though)
+            } else {
+              return false;
             }
             break;
           }
@@ -153,8 +152,8 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
           }
         }
       }
+      return true;
     }
-    return true;
   }
   return false;
 }

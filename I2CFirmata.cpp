@@ -91,7 +91,7 @@ boolean I2CFirmataClass::handlePinMode(byte pin, int mode)
 
 void I2CFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_I2C(pin)) {
+  if (IS_PIN_I2C(pin) && Firmata.getPinMode(pin)!=IGNORE) {
     Firmata.write(I2C);
     Firmata.write(1);  // to do: determine appropriate value
   }
@@ -101,11 +101,12 @@ boolean I2CFirmataClass::handleSysex(byte command, byte argc, byte *argv)
 {
   switch(command) {
   case I2C_REQUEST:
-    handleI2CRequest(argc,argv);
-    return true;
+    if (isI2CEnabled) {
+      handleI2CRequest(argc,argv);
+      return true;
+    }
   case I2C_CONFIG:
-    handleI2CConfig(argc,argv);
-    return true;
+    return handleI2CConfig(argc,argv);
   }
   return false;
 }
@@ -187,7 +188,6 @@ void I2CFirmataClass::handleI2CRequest(byte argc, byte *argv)
           query[i].bytes = query[i+1].bytes;
         }
       }
-      isI2CEnabled = true;
       queryIndex--;
     }
     break;
@@ -196,7 +196,7 @@ void I2CFirmataClass::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-void I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
+boolean I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
@@ -207,15 +207,19 @@ void I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
   if (!isI2CEnabled) {
     enableI2CPins();
   }
+  return isI2CEnabled;
 }
 
-void I2CFirmataClass::enableI2CPins()
+boolean I2CFirmataClass::enableI2CPins()
 {
   byte i;
   // is there a faster way to do this? would probaby require importing
   // Arduino.h to get SCL and SDA pins
   for (i=0; i < TOTAL_PINS; i++) {
     if(IS_PIN_I2C(i)) {
+      if (Firmata.getPinMode(i)==IGNORE) {
+          return false;
+      }
       // mark pins as i2c so they are ignore in non i2c data requests
       Firmata.setPinMode(i, I2C);
       pinMode(i, I2C);

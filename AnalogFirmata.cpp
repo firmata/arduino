@@ -61,20 +61,22 @@ boolean AnalogFirmataClass::handlePinMode(byte pin, int mode)
         pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       }
+      return true;
     }
-    return true;
   case PWM:
     if (IS_PIN_PWM(pin)) {
       pinMode(PIN_TO_PWM(pin), OUTPUT);
       analogWrite(PIN_TO_PWM(pin), 0);
+      return true;
     }
-    return true;
   }
   return false;
 }
 
 void AnalogFirmataClass::handleCapability(byte pin)
 {
+  if (Firmata.getPinMode(pin)==IGNORE)
+    return;
   if (IS_PIN_ANALOG(pin)) {
     Firmata.write(ANALOG);
     Firmata.write(10);

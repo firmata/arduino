@@ -59,8 +59,8 @@ private:
 
   void readAndReportData(byte address, int theRegister, byte numBytes);
   void handleI2CRequest(byte argc, byte *argv);
-  void handleI2CConfig(byte argc, byte *argv);
-  void enableI2CPins();
+  boolean handleI2CConfig(byte argc, byte *argv);
+  boolean enableI2CPins();
   void disableI2CPins();
 };
 
