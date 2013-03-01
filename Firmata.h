@@ -77,7 +77,8 @@
 #define I2C                     0x06 // pin included in I2C setup
 #define ONEWIRE                 0x07 // pin configured for 1-wire
 #define STEPPER                 0x08 // pin configured for stepper motor
-#define TOTAL_PIN_MODES         9
+#define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
+#define TOTAL_PIN_MODES         10
 
 extern "C" {
 // callback function types
@@ -124,7 +125,7 @@ public:
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
 /* delegate to Scheduler (if any) */
-    void attach(delayTaskCallbackFunction newFunction);
+    void attachDelayTask(delayTaskCallbackFunction newFunction);
     void delayTask(long delay);
 /* access pin config */
     byte getPinMode(byte pin);
