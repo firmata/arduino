@@ -156,7 +156,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #ifdef FIRMATAREPORTING
   if (FirmataReporting.handleSysex(command,argc,argv)) return;
 #endif  
-  Firmata.sendString("Unknown sysex command");
+  Firmata.sendString("Unhandled sysex command");
 }
 
 /*==============================================================================
@@ -167,6 +167,22 @@ void systemResetCallback()
 {
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
+
+  // pins with analog capability default to analog input
+  // otherwise, pins default to digital output
+  for (byte i=0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_ANALOG(i)) {
+#ifdef ANALOGFIRMATA
+      // turns off pullup, configures everything
+      Firmata.setPinMode(i, ANALOG);
+#endif
+    } else {
+#ifdef DIGITALFIRMATA
+      // sets the output to 0, configures portConfigInputs
+      Firmata.setPinMode(i, OUTPUT);
+#endif
+    }
+  }
 #ifdef I2CFIRMATA
   I2CFirmata.reset();
 #endif
@@ -185,21 +201,9 @@ void systemResetCallback()
 #ifdef FIRMATASCHEDULER
   FirmataScheduler.reset();
 #endif
-  // pins with analog capability default to analog input
-  // otherwise, pins default to digital output
-  for (byte i=0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_ANALOG(i)) {
-#ifdef ANALOGFIRMATA
-      // turns off pullup, configures everything
-      Firmata.setPinMode(i, ANALOG);
+#ifdef FIRMATAREPORTING
+  FirmataReporting.reset();
 #endif
-    } else {
-#ifdef DIGITALFIRMATA
-      // sets the output to 0, configures portConfigInputs
-      Firmata.setPinMode(i, OUTPUT);
-#endif
-    }
-  }
 }
 
 void setup() 
@@ -234,7 +238,7 @@ void setup()
 #endif
 #ifdef FIRMATASCHEDULER
   /* delayTaskCallback is declared in FirmataScheduler.h */
-  Firmata.attach(delayTaskCallback);
+  Firmata.attachDelayTask(delayTaskCallback);
 #endif
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
