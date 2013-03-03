@@ -25,7 +25,6 @@
 class FirmataReportingClass:public FirmataFeature
 {
 public:
-  FirmataReportingClass();
   void setSamplingInterval(int interval);
   void handleCapability(byte pin); //empty method
   boolean handlePinMode(byte pin, int mode); //empty method

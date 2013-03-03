@@ -17,12 +17,6 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
-#include <FirmataExt.h>
-
-FirmataReportingClass::FirmataReportingClass()
-{
-  FirmataExt.addFeature(FirmataReporting);
-}
 
 void FirmataReportingClass::setSamplingInterval(int interval)
 {
