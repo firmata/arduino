@@ -27,6 +27,11 @@ DigitalInputFirmataClass::DigitalInputFirmataClass()
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
 }
 
+boolean DigitalInputFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+{
+  return false;
+}
+
 void DigitalInputFirmataClass::outputPort(byte portNumber, byte portValue, byte forceSend)
 {
   // pins not configured as INPUT are cleared to zeros

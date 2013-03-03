@@ -17,12 +17,35 @@
 #include <Firmata.h>
 #include <FirmataExt.h>
 
+void setPinModeCallback(byte pin, int mode)
+{
+  FirmataExt.handlePinMode(pin,mode);
+}
+
+void handleSysexCallback(byte command, byte argc, byte* argv)
+{
+  FirmataExt.handleSysex(command, argc, argv);
+}
+
 FirmataExtClass::FirmataExtClass()
 {
+  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach((byte)START_SYSEX,handleSysexCallback);
   numCapabilities = 0;
 }
 
-boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
+void FirmataExtClass::handlePinMode(byte pin, byte mode)
+{
+  boolean known = false;
+  for (byte i=0;i<numCapabilities;i++) {
+    known |= capabilities[i]->handlePinMode(pin,mode);
+  }
+  if (!known && mode != IGNORE) {
+    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+  }
+}
+
+void FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
 
@@ -39,10 +62,9 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
         if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
         if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
         Firmata.write(END_SYSEX);
-        return true;
       }
     }
-    break;
+    return;
   case CAPABILITY_QUERY:
     Firmata.write(START_SYSEX);
     Firmata.write(CAPABILITY_RESPONSE);
@@ -55,15 +77,29 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
       Firmata.write(127);
     }
     Firmata.write(END_SYSEX);
-    return true;
+    return;
+  default:
+    for (byte i=0;i<numCapabilities;i++) {
+      if (capabilities[i]->handleSysex(command,argc,argv)) {
+          return;
+      }
+    }
+    Firmata.sendString("Unhandled sysex command");
+    break;
   }
-  return false;
 }
 
-void FirmataExtClass::addCapability(FirmataCapability &capability)
+void FirmataExtClass::addFeature(FirmataFeature &capability)
 {
-  if (numCapabilities<TOTAL_PIN_MODES-1) {
+  if (numCapabilities<MAX_FEATURES) {
     capabilities[numCapabilities++] = &capability;
+  }
+}
+
+void FirmataExtClass::reset()
+{
+  for (byte i=0;i<numCapabilities;i++) {
+    capabilities[i]->reset();
   }
 }
 

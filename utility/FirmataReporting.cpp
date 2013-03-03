@@ -15,16 +15,28 @@
 */
 
 #include <Firmata.h>
+#include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
+#include <FirmataExt.h>
 
 FirmataReportingClass::FirmataReportingClass()
 {
-  reset();
+  FirmataExt.addFeature(FirmataReporting);
 }
 
 void FirmataReportingClass::setSamplingInterval(int interval)
 {
   samplingInterval = interval;
+}
+
+void FirmataReportingClass::handleCapability(byte pin)
+{
+
+}
+
+boolean FirmataReportingClass::handlePinMode(byte pin, int mode)
+{
+  return false;
 }
 
 boolean FirmataReportingClass::handleSysex(byte command, byte argc, byte* argv)
@@ -58,4 +70,5 @@ void FirmataReportingClass::reset()
   previousMillis = millis();
   samplingInterval = 19;
 }
+
 FirmataReportingClass FirmataReporting;

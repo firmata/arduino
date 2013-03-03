@@ -18,17 +18,18 @@
 #define AnalogOutputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataCapability.h>
+#include <utility/FirmataFeature.h>
 
 void reportAnalogCallback(byte analogPin, int value);
 
-class AnalogOutputFirmataClass:public FirmataCapability
+class AnalogOutputFirmataClass:public FirmataFeature
 {
 public:
 //  AnalogOutputFirmataClass();
   void handleCapability(byte pin);
   boolean handlePinMode(byte pin, int mode);
   boolean handleSysex(byte command, byte argc, byte* argv);
+  void reset();
 private:
 };
 

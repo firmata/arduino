@@ -13,7 +13,8 @@
 #ifndef FirmataScheduler_h
 #define FirmataScheduler_h
 
-#include <Arduino.h>
+#include <Firmata.h>
+#include <utility/FirmataFeature.h>
 #include <Encoder7Bit.h>
 
 //subcommands
@@ -43,10 +44,12 @@ struct firmata_task
   byte messages[];
 };
 
-class FirmataSchedulerClass
+class FirmataSchedulerClass:public FirmataFeature
 {
 public:
   FirmataSchedulerClass();
+  void handleCapability(byte pin); //empty method
+  boolean handlePinMode(byte pin, int mode); //empty method
   boolean handleSysex(byte command, byte argc, byte* argv);
   void runTasks();
   void reset();

@@ -18,14 +18,17 @@
 #define FirmataReporting_h
 
 #include <Firmata.h>
+#include <utility/FirmataFeature.h>
 
 #define MINIMUM_SAMPLING_INTERVAL 10
 
-class FirmataReportingClass
+class FirmataReportingClass:public FirmataFeature
 {
 public:
   FirmataReportingClass();
   void setSamplingInterval(int interval);
+  void handleCapability(byte pin); //empty method
+  boolean handlePinMode(byte pin, int mode); //empty method
   boolean handleSysex(byte command, byte argc, byte* argv);
   boolean elapsed();
   void reset();

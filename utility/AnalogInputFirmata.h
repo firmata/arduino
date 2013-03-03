@@ -18,12 +18,12 @@
 #define AnalogInputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataCapability.h>
+#include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
 
 void reportAnalogCallback(byte analogPin, int value);
 
-class AnalogInputFirmataClass:public FirmataCapability
+class AnalogInputFirmataClass:public FirmataFeature
 {
 public:
   AnalogInputFirmataClass();

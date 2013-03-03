@@ -18,17 +18,21 @@
 #define FirmataExt_h
 
 #include <Firmata.h>
-#include <FirmataCapability.h>
+#include <FirmataFeature.h>
+
+#define MAX_FEATURES TOTAL_PIN_MODES+1
 
 class FirmataExtClass
 {
 public:
   FirmataExtClass();
-  boolean handleSysex(byte command, byte argc, byte* argv);
-  void addCapability(FirmataCapability &capability);
+  void handlePinMode(byte pin, byte mode);
+  void handleSysex(byte command, byte argc, byte* argv);
+  void addFeature(FirmataFeature &capability);
+  void reset();
 
 private:
-  FirmataCapability *capabilities[TOTAL_PIN_MODES-1];
+  FirmataFeature *capabilities[MAX_FEATURES];
   byte numCapabilities;
 };
 

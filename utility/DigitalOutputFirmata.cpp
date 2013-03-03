@@ -27,6 +27,16 @@ DigitalOutputFirmataClass::DigitalOutputFirmataClass()
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
 }
 
+boolean DigitalOutputFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+{
+  return false;
+}
+
+void DigitalOutputFirmataClass::reset()
+{
+
+}
+
 void DigitalOutputFirmataClass::digitalWrite(byte port, int value)
 {
   byte pin, lastPin, mask=1, pinWriteMask=0;

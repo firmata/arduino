@@ -10,10 +10,11 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#include "Arduino.h"
-#include "Encoder7Bit.h"
-#include "FirmataScheduler.h"
 #include <Firmata.h>
+#include <utility/FirmataFeature.h>
+#include <Encoder7Bit.h>
+#include <FirmataScheduler.h>
+#include <FirmataExt.h>
 
 void delayTaskCallback(long delay)
 {
@@ -24,7 +25,18 @@ FirmataSchedulerClass::FirmataSchedulerClass()
 {
   tasks = NULL;
   running = NULL;
+  FirmataExt.addFeature(FirmataScheduler);
   Firmata.attachDelayTask(delayTaskCallback);
+}
+
+void FirmataSchedulerClass::handleCapability(byte pin)
+{
+
+}
+
+boolean FirmataSchedulerClass::handlePinMode(byte pin, int mode)
+{
+  return false;
 }
 
 boolean FirmataSchedulerClass::handleSysex(byte command, byte argc, byte* argv)

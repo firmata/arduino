@@ -19,9 +19,9 @@
 
 #include <Servo.h>
 #include <Firmata.h>
-#include <utility/FirmataCapability.h>
+#include <utility/FirmataFeature.h>
 
-class ServoFirmataClass:public FirmataCapability
+class ServoFirmataClass:public FirmataFeature
 {
 public:
   boolean analogWrite(byte pin, int value);

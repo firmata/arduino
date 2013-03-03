@@ -23,6 +23,11 @@
 //  Firmata.attach(REPORT_ANALOG, analogWriteCallback); //TODO: analogWriteCallback is the same for PWM and SERVO
 //}
 
+void AnalogOutputFirmataClass::reset()
+{
+
+}
+
 boolean AnalogOutputFirmataClass::handlePinMode(byte pin, int mode)
 {
   if (mode == PWM && IS_PIN_PWM(pin)) {

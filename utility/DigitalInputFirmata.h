@@ -18,17 +18,18 @@
 #define DigitalInputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataCapability.h>
+#include <utility/FirmataFeature.h>
 
 void reportDigitalCallback(byte port, int value);
 
-class DigitalInputFirmataClass:public FirmataCapability
+class DigitalInputFirmataClass:public FirmataFeature
 {
 public:
   DigitalInputFirmataClass();
   void reportDigital(byte port, int value);
   void report(void);
   void handleCapability(byte pin);
+  boolean handleSysex(byte command, byte argc, byte* argv);
   boolean handlePinMode(byte pin, int mode);
   void reset();
 

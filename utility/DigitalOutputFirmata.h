@@ -18,17 +18,19 @@
 #define DigitalOutputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataCapability.h>
+#include <utility/FirmataFeature.h>
 
 void digitalWriteCallback(byte port, int value);
 
-class DigitalOutputFirmataClass:public FirmataCapability
+class DigitalOutputFirmataClass:public FirmataFeature
 {
 public:
   DigitalOutputFirmataClass();
   void digitalWrite(byte port, int value);
   void handleCapability(byte pin);
+  boolean handleSysex(byte command, byte argc, byte* argv);
   boolean handlePinMode(byte pin, int mode);
+  void reset();
 private:
 };
 
