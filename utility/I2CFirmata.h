@@ -18,6 +18,8 @@
 #define I2CFirmata_h
 
 #include <Firmata.h>
+#include <utility/FirmataCapability.h>
+#include <FirmataReporting.h>
 
 // move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
@@ -38,7 +40,7 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CFirmataClass
+class I2CFirmataClass:public FirmataCapability
 {
 public:
   I2CFirmataClass();

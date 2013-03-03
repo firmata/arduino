@@ -14,6 +14,7 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
+#include <Servo.h>
 #include <Firmata.h>
 #include <ServoFirmata.h>
 
@@ -41,7 +42,7 @@ boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
 
 void ServoFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin) != IGNORE) {
+  if (IS_PIN_SERVO(pin)) {
     Firmata.write(SERVO);
     Firmata.write(14); //14 bit resolution (Servo takes int as argument)
   }
@@ -93,8 +94,10 @@ void ServoFirmataClass::detach(byte pin)
 
 void ServoFirmataClass::reset()
 {
-  for (byte i=0;i<MAX_SERVOS;i++) {
-    detach(i);
+  for (byte pin=0;pin<TOTAL_PINS;pin++) {
+    if (IS_PIN_SERVO(pin)) {
+      detach(pin);
+    }
   }
 }
 

@@ -14,6 +14,8 @@
 #define OneWireFirmata_h
 
 #include "OneWire.h"
+#include <Firmata.h>
+#include <utility/FirmataCapability.h>
 
 //subcommands:
 #define ONEWIRE_SEARCH_REQUEST 0x40
@@ -44,7 +46,7 @@ struct ow_device_info
   boolean power;
 };
 
-class OneWireFirmataClass
+class OneWireFirmataClass:public FirmataCapability
 {
 public:
   boolean handlePinMode(byte pin, int mode);

@@ -16,19 +16,34 @@
 
 #include <Firmata.h>
 #include <AnalogFirmata.h>
+#include <AnalogOutputFirmata.h>
 
-boolean AnalogFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+//AnalogOutputFirmataClass::AnalogOutputFirmataClass()
+//{
+//  Firmata.attach(REPORT_ANALOG, analogWriteCallback); //TODO: analogWriteCallback is the same for PWM and SERVO
+//}
+
+boolean AnalogOutputFirmataClass::handlePinMode(byte pin, int mode)
 {
-  if (command == ANALOG_MAPPING_QUERY) {
-    Firmata.write(START_SYSEX);
-    Firmata.write(ANALOG_MAPPING_RESPONSE);
-    for (byte pin=0; pin < TOTAL_PINS; pin++) {
-      Firmata.write(IS_PIN_ANALOG(pin) ? PIN_TO_ANALOG(pin) : 127);
-    }
-    Firmata.write(END_SYSEX);
+  if (mode == PWM && IS_PIN_PWM(pin)) {
+    pinMode(PIN_TO_PWM(pin), OUTPUT);
+    analogWrite(PIN_TO_PWM(pin), 0);
     return true;
   }
   return false;
 }
 
-AnalogFirmataClass AnalogFirmata;
+void AnalogOutputFirmataClass::handleCapability(byte pin)
+{
+  if (IS_PIN_PWM(pin)) {
+    Firmata.write(PWM);
+    Firmata.write(8);
+  }
+}
+
+boolean AnalogOutputFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+{
+  return AnalogFirmata.handleSysex(command, argc, argv);
+}
+
+AnalogOutputFirmataClass AnalogOutputFirmata;

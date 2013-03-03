@@ -1,5 +1,5 @@
 /*
-  DigitalFirmata.h - Firmata library
+  DigitalInputFirmata.cpp - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -15,19 +15,19 @@
 */
 
 #include <Firmata.h>
-#include <DigitalFirmata.h>
-
-void digitalWriteCallback(byte port, int value)
-{
-  DigitalFirmata.digitalWrite(port,value);
-}
+#include <DigitalInputFirmata.h>
 
 void reportDigitalCallback(byte port, int value)
 {
-  DigitalFirmata.reportDigital(port,value);
+  DigitalInputFirmata.reportDigital(port,value);
 }
 
-void DigitalFirmataClass::outputPort(byte portNumber, byte portValue, byte forceSend)
+DigitalInputFirmataClass::DigitalInputFirmataClass()
+{
+  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+}
+
+void DigitalInputFirmataClass::outputPort(byte portNumber, byte portValue, byte forceSend)
 {
   // pins not configured as INPUT are cleared to zeros
   portValue = portValue & portConfigInputs[portNumber];
@@ -41,7 +41,7 @@ void DigitalFirmataClass::outputPort(byte portNumber, byte portValue, byte force
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
  * to the Serial output queue using Serial.print() */
-void DigitalFirmataClass::checkDigitalInputs(void)
+void DigitalInputFirmataClass::report(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs
@@ -64,32 +64,7 @@ void DigitalFirmataClass::checkDigitalInputs(void)
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
 }
 
-void DigitalFirmataClass::digitalWrite(byte port, int value)
-{
-  byte pin, lastPin, mask=1, pinWriteMask=0;
-
-  if (port < TOTAL_PORTS) {
-    // create a mask of the pins on this port that are writable.
-    lastPin = port*8+8;
-    if (lastPin > TOTAL_PINS) lastPin = TOTAL_PINS;
-    for (pin=port*8; pin < lastPin; pin++) {
-      // do not disturb non-digital pins (eg, Rx & Tx)
-      if (IS_PIN_DIGITAL(pin)) {
-        // only write to OUTPUT and INPUT (enables pullup)
-        // do not touch pins in PWM, ANALOG, SERVO or other modes
-        byte pinMode = Firmata.getPinMode(pin);
-        if (pinMode == OUTPUT || pinMode == INPUT) {
-          pinWriteMask |= mask;
-          Firmata.setPinState(pin,((byte)value & mask) ? 1 : 0);
-        }
-      }
-      mask = mask << 1;
-    }
-    writePort(port, (byte)value, pinWriteMask);
-  }
-}
-
-void DigitalFirmataClass::reportDigital(byte port, int value)
+void DigitalInputFirmataClass::reportDigital(byte port, int value)
 {
   if (port < TOTAL_PORTS) {
     reportPINs[port] = (byte)value;
@@ -102,39 +77,30 @@ void DigitalFirmataClass::reportDigital(byte port, int value)
   // pins configured as analog
 }
 
-boolean DigitalFirmataClass::handlePinMode(byte pin, int mode)
+boolean DigitalInputFirmataClass::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
       portConfigInputs[pin/8] |= (1 << (pin & 7));
-    } else {
-      portConfigInputs[pin/8] &= ~(1 << (pin & 7));
-    }
-  switch(mode) {
-  case INPUT:
       pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
       return true;
-  case OUTPUT:
-      digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
-      pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-      return true;
+    } else {
+      portConfigInputs[pin/8] &= ~(1 << (pin & 7));
     }
   }
   return false;
 }
 
-void DigitalFirmataClass::handleCapability(byte pin)
+void DigitalInputFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin) != IGNORE) {
+  if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)INPUT);
-    Firmata.write(1);
-    Firmata.write((byte)OUTPUT);
     Firmata.write(1);
   }
 }
 
-void DigitalFirmataClass::reset()
+void DigitalInputFirmataClass::reset()
 {
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
@@ -143,4 +109,4 @@ void DigitalFirmataClass::reset()
   }
 }
 
-DigitalFirmataClass DigitalFirmata;
+DigitalInputFirmataClass DigitalInputFirmata;

@@ -19,26 +19,11 @@
 
 #include <Firmata.h>
 
-void reportAnalogCallback(byte analogPin, int value);
-
 class AnalogFirmataClass
 {
 public:
-  AnalogFirmataClass();
-  void reportAnalog(byte analogPin, int value);
-  void handleCapability(byte pin);
-  boolean handlePinMode(byte pin, int mode);
   boolean handleSysex(byte command, byte argc, byte* argv);
-  void reset();
-  void report();
-
 private:
-  /* analog inputs */
-  int analogInputsToReport; // bitwise array to store pin reporting
-
-  void handleExtendedAnalog(byte argc, byte *argv);
-  void handleAnalogMappingQuery();
-
 };
 
 extern AnalogFirmataClass AnalogFirmata;

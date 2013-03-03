@@ -25,8 +25,8 @@ boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
 
 void OneWireFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin)!=IGNORE) {
-    Firmata.write((byte)ONEWIRE);
+  if (IS_PIN_DIGITAL(pin)) {
+    Firmata.write(ONEWIRE);
     Firmata.write(1);
   }
 }

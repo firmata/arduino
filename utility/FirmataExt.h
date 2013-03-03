@@ -18,21 +18,18 @@
 #define FirmataExt_h
 
 #include <Firmata.h>
-
-extern "C" {
-// callback function types
-    typedef void (*capabilityCallbackFunction)(byte);
-}
+#include <FirmataCapability.h>
 
 class FirmataExtClass
 {
 public:
+  FirmataExtClass();
   boolean handleSysex(byte command, byte argc, byte* argv);
-
-  void attach(capabilityCallbackFunction callback);
+  void addCapability(FirmataCapability &capability);
 
 private:
-  capabilityCallbackFunction capabilityFunction;
+  FirmataCapability *capabilities[TOTAL_PIN_MODES-1];
+  byte numCapabilities;
 };
 
 extern FirmataExtClass FirmataExt;

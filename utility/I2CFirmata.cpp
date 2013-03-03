@@ -91,7 +91,7 @@ boolean I2CFirmataClass::handlePinMode(byte pin, int mode)
 
 void I2CFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_I2C(pin) && Firmata.getPinMode(pin)!=IGNORE) {
+  if (IS_PIN_I2C(pin)) {
     Firmata.write(I2C);
     Firmata.write(1);  // to do: determine appropriate value
   }

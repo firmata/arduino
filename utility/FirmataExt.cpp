@@ -17,6 +17,11 @@
 #include <Firmata.h>
 #include <FirmataExt.h>
 
+FirmataExtClass::FirmataExtClass()
+{
+  numCapabilities = 0;
+}
+
 boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
@@ -41,11 +46,13 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
   case CAPABILITY_QUERY:
     Firmata.write(START_SYSEX);
     Firmata.write(CAPABILITY_RESPONSE);
-    if (capabilityFunction) {
-      for (byte pin=0; pin < TOTAL_PINS; pin++) {
-          capabilityFunction(pin);
-          Firmata.write(127);
+    for (byte pin=0; pin < TOTAL_PINS; pin++) {
+      if (Firmata.getPinMode(pin) != IGNORE) {
+        for (byte i=0;i<numCapabilities;i++) {
+          capabilities[i]->handleCapability(pin);
+        }
       }
+      Firmata.write(127);
     }
     Firmata.write(END_SYSEX);
     return true;
@@ -53,9 +60,11 @@ boolean FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-void FirmataExtClass::attach(capabilityCallbackFunction function)
+void FirmataExtClass::addCapability(FirmataCapability &capability)
 {
-  capabilityFunction = function;
+  if (numCapabilities<TOTAL_PIN_MODES-1) {
+    capabilities[numCapabilities++] = &capability;
+  }
 }
 
 FirmataExtClass FirmataExt;

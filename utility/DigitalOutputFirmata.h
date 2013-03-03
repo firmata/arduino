@@ -1,5 +1,5 @@
 /*
-  DigitalFirmata.h - Firmata library
+  DigitalOutputFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,34 +14,24 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef DigitalFirmata_h
-#define DigitalFirmata_h
+#ifndef DigitalOutputFirmata_h
+#define DigitalOutputFirmata_h
 
 #include <Firmata.h>
+#include <utility/FirmataCapability.h>
 
 void digitalWriteCallback(byte port, int value);
-void reportDigitalCallback(byte port, int value);
 
-class DigitalFirmataClass
+class DigitalOutputFirmataClass:public FirmataCapability
 {
 public:
+  DigitalOutputFirmataClass();
   void digitalWrite(byte port, int value);
-  void reportDigital(byte port, int value);
-  void checkDigitalInputs(void);
   void handleCapability(byte pin);
   boolean handlePinMode(byte pin, int mode);
-  void reset();
-
 private:
-  /* digital input ports */
-  byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
-  byte previousPINs[TOTAL_PORTS];     // previous 8 bits sent
-
-  /* pins configuration */
-  byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
-  void outputPort(byte portNumber, byte portValue, byte forceSend);
 };
 
-extern DigitalFirmataClass DigitalFirmata;
+extern DigitalOutputFirmataClass DigitalOutputFirmata;
 
 #endif

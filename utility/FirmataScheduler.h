@@ -45,8 +45,7 @@ struct firmata_task
 
 class FirmataSchedulerClass
 {
-  public:
-  
+public:
   FirmataSchedulerClass();
   boolean handleSysex(byte command, byte argc, byte* argv);
   void runTasks();
@@ -59,8 +58,7 @@ class FirmataSchedulerClass
   void queryAllTasks();
   void queryTask(byte id);
 
-  private:
-
+private:
   firmata_task *tasks;
   firmata_task *running;
   

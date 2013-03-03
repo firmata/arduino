@@ -30,41 +30,36 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
-#include "FirmataConfig.h"
 #include <Firmata.h>
 
-#ifdef DIGITALFIRMATA
-#include <utility/DigitalFirmata.h>
-#endif
-#ifdef ANALOGFIRMATA
-#include <utility/AnalogFirmata.h>
-#endif
-#ifdef SERVOFIRMATA
+#include <utility/DigitalInputFirmata.h>
+
+#include <utility/DigitalOutputFirmata.h>
+
+#include <utility/AnalogInputFirmata.h>
+
+#include <utility/AnalogOutputFirmata.h>
+
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
 #include <utility/ServoFirmata.h>
-#endif
-#if defined ANALOGFIRMATA || defined SERVOFIRMATA
+
+#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
 #include <utility/AnalogWrite.h>
 #endif
-#ifdef I2CFIRMATA
+
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/I2CFirmata.h>
-#endif
-#ifdef ONEWIREFIRMATA
-#include <utility/OneWireFirmata.h>
-#endif
-#ifdef STEPPERFIRMATA
-#include <utility/StepperFirmata.h>
-#endif
 
-#ifdef FIRMATAEXT
+#include <utility/OneWireFirmata.h>
+
+#include <utility/StepperFirmata.h>
+
 #include <utility/FirmataExt.h>
-#endif
-#ifdef FIRMATAREPORTING
-#include <utility/FirmataReporting.h>
-#endif
-#ifdef FIRMATASCHEDULER
+
 #include <utility/FirmataScheduler.h>
+
+#if defined AnalogInputFirmata_h || defined DigitalInputFirmata || defined I2CFirmata_h
+#include <utility/FirmataReporting.h>
 #endif
 
 /*==============================================================================
@@ -78,25 +73,31 @@
 void setPinModeCallback(byte pin, int mode)
 {
   boolean known = false;
-#ifdef DIGITALFIRMATA
-  known |= DigitalFirmata.handlePinMode(pin,mode);
+#ifdef DigitalInputFirmata_h
+  known |= DigitalInputFirmata.handlePinMode(pin,mode);
 #endif
-#ifdef ANALOGFIRMATA
-  known |= AnalogFirmata.handlePinMode(pin,mode);
+#ifdef DigitalOutputFirmata_h
+  known |= DigitalOutputFirmata.handlePinMode(pin,mode);
 #endif
-#ifdef SERVOFIRMATA
+#ifdef AnalogInputFirmata_h
+  known |= AnalogInputFirmata.handlePinMode(pin,mode);
+#endif
+#ifdef AnalogOutputFirmata_h
+  known |= AnalogOutputFirmata.handlePinMode(pin,mode);
+#endif
+#ifdef ServoFirmata_h
   known |= ServoFirmata.handlePinMode(pin,mode);
 #endif
-#ifdef I2CFIRMATA
+#ifdef I2CFirmata_h
   known |= I2CFirmata.handlePinMode(pin,mode);
 #endif
-#ifdef ONEWIREFIRMATA
+#ifdef OneWireFirmata_h
   known |= OneWireFirmata.handlePinMode(pin,mode);
 #endif
-#ifdef STEPPERFIRMATA
+#ifdef StepperFirmata_h
   known |= StepperFirmata.handlePinMode(pin,mode);
 #endif
-  if (!known) {
+  if (!known && mode != IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
   // TODO: save status to EEPROM here, if changed
@@ -106,54 +107,33 @@ void setPinModeCallback(byte pin, int mode)
  * SYSEX-BASED commands
  *============================================================================*/
 
-#ifdef FIRMATAEXT
-void capabilityQueryCallback(byte pin)
-{
-#ifdef DIGITALFIRMATA
-  DigitalFirmata.handleCapability(pin);
-#endif
-#ifdef ANALOGFIRMATA
-  AnalogFirmata.handleCapability(pin);
-#endif
-#ifdef SERVOFIRMATA
-  ServoFirmata.handleCapability(pin);
-#endif
-#ifdef I2CFIRMATA
-  I2CFirmata.handleCapability(pin);
-#endif
-#ifdef ONEWIREFIRMATA
-  OneWireFirmata.handleCapability(pin);
-#endif
-#ifdef STEPPERFIRMATA
-  StepperFirmata.handleCapability(pin);
-#endif
-}
-#endif
-
 void sysexCallback(byte command, byte argc, byte *argv)
 {
-#ifdef ANALOGFIRMATA
-  if (AnalogFirmata.handleSysex(command,argc,argv)) return;
+#ifdef AnalogInputFirmata_h
+  if (AnalogInputFirmata.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef SERVOFIRMATA
+#ifdef AnalogOutputFirmata_h
+  if (AnalogOutputFirmata.handleSysex(command,argc,argv)) return;
+#endif
+#ifdef ServoFirmata_h
   if (ServoFirmata.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef I2CFIRMATA
+#ifdef I2CFirmata_h
   if (I2CFirmata.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef ONEWIREFIRMATA
+#ifdef OneWireFirmata_h
   if (OneWireFirmata.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef STEPPERFIRMATA
+#ifdef StepperFirmata_h
   if (StepperFirmata.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef FIRMATASCHEDULER
+#ifdef FirmataScheduler_h
   if (FirmataScheduler.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef FIRMATAEXT
+#ifdef FirmataExt_h
   if (FirmataExt.handleSysex(command,argc,argv)) return;
 #endif
-#ifdef FIRMATAREPORTING
+#ifdef FirmataReporting_h
   if (FirmataReporting.handleSysex(command,argc,argv)) return;
 #endif  
   Firmata.sendString("Unhandled sysex command");
@@ -172,36 +152,38 @@ void systemResetCallback()
   // otherwise, pins default to digital output
   for (byte i=0; i < TOTAL_PINS; i++) {
     if (IS_PIN_ANALOG(i)) {
-#ifdef ANALOGFIRMATA
+#ifdef AnalogInputFirmata_h
       // turns off pullup, configures everything
       Firmata.setPinMode(i, ANALOG);
 #endif
     } else {
-#ifdef DIGITALFIRMATA
+#ifdef DigitalOutputFirmata_h
       // sets the output to 0, configures portConfigInputs
       Firmata.setPinMode(i, OUTPUT);
 #endif
     }
   }
-#ifdef I2CFIRMATA
-  I2CFirmata.reset();
+
+#ifdef DigitalInputFirmata_h
+  DigitalInputFirmata.reset();
 #endif
-#ifdef DIGITALFIRMATA
-  DigitalFirmata.reset();
+#ifdef AnalogInputFirmata_h
+  AnalogInputFirmata.reset();
 #endif
-#ifdef ANALOGFIRMATA
-  AnalogFirmata.reset();
-#endif
-#ifdef SERVOFIRMATA
+#ifdef ServoFirmata_h
   ServoFirmata.reset();
 #endif
-#ifdef ONEWIREFIRMATA
+#ifdef I2CFirmata_h
+  I2CFirmata.reset();
+#endif
+#ifdef OneWireFirmata_h
   OneWireFirmata.reset();
 #endif
-#ifdef FIRMATASCHEDULER
+  
+#ifdef FirmataScheduler_h
   FirmataScheduler.reset();
 #endif
-#ifdef FIRMATAREPORTING
+#ifdef FirmataReporting_h
   FirmataReporting.reset();
 #endif
 }
@@ -210,35 +192,41 @@ void setup()
 {
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
-#ifdef DIGITALFIRMATA
-  /* digitalWriteCallback is declared in DigitalFirmata.h */
-  Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
-#ifdef FIRMATAREPORTING
-  /* reportDigitalCallback is declared in DigitalFirmata.h */
-  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
-#endif
-#endif
-#if defined ANALOGFIRMATA || defined SERVOFIRMATA
+#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
   /* analogWriteCallback is declared in AnalogWrite.h */
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 #endif
-#if defined ANALOGFIRMATA && defined FIRMATAREPORTING
-  /* reportAnalogCallback is declared in AnalogFirmata.h */
-  Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
-#endif
   /* setPinModeCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
-#if defined ANALOGFIRMATA || defined SERVOFIRMATA || defined I2CFIRMATA || defined FIRMATAEXT || defined FIRMATAREPORTING || defined STEPPERFIRMATA
+#if defined AnalogInputFirmata_h || defined AnalogOutputFirmata_h || defined ServoFirmata_h || defined I2CFirmata_h || defined FirmataExt_h || defined FirmataReporting_h || defined StepperFirmata_h
   /* sysexCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(START_SYSEX, sysexCallback);
 #endif
-#ifdef FIRMATAEXT
-  /* capabilityQueryCallback is declared here (in ConfigurableFirmata.ino) */
-  FirmataExt.attach(capabilityQueryCallback);
+#ifdef FirmataExt_h
+#ifdef DigitalInputFirmata_h
+  FirmataExt.addCapability(DigitalInputFirmata);
 #endif
-#ifdef FIRMATASCHEDULER
-  /* delayTaskCallback is declared in FirmataScheduler.h */
-  Firmata.attachDelayTask(delayTaskCallback);
+#ifdef DigitalOutputFirmata_h
+  FirmataExt.addCapability(DigitalOutputFirmata);
+#endif
+#ifdef AnalogInputFirmata_h
+  FirmataExt.addCapability(AnalogInputFirmata);
+#endif
+#ifdef AnalogOutputFirmata_h
+  FirmataExt.addCapability(AnalogOutputFirmata);
+#endif
+#ifdef ServoFirmata_h
+  FirmataExt.addCapability(ServoFirmata);
+#endif
+#ifdef I2CFirmata_h
+  FirmataExt.addCapability(I2CFirmata);
+#endif
+#ifdef OneWireFirmata_h
+  FirmataExt.addCapability(OneWireFirmata);
+#endif
+#ifdef StepperFirmata_h
+  FirmataExt.addCapability(StepperFirmata);
+#endif
 #endif
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
@@ -252,17 +240,17 @@ void setup()
  *============================================================================*/
 void loop() 
 {
-#ifdef DIGITALFIRMATA
+#ifdef DigitalInputFirmata_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * FTDI buffer using Serial.print()  */
-  DigitalFirmata.checkDigitalInputs();
+  DigitalInputFirmata.report();
 #endif
 
   /* SERIALREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while(Firmata.available()) {
     Firmata.processInput();
-#ifdef FIRMATASCHEDULER
+#ifdef FirmataScheduler_h
     if (!Firmata.isParsingMessage()) {
       goto runtasks;
     }
@@ -276,19 +264,19 @@ runtasks: FirmataScheduler.runTasks();
    * 60 bytes. use a timer to sending an event character every 4 ms to
    * trigger the buffer to dump. */
 
-#ifdef FIRMATAREPORTING
+#ifdef FirmataReporting_h
   if (FirmataReporting.elapsed()) {
-#ifdef ANALOGFIRMATA
+#ifdef AnalogInputFirmata_h
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
-    AnalogFirmata.report();
+    AnalogInputFirmata.report();
 #endif
-#ifdef I2CFIRMATA    
+#ifdef I2CFirmata_h
     // report i2c data for all device with read continuous mode enabled
     I2CFirmata.report();
 #endif
   }
 #endif
-#ifdef STEPPERFIRMATA
+#ifdef StepperFirmata_h
   StepperFirmata.update();
 #endif
 }

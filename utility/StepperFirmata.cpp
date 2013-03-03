@@ -48,7 +48,7 @@ boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
 
 void StepperFirmataClass::handleCapability(byte pin)
 {
-  if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin) != IGNORE) {
+  if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(STEPPER);
     Firmata.write(21); //21 bits used for number of steps
   }

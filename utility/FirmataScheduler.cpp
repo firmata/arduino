@@ -24,6 +24,7 @@ FirmataSchedulerClass::FirmataSchedulerClass()
 {
   tasks = NULL;
   running = NULL;
+  Firmata.attachDelayTask(delayTaskCallback);
 }
 
 boolean FirmataSchedulerClass::handleSysex(byte command, byte argc, byte* argv)

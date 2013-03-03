@@ -35,12 +35,13 @@
 
 #include "FirmataStepper.h"
 #include <Firmata.h>
+#include <utility/FirmataCapability.h>
 
 #define MAX_STEPPERS 6 // arbitrary value... may need to adjust
 #define STEPPER_CONFIG 0
 #define STEPPER_STEP 1
 
-class StepperFirmataClass
+class StepperFirmataClass:public FirmataCapability
 {
 public:
   boolean handlePinMode(byte pin, int mode);

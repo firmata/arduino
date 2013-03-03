@@ -1,5 +1,5 @@
 /*
-  AnalogWrite.h - Firmata library
+  AnalogFirmata.h - Firmata library
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -14,36 +14,24 @@
   See file LICENSE.txt for further informations on licensing terms.
 */
 
-#ifndef AnalogWrite_h
-#define AnalogWrite_h
+#ifndef AnalogOutputFirmata_h
+#define AnalogOutputFirmata_h
 
 #include <Firmata.h>
+#include <utility/FirmataCapability.h>
 
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
+void reportAnalogCallback(byte analogPin, int value);
 
-void analogWriteCallback(byte pin, int value)
+class AnalogOutputFirmataClass:public FirmataCapability
 {
-  if (pin < TOTAL_PINS) {
-    switch(Firmata.getPinMode(pin)) {
-#ifdef ServoFirmata_h
-    case SERVO:
-      if (IS_PIN_SERVO(pin)) {
-        ServoFirmata.analogWrite(pin,value);
-        Firmata.setPinState(pin,value);
-      }
-      break;
-#endif
-#ifdef AnalogOutputFirmata_h
-    case PWM:
-      if (IS_PIN_PWM(pin)) {
-        analogWrite(PIN_TO_PWM(pin), value);
-        Firmata.setPinState(pin,value);
-      }
-      break;
-#endif
-    }
-  }
-}
+public:
+//  AnalogOutputFirmataClass();
+  void handleCapability(byte pin);
+  boolean handlePinMode(byte pin, int mode);
+  boolean handleSysex(byte command, byte argc, byte* argv);
+private:
+};
 
-#endif
+extern AnalogOutputFirmataClass AnalogOutputFirmata;
+
 #endif
