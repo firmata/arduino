@@ -34,7 +34,7 @@
 #include <FirmataStepper.h>
 #include <Firmata.h>
 
-boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
+boolean StepperFirmata::handlePinMode(byte pin, int mode)
 {
   if (mode == STEPPER) {
     if (IS_PIN_DIGITAL(pin)) {
@@ -46,7 +46,7 @@ boolean StepperFirmataClass::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void StepperFirmataClass::handleCapability(byte pin)
+void StepperFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(STEPPER);
@@ -58,7 +58,7 @@ void StepperFirmataClass::handleCapability(byte pin)
  * SYSEX-BASED commands
  *============================================================================*/
 
-boolean StepperFirmataClass::handleSysex(byte command, byte argc, byte *argv)
+boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   if (command == STEPPER_DATA) {
     byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
@@ -126,7 +126,7 @@ boolean StepperFirmataClass::handleSysex(byte command, byte argc, byte *argv)
  * SETUP()
  *============================================================================*/
 
-void StepperFirmataClass::reset()
+void StepperFirmata::reset()
 {
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
@@ -141,7 +141,7 @@ void StepperFirmataClass::reset()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void StepperFirmataClass::update()
+void StepperFirmata::update()
 {
   if (numSteppers>0) {
     // if one or more stepper motors are used, update their position
@@ -159,5 +159,3 @@ void StepperFirmataClass::update()
     }
   }
 }
-
-StepperFirmataClass StepperFirmata;

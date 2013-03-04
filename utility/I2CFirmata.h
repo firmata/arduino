@@ -40,10 +40,10 @@ struct i2c_device_info {
   byte bytes;
 };
 
-class I2CFirmataClass:public FirmataFeature
+class I2CFirmata:public FirmataFeature
 {
 public:
-  I2CFirmataClass();
+  I2CFirmata();
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte* argv);
@@ -65,7 +65,5 @@ private:
   boolean enableI2CPins();
   void disableI2CPins();
 };
-
-extern I2CFirmataClass I2CFirmata;
 
 #endif

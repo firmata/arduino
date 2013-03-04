@@ -33,15 +33,20 @@
 #include <Firmata.h>
 
 #include <utility/DigitalInputFirmata.h>
+DigitalInputFirmata digitalInput;
 
 #include <utility/DigitalOutputFirmata.h>
+DigitalOutputFirmata digitalOutput;
 
 #include <utility/AnalogInputFirmata.h>
+AnalogInputFirmata analogInput;
 
 #include <utility/AnalogOutputFirmata.h>
+AnalogOutputFirmata analogOutput;
 
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
 #include <utility/ServoFirmata.h>
+ServoFirmata servo;
 
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
 #include <utility/AnalogWrite.h>
@@ -49,17 +54,23 @@
 
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/I2CFirmata.h>
+I2CFirmata i2c;
 
 #include <utility/OneWireFirmata.h>
+OneWireFirmata oneWire;
 
 #include <utility/StepperFirmata.h>
+StepperFirmata stepper;
 
 #include <utility/FirmataExt.h>
+FirmataExt firmataExt;
 
 #include <utility/FirmataScheduler.h>
+FirmataScheduler scheduler;
 
-#if defined AnalogInputFirmata_h || defined DigitalInputFirmata || defined I2CFirmata_h
+#if defined AnalogInputFirmata_h || defined I2CFirmata_h
 #include <utility/FirmataReporting.h>
+FirmataReporting reporting;
 #endif
 
 /*==============================================================================
@@ -88,7 +99,7 @@ void systemResetCallback()
   }
 
 #ifdef FirmataExt_h
-  FirmataExt.reset();
+  firmataExt.reset();
 #endif
 }
 
@@ -107,34 +118,34 @@ void setup()
 
   #ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h
-  FirmataExt.addFeature(DigitalInputFirmata);
+  firmataExt.addFeature(digitalInput);
 #endif
 #ifdef DigitalOutputFirmata_h
-  FirmataExt.addFeature(DigitalOutputFirmata);
+  firmataExt.addFeature(digitalOutput);
 #endif
 #ifdef AnalogInputFirmata_h
-  FirmataExt.addFeature(AnalogInputFirmata);
+  firmataExt.addFeature(analogInput);
 #endif
 #ifdef AnalogOutputFirmata_h
-  FirmataExt.addFeature(AnalogOutputFirmata);
+  firmataExt.addFeature(analogOutput);
 #endif
 #ifdef ServoFirmata_h
-  FirmataExt.addFeature(ServoFirmata);
+  firmataExt.addFeature(servo);
 #endif
 #ifdef I2CFirmata_h
-  FirmataExt.addFeature(I2CFirmata);
+  firmataExt.addFeature(i2c);
 #endif
 #ifdef OneWireFirmata_h
-  FirmataExt.addFeature(OneWireFirmata);
+  firmataExt.addFeature(oneWire);
 #endif
 #ifdef StepperFirmata_h
-  FirmataExt.addFeature(StepperFirmata);
+  firmataExt.addFeature(stepper);
 #endif
 #ifdef FirmataReporting_h
-  FirmataExt.addFeature(FirmataReporting);
+  firmataExt.addFeature(reporting);
 #endif
 #ifdef FirmataScheduler_h
-  FirmataExt.addFeature(FirmataScheduler);
+  firmataExt.addFeature(scheduler);
 #endif
 #endif
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
@@ -152,7 +163,7 @@ void loop()
 #ifdef DigitalInputFirmata_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * FTDI buffer using Serial.print()  */
-  DigitalInputFirmata.report();
+  digitalInput.report();
 #endif
 
   /* SERIALREAD - processing incoming messagse as soon as possible, while still
@@ -165,7 +176,7 @@ void loop()
     }
   }
   if (!Firmata.isParsingMessage()) {
-runtasks: FirmataScheduler.runTasks();
+runtasks: scheduler.runTasks();
 #endif
   }
 
@@ -174,18 +185,18 @@ runtasks: FirmataScheduler.runTasks();
    * trigger the buffer to dump. */
 
 #ifdef FirmataReporting_h
-  if (FirmataReporting.elapsed()) {
+  if (reporting.elapsed()) {
 #ifdef AnalogInputFirmata_h
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
-    AnalogInputFirmata.report();
+    analogInput.report();
 #endif
 #ifdef I2CFirmata_h
     // report i2c data for all device with read continuous mode enabled
-    I2CFirmata.report();
+    i2c.report();
 #endif
   }
 #endif
 #ifdef StepperFirmata_h
-  StepperFirmata.update();
+  stepper.update();
 #endif
 }

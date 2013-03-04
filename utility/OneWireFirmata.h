@@ -46,7 +46,7 @@ struct ow_device_info
   boolean power;
 };
 
-class OneWireFirmataClass:public FirmataFeature
+class OneWireFirmata:public FirmataFeature
 {
 public:
   boolean handlePinMode(byte pin, int mode);
@@ -58,8 +58,6 @@ private:
   ow_device_info pinOneWire[TOTAL_PINS];
   void oneWireConfig(byte pin, boolean power);
 };
-
-extern OneWireFirmataClass OneWireFirmata;
 
 #endif
 

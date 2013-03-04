@@ -23,10 +23,10 @@
 
 void reportAnalogCallback(byte analogPin, int value);
 
-class AnalogInputFirmataClass:public FirmataFeature
+class AnalogInputFirmata:public FirmataFeature
 {
 public:
-  AnalogInputFirmataClass();
+  AnalogInputFirmata();
   void reportAnalog(byte analogPin, int value);
   void handleCapability(byte pin);
   boolean handlePinMode(byte pin, int mode);
@@ -38,7 +38,5 @@ private:
   /* analog inputs */
   int analogInputsToReport; // bitwise array to store pin reporting
 };
-
-extern AnalogInputFirmataClass AnalogInputFirmata;
 
 #endif

@@ -17,7 +17,7 @@
 #include <Firmata.h>
 #include <AnalogFirmata.h>
 
-boolean AnalogFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+boolean handleAnalogFirmataSysex(byte command, byte argc, byte* argv)
 {
   if (command == ANALOG_MAPPING_QUERY) {
     Firmata.write(START_SYSEX);
@@ -30,5 +30,3 @@ boolean AnalogFirmataClass::handleSysex(byte command, byte argc, byte* argv)
   }
   return false;
 }
-
-AnalogFirmataClass AnalogFirmata;

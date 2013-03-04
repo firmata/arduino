@@ -16,30 +16,32 @@
 #include <FirmataScheduler.h>
 #include <FirmataExt.h>
 
+FirmataScheduler *FirmataSchedulerInstance;
+
 void delayTaskCallback(long delay)
 {
-  FirmataScheduler.delayTask(delay);
+  FirmataSchedulerInstance->delayTask(delay);
 }
 
-FirmataSchedulerClass::FirmataSchedulerClass()
+FirmataScheduler::FirmataScheduler()
 {
+  FirmataSchedulerInstance = this;
   tasks = NULL;
   running = NULL;
-  FirmataExt.addFeature(FirmataScheduler);
   Firmata.attachDelayTask(delayTaskCallback);
 }
 
-void FirmataSchedulerClass::handleCapability(byte pin)
+void FirmataScheduler::handleCapability(byte pin)
 {
 
 }
 
-boolean FirmataSchedulerClass::handlePinMode(byte pin, int mode)
+boolean FirmataScheduler::handlePinMode(byte pin, int mode)
 {
   return false;
 }
 
-boolean FirmataSchedulerClass::handleSysex(byte command, byte argc, byte* argv)
+boolean FirmataScheduler::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == SCHEDULER_DATA) {
     if (argc>0) {
@@ -107,7 +109,7 @@ boolean FirmataSchedulerClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 };
 
-void FirmataSchedulerClass::createTask(byte id,int len)
+void FirmataScheduler::createTask(byte id,int len)
 {
   firmata_task *existing = findTask(id);
   if (existing) {
@@ -124,7 +126,7 @@ void FirmataSchedulerClass::createTask(byte id,int len)
   }
 };
 
-void FirmataSchedulerClass::deleteTask(byte id)
+void FirmataScheduler::deleteTask(byte id)
 {
   firmata_task *current = tasks;
   firmata_task *previous = NULL;
@@ -146,7 +148,7 @@ void FirmataSchedulerClass::deleteTask(byte id)
   }
 };
 
-void FirmataSchedulerClass::addToTask(byte id, int additionalBytes, byte *message)
+void FirmataScheduler::addToTask(byte id, int additionalBytes, byte *message)
 {
   firmata_task *existing = findTask(id);
   if (existing) { //task exists and has not been fully loaded yet
@@ -161,7 +163,7 @@ void FirmataSchedulerClass::addToTask(byte id, int additionalBytes, byte *messag
   }
 };
 
-void FirmataSchedulerClass::schedule(byte id,long delay_ms)
+void FirmataScheduler::schedule(byte id,long delay_ms)
 {
   firmata_task *existing = findTask(id);
   if (existing) {
@@ -173,7 +175,7 @@ void FirmataSchedulerClass::schedule(byte id,long delay_ms)
   }
 };
 
-void FirmataSchedulerClass::delayTask(long delay_ms)
+void FirmataScheduler::delayTask(long delay_ms)
 {
   if (running) {
     long now = millis();
@@ -184,7 +186,7 @@ void FirmataSchedulerClass::delayTask(long delay_ms)
   }
 }
 
-void FirmataSchedulerClass::queryAllTasks()
+void FirmataScheduler::queryAllTasks()
 {
   Firmata.write(START_SYSEX);
   Firmata.write(SCHEDULER_DATA);
@@ -197,13 +199,13 @@ void FirmataSchedulerClass::queryAllTasks()
   Firmata.write(END_SYSEX);
 };
 
-void FirmataSchedulerClass::queryTask(byte id)
+void FirmataScheduler::queryTask(byte id)
 {
   firmata_task *task = findTask(id);
   reportTask(id,task,false);
 }
 
-void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean error)
+void FirmataScheduler::reportTask(byte id, firmata_task *task, boolean error)
 {
   Firmata.write(START_SYSEX);
   Firmata.write(SCHEDULER_DATA);
@@ -223,7 +225,7 @@ void FirmataSchedulerClass::reportTask(byte id, firmata_task *task, boolean erro
   Firmata.write(END_SYSEX);
 };
 
-void FirmataSchedulerClass::runTasks()
+void FirmataScheduler::runTasks()
 {
   if (tasks) {
     long now = millis();
@@ -255,7 +257,7 @@ void FirmataSchedulerClass::runTasks()
   }
 };
 
-void FirmataSchedulerClass::reset()
+void FirmataScheduler::reset()
 {
   while (tasks) {
     firmata_task *nextTask = tasks->nextTask;
@@ -265,7 +267,7 @@ void FirmataSchedulerClass::reset()
 };
 
 //private
-boolean FirmataSchedulerClass::execute(firmata_task *task)
+boolean FirmataScheduler::execute(firmata_task *task)
 { 
   long start = task->time_ms;
   int pos = task->pos;
@@ -284,7 +286,7 @@ boolean FirmataSchedulerClass::execute(firmata_task *task)
   return false;
 }
 
-firmata_task *FirmataSchedulerClass::findTask(byte id)
+firmata_task *FirmataScheduler::findTask(byte id)
 {
   firmata_task *currentTask = tasks;
   while (currentTask) {
@@ -297,4 +299,3 @@ firmata_task *FirmataSchedulerClass::findTask(byte id)
   return NULL;
 }
 
-FirmataSchedulerClass FirmataScheduler;

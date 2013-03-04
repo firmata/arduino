@@ -18,7 +18,19 @@
 #include <Firmata.h>
 #include <ServoFirmata.h>
 
-boolean ServoFirmataClass::analogWrite(byte pin, int value)
+ServoFirmata *ServoInstance;
+
+void servoAnalogWrite(byte pin, int value)
+{
+  ServoInstance->analogWrite(pin,value);
+}
+
+ServoFirmata::ServoFirmata()
+{
+  ServoInstance = this;
+}
+
+boolean ServoFirmata::analogWrite(byte pin, int value)
 {
   if (IS_PIN_SERVO(pin)) {
     Servo *servo = servos[PIN_TO_SERVO(pin)];
@@ -27,7 +39,7 @@ boolean ServoFirmataClass::analogWrite(byte pin, int value)
   }
 }
 
-boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
+boolean ServoFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_SERVO(pin)) {
     if (mode==SERVO) {
@@ -40,7 +52,7 @@ boolean ServoFirmataClass::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void ServoFirmataClass::handleCapability(byte pin)
+void ServoFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_SERVO(pin)) {
     Firmata.write(SERVO);
@@ -48,7 +60,7 @@ void ServoFirmataClass::handleCapability(byte pin)
   }
 }
 
-boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if(command == SERVO_CONFIG) {
     if (argc > 4) {
@@ -66,7 +78,7 @@ boolean ServoFirmataClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-void ServoFirmataClass::attach(byte pin, int minPulse, int maxPulse)
+void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
 {
   Servo *servo = servos[PIN_TO_SERVO(pin)];
   if (!servo) {
@@ -81,7 +93,7 @@ void ServoFirmataClass::attach(byte pin, int minPulse, int maxPulse)
     servo->attach(PIN_TO_DIGITAL(pin));
 }
 
-void ServoFirmataClass::detach(byte pin)
+void ServoFirmata::detach(byte pin)
 {
   Servo *servo = servos[PIN_TO_SERVO(pin)];
   if (servo) {
@@ -92,7 +104,7 @@ void ServoFirmataClass::detach(byte pin)
   }
 }
 
-void ServoFirmataClass::reset()
+void ServoFirmata::reset()
 {
   for (byte pin=0;pin<TOTAL_PINS;pin++) {
     if (IS_PIN_SERVO(pin)) {
@@ -100,5 +112,3 @@ void ServoFirmataClass::reset()
     }
   }
 }
-
-ServoFirmataClass ServoFirmata;

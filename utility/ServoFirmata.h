@@ -21,9 +21,12 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
-class ServoFirmataClass:public FirmataFeature
+void servoAnalogWrite(byte pin, int value);
+
+class ServoFirmata:public FirmataFeature
 {
 public:
+  ServoFirmata();
   boolean analogWrite(byte pin, int value);
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
@@ -34,7 +37,5 @@ private:
   void attach(byte pin, int minPulse, int maxPulse);
   void detach(byte pin);
 };
-
-extern ServoFirmataClass ServoFirmata;
 
 #endif

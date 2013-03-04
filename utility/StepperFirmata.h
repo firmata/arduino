@@ -41,7 +41,7 @@
 #define STEPPER_CONFIG 0
 #define STEPPER_STEP 1
 
-class StepperFirmataClass:public FirmataFeature
+class StepperFirmata:public FirmataFeature
 {
 public:
   boolean handlePinMode(byte pin, int mode);
@@ -53,7 +53,5 @@ private:
   FirmataStepper *stepper[MAX_STEPPERS];
   byte numSteppers;
 };
-
-extern StepperFirmataClass StepperFirmata;
 
 #endif

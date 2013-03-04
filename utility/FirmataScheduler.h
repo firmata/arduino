@@ -44,10 +44,10 @@ struct firmata_task
   byte messages[];
 };
 
-class FirmataSchedulerClass:public FirmataFeature
+class FirmataScheduler:public FirmataFeature
 {
 public:
-  FirmataSchedulerClass();
+  FirmataScheduler();
   void handleCapability(byte pin); //empty method
   boolean handlePinMode(byte pin, int mode); //empty method
   boolean handleSysex(byte command, byte argc, byte* argv);
@@ -69,7 +69,5 @@ private:
   firmata_task *findTask(byte id);
   void reportTask(byte id, firmata_task *task, boolean error);
 };
-
-extern FirmataSchedulerClass FirmataScheduler;
 
 #endif

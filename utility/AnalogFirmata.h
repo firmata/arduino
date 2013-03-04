@@ -19,13 +19,6 @@
 
 #include <Firmata.h>
 
-class AnalogFirmataClass
-{
-public:
-  boolean handleSysex(byte command, byte argc, byte* argv);
-private:
-};
-
-extern AnalogFirmataClass AnalogFirmata;
+boolean handleAnalogFirmataSysex(byte command, byte argc, byte* argv);
 
 #endif

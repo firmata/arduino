@@ -28,7 +28,7 @@ void analogWriteCallback(byte pin, int value)
 #ifdef ServoFirmata_h
     case SERVO:
       if (IS_PIN_SERVO(pin)) {
-        ServoFirmata.analogWrite(pin,value);
+        servoAnalogWrite(pin,value);
         Firmata.setPinState(pin,value);
       }
       break;

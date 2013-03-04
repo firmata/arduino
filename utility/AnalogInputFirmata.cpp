@@ -18,13 +18,16 @@
 #include <AnalogFirmata.h>
 #include <AnalogInputFirmata.h>
 
+AnalogInputFirmata *AnalogInputFirmataInstance;
+
 void reportAnalogCallback(byte analogPin, int value)
 {
-  AnalogInputFirmata.reportAnalog(analogPin,value);
+  AnalogInputFirmataInstance->reportAnalog(analogPin,value);
 }
 
-AnalogInputFirmataClass::AnalogInputFirmataClass()
+AnalogInputFirmata::AnalogInputFirmata()
 {
+  AnalogInputFirmataInstance = this;
   analogInputsToReport = 0;
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
 }
@@ -34,7 +37,7 @@ AnalogInputFirmataClass::AnalogInputFirmataClass()
  */
 //void FirmataClass::setAnalogPinReporting(byte pin, byte state) {
 //}
-void AnalogInputFirmataClass::reportAnalog(byte analogPin, int value)
+void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
 {
   if (analogPin < TOTAL_ANALOG_PINS) {
     if(value == 0) {
@@ -46,7 +49,7 @@ void AnalogInputFirmataClass::reportAnalog(byte analogPin, int value)
   // TODO: save status to EEPROM here, if changed
 }
 
-boolean AnalogInputFirmataClass::handlePinMode(byte pin, int mode)
+boolean AnalogInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_ANALOG(pin)) {
     if (mode == ANALOG) {
@@ -63,7 +66,7 @@ boolean AnalogInputFirmataClass::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void AnalogInputFirmataClass::handleCapability(byte pin)
+void AnalogInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_ANALOG(pin)) {
     Firmata.write(ANALOG);
@@ -71,7 +74,7 @@ void AnalogInputFirmataClass::handleCapability(byte pin)
   }
 }
 
-boolean AnalogInputFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+boolean AnalogInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == EXTENDED_ANALOG) {
     if (argc > 1) {
@@ -82,17 +85,17 @@ boolean AnalogInputFirmataClass::handleSysex(byte command, byte argc, byte* argv
       return true;
     }
   } else {
-    return AnalogFirmata.handleSysex(command, argc, argv);
+    return handleAnalogFirmataSysex(command, argc, argv);
   }
 }
 
-void AnalogInputFirmataClass::reset()
+void AnalogInputFirmata::reset()
 {
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
 }
 
-void AnalogInputFirmataClass::report()
+void AnalogInputFirmata::report()
 {
   byte pin,analogPin;
   /* ANALOGREAD - do all analogReads() at the configured sampling interval */
@@ -105,5 +108,3 @@ void AnalogInputFirmataClass::report()
     }
   }
 }
-
-AnalogInputFirmataClass AnalogInputFirmata;

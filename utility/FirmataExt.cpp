@@ -17,35 +17,45 @@
 #include <Firmata.h>
 #include <FirmataExt.h>
 
+FirmataExt *FirmataExtInstance;
+
 void setPinModeCallback(byte pin, int mode)
 {
-  FirmataExt.handlePinMode(pin,mode);
-}
-
-void handleSysexCallback(byte command, byte argc, byte* argv)
-{
-  FirmataExt.handleSysex(command, argc, argv);
-}
-
-FirmataExtClass::FirmataExtClass()
-{
-  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
-  Firmata.attach((byte)START_SYSEX,handleSysexCallback);
-  numCapabilities = 0;
-}
-
-void FirmataExtClass::handlePinMode(byte pin, byte mode)
-{
-  boolean known = false;
-  for (byte i=0;i<numCapabilities;i++) {
-    known |= capabilities[i]->handlePinMode(pin,mode);
-  }
-  if (!known && mode != IGNORE) {
+  if (!FirmataExtInstance->handlePinMode(pin,mode) && mode != IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
 }
 
-void FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
+void handleSysexCallback(byte command, byte argc, byte* argv)
+{
+  if (!FirmataExtInstance->handleSysex(command, argc, argv)) {
+    Firmata.sendString("Unhandled sysex command");
+  }
+}
+
+FirmataExt::FirmataExt()
+{
+  FirmataExtInstance = this;
+  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach((byte)START_SYSEX,handleSysexCallback);
+  numFeatures = 0;
+}
+
+void FirmataExt::handleCapability(byte pin)
+{
+
+}
+
+boolean FirmataExt::handlePinMode(byte pin, int mode)
+{
+  boolean known = false;
+  for (byte i=0;i<numFeatures;i++) {
+    known |= features[i]->handlePinMode(pin,mode);
+  }
+  return known;
+}
+
+boolean FirmataExt::handleSysex(byte command, byte argc, byte* argv)
 {
   switch (command) {
 
@@ -62,46 +72,44 @@ void FirmataExtClass::handleSysex(byte command, byte argc, byte* argv)
         if (pinState & 0xFF80) Firmata.write((byte)(pinState >> 7) & 0x7F);
         if (pinState & 0xC000) Firmata.write((byte)(pinState >> 14) & 0x7F);
         Firmata.write(END_SYSEX);
+        return true;
       }
     }
-    return;
+    break;
   case CAPABILITY_QUERY:
     Firmata.write(START_SYSEX);
     Firmata.write(CAPABILITY_RESPONSE);
     for (byte pin=0; pin < TOTAL_PINS; pin++) {
       if (Firmata.getPinMode(pin) != IGNORE) {
-        for (byte i=0;i<numCapabilities;i++) {
-          capabilities[i]->handleCapability(pin);
+        for (byte i=0;i<numFeatures;i++) {
+          features[i]->handleCapability(pin);
         }
       }
       Firmata.write(127);
     }
     Firmata.write(END_SYSEX);
-    return;
+    return true;
   default:
-    for (byte i=0;i<numCapabilities;i++) {
-      if (capabilities[i]->handleSysex(command,argc,argv)) {
-          return;
+    for (byte i=0;i<numFeatures;i++) {
+      if (features[i]->handleSysex(command,argc,argv)) {
+        return true;
       }
     }
-    Firmata.sendString("Unhandled sysex command");
     break;
   }
+  return false;
 }
 
-void FirmataExtClass::addFeature(FirmataFeature &capability)
+void FirmataExt::addFeature(FirmataFeature &capability)
 {
-  if (numCapabilities<MAX_FEATURES) {
-    capabilities[numCapabilities++] = &capability;
+  if (numFeatures<MAX_FEATURES) {
+    features[numFeatures++] = &capability;
   }
 }
 
-void FirmataExtClass::reset()
+void FirmataExt::reset()
 {
-  for (byte i=0;i<numCapabilities;i++) {
-    capabilities[i]->reset();
+  for (byte i=0;i<numFeatures;i++) {
+    features[i]->reset();
   }
 }
-
-FirmataExtClass FirmataExt;
-

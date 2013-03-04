@@ -22,10 +22,10 @@
 
 void digitalWriteCallback(byte port, int value);
 
-class DigitalOutputFirmataClass:public FirmataFeature
+class DigitalOutputFirmata:public FirmataFeature
 {
 public:
-  DigitalOutputFirmataClass();
+  DigitalOutputFirmata();
   void digitalWrite(byte port, int value);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte* argv);
@@ -33,7 +33,5 @@ public:
   void reset();
 private:
 };
-
-extern DigitalOutputFirmataClass DigitalOutputFirmata;
 
 #endif

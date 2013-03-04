@@ -22,17 +22,14 @@
 
 void reportAnalogCallback(byte analogPin, int value);
 
-class AnalogOutputFirmataClass:public FirmataFeature
+class AnalogOutputFirmata:public FirmataFeature
 {
 public:
-//  AnalogOutputFirmataClass();
   void handleCapability(byte pin);
   boolean handlePinMode(byte pin, int mode);
   boolean handleSysex(byte command, byte argc, byte* argv);
   void reset();
 private:
 };
-
-extern AnalogOutputFirmataClass AnalogOutputFirmata;
 
 #endif

@@ -17,22 +17,25 @@
 #include <Firmata.h>
 #include <DigitalInputFirmata.h>
 
+DigitalInputFirmata *DigitalInputFirmataInstance;
+
 void reportDigitalCallback(byte port, int value)
 {
-  DigitalInputFirmata.reportDigital(port,value);
+  DigitalInputFirmataInstance->reportDigital(port,value);
 }
 
-DigitalInputFirmataClass::DigitalInputFirmataClass()
+DigitalInputFirmata::DigitalInputFirmata()
 {
+  DigitalInputFirmataInstance = this;
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
 }
 
-boolean DigitalInputFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+boolean DigitalInputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   return false;
 }
 
-void DigitalInputFirmataClass::outputPort(byte portNumber, byte portValue, byte forceSend)
+void DigitalInputFirmata::outputPort(byte portNumber, byte portValue, byte forceSend)
 {
   // pins not configured as INPUT are cleared to zeros
   portValue = portValue & portConfigInputs[portNumber];
@@ -46,7 +49,7 @@ void DigitalInputFirmataClass::outputPort(byte portNumber, byte portValue, byte 
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
  * to the Serial output queue using Serial.print() */
-void DigitalInputFirmataClass::report(void)
+void DigitalInputFirmata::report(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
    * The compiler will apply substantial optimizations if the inputs
@@ -69,7 +72,7 @@ void DigitalInputFirmataClass::report(void)
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
 }
 
-void DigitalInputFirmataClass::reportDigital(byte port, int value)
+void DigitalInputFirmata::reportDigital(byte port, int value)
 {
   if (port < TOTAL_PORTS) {
     reportPINs[port] = (byte)value;
@@ -82,7 +85,7 @@ void DigitalInputFirmataClass::reportDigital(byte port, int value)
   // pins configured as analog
 }
 
-boolean DigitalInputFirmataClass::handlePinMode(byte pin, int mode)
+boolean DigitalInputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
@@ -97,7 +100,7 @@ boolean DigitalInputFirmataClass::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void DigitalInputFirmataClass::handleCapability(byte pin)
+void DigitalInputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write((byte)INPUT);
@@ -105,7 +108,7 @@ void DigitalInputFirmataClass::handleCapability(byte pin)
   }
 }
 
-void DigitalInputFirmataClass::reset()
+void DigitalInputFirmata::reset()
 {
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
@@ -114,4 +117,3 @@ void DigitalInputFirmataClass::reset()
   }
 }
 
-DigitalInputFirmataClass DigitalInputFirmata;

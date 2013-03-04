@@ -22,7 +22,7 @@
 
 #define MINIMUM_SAMPLING_INTERVAL 10
 
-class FirmataReportingClass:public FirmataFeature
+class FirmataReporting:public FirmataFeature
 {
 public:
   void setSamplingInterval(int interval);
@@ -38,5 +38,4 @@ private:
   int samplingInterval;          // how often to run the main loop (in ms)
 };
 
-extern FirmataReportingClass FirmataReporting;
 #endif

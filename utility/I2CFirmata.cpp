@@ -18,14 +18,14 @@
 #include <Wire.h>
 #include <I2CFirmata.h>
 
-I2CFirmataClass::I2CFirmataClass()
+I2CFirmata::I2CFirmata()
 {
   isI2CEnabled = false;
   queryIndex = -1;
   i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 }
 
-void I2CFirmataClass::readAndReportData(byte address, int theRegister, byte numBytes) {
+void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
@@ -72,7 +72,7 @@ void I2CFirmataClass::readAndReportData(byte address, int theRegister, byte numB
   Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
 }
 
-boolean I2CFirmataClass::handlePinMode(byte pin, int mode)
+boolean I2CFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
     if (mode==I2C) {
@@ -89,7 +89,7 @@ boolean I2CFirmataClass::handlePinMode(byte pin, int mode)
   return false;
 }
 
-void I2CFirmataClass::handleCapability(byte pin)
+void I2CFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_I2C(pin)) {
     Firmata.write(I2C);
@@ -97,7 +97,7 @@ void I2CFirmataClass::handleCapability(byte pin)
   }
 }
 
-boolean I2CFirmataClass::handleSysex(byte command, byte argc, byte *argv)
+boolean I2CFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   switch(command) {
   case I2C_REQUEST:
@@ -111,7 +111,7 @@ boolean I2CFirmataClass::handleSysex(byte command, byte argc, byte *argv)
   return false;
 }
 
-void I2CFirmataClass::handleI2CRequest(byte argc, byte *argv)
+void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
 {
   byte mode;
   byte slaveAddress;
@@ -196,7 +196,7 @@ void I2CFirmataClass::handleI2CRequest(byte argc, byte *argv)
   }
 }
 
-boolean I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
+boolean I2CFirmata::handleI2CConfig(byte argc, byte *argv)
 {
   unsigned int delayTime = (argv[0] + (argv[1] << 7));
 
@@ -210,7 +210,7 @@ boolean I2CFirmataClass::handleI2CConfig(byte argc, byte *argv)
   return isI2CEnabled;
 }
 
-boolean I2CFirmataClass::enableI2CPins()
+boolean I2CFirmata::enableI2CPins()
 {
   byte i;
   // is there a faster way to do this? would probaby require importing
@@ -233,7 +233,7 @@ boolean I2CFirmataClass::enableI2CPins()
 }
 
 /* disable the i2c pins so they can be used for other functions */
-void I2CFirmataClass::disableI2CPins()
+void I2CFirmata::disableI2CPins()
 {
   isI2CEnabled = false;
   // disable read continuous mode for all devices
@@ -242,14 +242,14 @@ void I2CFirmataClass::disableI2CPins()
   // Wire.end();
 }
 
-void I2CFirmataClass::reset()
+void I2CFirmata::reset()
 {
   if (isI2CEnabled) {
     disableI2CPins();
   }
 }
 
-void I2CFirmataClass::report()
+void I2CFirmata::report()
 {
   // report i2c data for all device with read continuous mode enabled
   if (queryIndex > -1) {
@@ -258,5 +258,3 @@ void I2CFirmataClass::report()
     }
   }
 }
-
-I2CFirmataClass I2CFirmata;

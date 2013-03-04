@@ -18,22 +18,22 @@
 #include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
 
-void FirmataReportingClass::setSamplingInterval(int interval)
+void FirmataReporting::setSamplingInterval(int interval)
 {
   samplingInterval = interval;
 }
 
-void FirmataReportingClass::handleCapability(byte pin)
+void FirmataReporting::handleCapability(byte pin)
 {
 
 }
 
-boolean FirmataReportingClass::handlePinMode(byte pin, int mode)
+boolean FirmataReporting::handlePinMode(byte pin, int mode)
 {
   return false;
 }
 
-boolean FirmataReportingClass::handleSysex(byte command, byte argc, byte* argv)
+boolean FirmataReporting::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == SAMPLING_INTERVAL) {
     if (argc > 1) {
@@ -47,7 +47,7 @@ boolean FirmataReportingClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-boolean FirmataReportingClass::elapsed()
+boolean FirmataReporting::elapsed()
 {
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
@@ -59,10 +59,8 @@ boolean FirmataReportingClass::elapsed()
   return false;
 }
 
-void FirmataReportingClass::reset()
+void FirmataReporting::reset()
 {
   previousMillis = millis();
   samplingInterval = 19;
 }
-
-FirmataReportingClass FirmataReporting;

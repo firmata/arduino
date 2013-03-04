@@ -22,10 +22,10 @@
 
 void reportDigitalCallback(byte port, int value);
 
-class DigitalInputFirmataClass:public FirmataFeature
+class DigitalInputFirmata:public FirmataFeature
 {
 public:
-  DigitalInputFirmataClass();
+  DigitalInputFirmata();
   void reportDigital(byte port, int value);
   void report(void);
   void handleCapability(byte pin);
@@ -42,7 +42,5 @@ private:
   byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
   void outputPort(byte portNumber, byte portValue, byte forceSend);
 };
-
-extern DigitalInputFirmataClass DigitalInputFirmata;
 
 #endif

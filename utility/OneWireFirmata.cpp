@@ -14,16 +14,16 @@
 #include <OneWireFirmata.h>
 #include <Encoder7Bit.h>
 
-boolean OneWireFirmataClass::handlePinMode(byte pin, int mode)
+boolean OneWireFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin) && mode == ONEWIRE) {
-    OneWireFirmata.oneWireConfig(pin,ONEWIRE_POWER);
+    oneWireConfig(pin,ONEWIRE_POWER);
     return true;
   }
   return false;
 }
 
-void OneWireFirmataClass::handleCapability(byte pin)
+void OneWireFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(ONEWIRE);
@@ -31,7 +31,7 @@ void OneWireFirmataClass::handleCapability(byte pin)
   }
 }
 
-void OneWireFirmataClass::oneWireConfig(byte pin, boolean power)
+void OneWireFirmata::oneWireConfig(byte pin, boolean power)
 {
   ow_device_info *info = &pinOneWire[pin];
   if (info->device==NULL) {
@@ -43,7 +43,7 @@ void OneWireFirmataClass::oneWireConfig(byte pin, boolean power)
   info->power = power;
 }
 
-boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
+boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if (command == ONEWIRE_DATA) {
     if (argc>1) {
@@ -158,7 +158,7 @@ boolean OneWireFirmataClass::handleSysex(byte command, byte argc, byte* argv)
   return false;
 }
 
-void OneWireFirmataClass::reset()
+void OneWireFirmata::reset()
 {
   for (int i=0;i<TOTAL_PINS;i++) {
     if (pinOneWire[i].device) {
@@ -171,6 +171,3 @@ void OneWireFirmataClass::reset()
     pinOneWire[i].power=false;
   }
 }
-
-OneWireFirmataClass OneWireFirmata;
-
