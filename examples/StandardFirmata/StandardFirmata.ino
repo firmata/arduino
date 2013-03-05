@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
  */
 
 #include <Servo.h>
+#include "FirmataStepper.h"
 #include <Wire.h>
 #include <Firmata.h>
 
@@ -45,6 +46,11 @@
 #define MINIMUM_SAMPLING_INTERVAL 10
 
 #define REGISTER_NOT_SPECIFIED -1
+
+#define MAX_STEPPERS 6 // arbitrary value... may need to adjust
+#define STEPPER 0x72  // move this to Firmata.h
+#define STEPPER_CONFIG 0
+#define STEPPER_STEP 1
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -83,6 +89,9 @@ signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
+FirmataStepper *stepper[MAX_STEPPERS];
+byte numSteppers = 0;
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
@@ -440,6 +449,59 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
     }
     break;
+
+  case STEPPER:
+    byte stepCommand, deviceNum, directionPin, stepPin, stepDirection, interface;
+    byte motorPin3, motorPin4;
+    unsigned int stepsPerRev;
+    long numSteps;
+    int stepSpeed;
+    int accel;
+    int decel;
+
+    stepCommand = argv[0];
+    deviceNum = argv[1];
+
+    if (stepCommand == STEPPER_CONFIG) {
+      numSteppers++; // assumes steppers are added in order 0 -> 5
+      interface = argv[2];
+      stepsPerRev = (argv[3] + (argv[4] << 7));
+
+      directionPin = argv[5]; // or motorPin1 for TWO_WIRE or FOUR_WIRE interface
+      stepPin = argv[6]; // // or motorPin2 for TWO_WIRE or FOUR_WIRE interface
+      setPinModeCallback(directionPin, OUTPUT);
+      setPinModeCallback(stepPin, OUTPUT);      
+
+      if (interface == FirmataStepper::DRIVER || interface == FirmataStepper::TWO_WIRE) {
+        stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin);
+      } else if (interface == FirmataStepper::FOUR_WIRE) {
+        motorPin3 = argv[7];
+        motorPin4 = argv[8];          
+        setPinModeCallback(motorPin3, OUTPUT);
+        setPinModeCallback(motorPin4, OUTPUT);
+        stepper[deviceNum] = new FirmataStepper(interface, stepsPerRev, directionPin, stepPin, motorPin3, motorPin4);
+      }
+    }
+    else if (stepCommand == STEPPER_STEP) {
+      stepDirection = argv[2];
+      numSteps = (long)argv[3] | ((long)argv[4] << 7) | ((long)argv[5] << 14);
+      stepSpeed = (argv[6] + (argv[7] << 7));
+
+      if (stepDirection == 0) { numSteps *= -1; }
+
+      if (argc >= 8 && argc < 12) {
+        // num steps, speed (0.01*rad/sec)
+        stepper[deviceNum]->setStepsToMove(numSteps, stepSpeed); 
+      } else if (argc == 12) {
+        accel = (argv[8] + (argv[9] << 7));
+        decel = (argv[10] + (argv[11] << 7));
+        // num steps, speed (0.01*rad/sec), accel (0.01*rad/sec^2), decel (0.01*rad/sec^2)
+        stepper[deviceNum]->setStepsToMove(numSteps, stepSpeed, accel, decel);
+      }
+    }     
+
+    break;
+
   case SAMPLING_INTERVAL:
     if (argc > 1) {
       samplingInterval = argv[0] + (argv[1] << 7);
@@ -488,7 +550,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     Firmata.write(END_SYSEX);
     break;
-  case PIN_STATE_QUERY:
+  case PIN_STATE_QUERY:    
     if (argc > 0) {
       byte pin=argv[0];
       Firmata.write(START_SYSEX);
@@ -571,6 +633,8 @@ void systemResetCallback()
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
 
+  numSteppers = 0;
+
   /* send digital inputs to set the initial state on the host computer,
    * since once in the loop(), this firmware will only send on change */
   /*
@@ -617,6 +681,21 @@ void loop()
   /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
    * 60 bytes. use a timer to sending an event character every 4 ms to
    * trigger the buffer to dump. */
+
+  // if one or more stepper motors are used, update their position
+  if (numSteppers > 0) {
+    for (int i=0; i<numSteppers; i++) {
+      bool done = stepper[i]->update();
+
+      // send command to client application when stepping is complete
+      if (done) {
+        Serial.write(START_SYSEX);
+        Serial.write(STEPPER);
+        Serial.write(i);
+        Serial.write(END_SYSEX);
+      }
+    }
+  }
 
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
