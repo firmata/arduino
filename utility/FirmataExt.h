@@ -22,6 +22,10 @@
 
 #define MAX_FEATURES TOTAL_PIN_MODES+1
 
+void handleSetPinModeCallback(byte pin, int mode);
+
+void handleSysexCallback(byte command, byte argc, byte* argv);
+
 class FirmataExt:public FirmataFeature
 {
 public:

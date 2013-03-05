@@ -19,7 +19,7 @@
 
 DigitalOutputFirmata *DigitalOutputFirmataInstance;
 
-void digitalWriteCallback(byte port, int value)
+void digitalOutputWriteCallback(byte port, int value)
 {
   DigitalOutputFirmataInstance->digitalWrite(port,value);
 }
@@ -27,7 +27,7 @@ void digitalWriteCallback(byte port, int value)
 DigitalOutputFirmata::DigitalOutputFirmata()
 {
   DigitalOutputFirmataInstance = this;
-  Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
+  Firmata.attach(DIGITAL_MESSAGE, digitalOutputWriteCallback);
 }
 
 boolean DigitalOutputFirmata::handleSysex(byte command, byte argc, byte* argv)

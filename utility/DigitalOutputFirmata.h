@@ -20,7 +20,7 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
-void digitalWriteCallback(byte port, int value);
+void digitalOutputWriteCallback(byte port, int value);
 
 class DigitalOutputFirmata:public FirmataFeature
 {

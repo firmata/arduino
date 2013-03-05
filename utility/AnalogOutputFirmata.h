@@ -20,8 +20,6 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
-void reportAnalogCallback(byte analogPin, int value);
-
 class AnalogOutputFirmata:public FirmataFeature
 {
 public:

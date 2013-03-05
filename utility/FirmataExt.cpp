@@ -19,7 +19,7 @@
 
 FirmataExt *FirmataExtInstance;
 
-void setPinModeCallback(byte pin, int mode)
+void handleSetPinModeCallback(byte pin, int mode)
 {
   if (!FirmataExtInstance->handlePinMode(pin,mode) && mode != IGNORE) {
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
@@ -36,7 +36,7 @@ void handleSysexCallback(byte command, byte argc, byte* argv)
 FirmataExt::FirmataExt()
 {
   FirmataExtInstance = this;
-  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach(SET_PIN_MODE, handleSetPinModeCallback);
   Firmata.attach((byte)START_SYSEX,handleSysexCallback);
   numFeatures = 0;
 }

@@ -21,7 +21,7 @@
 #include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
 
-void reportAnalogCallback(byte analogPin, int value);
+void reportAnalogInputCallback(byte analogPin, int value);
 
 class AnalogInputFirmata:public FirmataFeature
 {

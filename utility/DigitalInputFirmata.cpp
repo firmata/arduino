@@ -19,7 +19,7 @@
 
 DigitalInputFirmata *DigitalInputFirmataInstance;
 
-void reportDigitalCallback(byte port, int value)
+void reportDigitalInputCallback(byte port, int value)
 {
   DigitalInputFirmataInstance->reportDigital(port,value);
 }
@@ -27,7 +27,7 @@ void reportDigitalCallback(byte port, int value)
 DigitalInputFirmata::DigitalInputFirmata()
 {
   DigitalInputFirmataInstance = this;
-  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+  Firmata.attach(REPORT_DIGITAL, reportDigitalInputCallback);
 }
 
 boolean DigitalInputFirmata::handleSysex(byte command, byte argc, byte* argv)

@@ -20,7 +20,7 @@
 
 AnalogInputFirmata *AnalogInputFirmataInstance;
 
-void reportAnalogCallback(byte analogPin, int value)
+void reportAnalogInputCallback(byte analogPin, int value)
 {
   AnalogInputFirmataInstance->reportAnalog(analogPin,value);
 }
@@ -29,7 +29,7 @@ AnalogInputFirmata::AnalogInputFirmata()
 {
   AnalogInputFirmataInstance = this;
   analogInputsToReport = 0;
-  Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
+  Firmata.attach(REPORT_ANALOG, reportAnalogInputCallback);
 }
 
 // -----------------------------------------------------------------------------

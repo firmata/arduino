@@ -20,7 +20,7 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
-void reportDigitalCallback(byte port, int value);
+void reportDigitalInputCallback(byte port, int value);
 
 class DigitalInputFirmata:public FirmataFeature
 {
