@@ -1,3 +1,18 @@
+/*
+ * FILE: DHT11Firmata.ino
+ * VERSION: 0.1
+ * PURPOSE: DHT11 Temperature & Humidity Sensor feature library for Firmata
+ * LICENSE: GPL v3 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * to be used with Firmata
+ * URL: http://www.firmata.org
+ * uses DHT11lib
+ * URL: http://arduino.cc/playground/Main/DHT11Lib
+ *
+ * HISTORY:
+ * Norbert Truchsess - Original version
+ */
+
 #include <Firmata.h>
 #include <utility/FirmataExt.h>
 #include <utility/FirmataReporting.h>
