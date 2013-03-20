@@ -50,7 +50,8 @@ void DHT11Feature::report()
       case DHTLIB_OK:
         Firmata.write(START_SYSEX);
         Firmata.write(RESERVED_COMMAND);
-        Firmata.write(7);
+        Firmata.write(DHT11_PIN);
+        Firmata.write(i);
         Firmata.write(DHT11.temperature & 0x7F);
         Firmata.write(DHT11.temperature >> 7 & 0x7F);
         Firmata.write(DHT11.humidity & 0x7F);
