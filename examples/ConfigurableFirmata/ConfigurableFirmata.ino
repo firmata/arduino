@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   
   This library is free software; you can redistribute it and/or
@@ -26,11 +26,17 @@
   formatted using the GNU C formatting and indenting
 */
 
-/* 
- * TODO: use Program Control to load stored profiles from EEPROM
- */
 
 #include <Firmata.h>
+
+// To configure, save this file to your working directory so you can edit it
+// then comment out the include and declaration for any features that you do 
+// not need on lines 41 - 71.
+
+// Also note that the current compile size for an Arduino Uno with all of the
+// following features enabled is about 22.4k. If you are using an older Arduino
+// or other microcontroller with less memory you will not be able to include
+// all of the following feature classes.
 
 #include <utility/DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
@@ -48,10 +54,6 @@ AnalogOutputFirmata analogOutput;
 #include <utility/ServoFirmata.h>
 ServoFirmata servo;
 
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-#include <utility/AnalogWrite.h>
-#endif
-
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/I2CFirmata.h>
 I2CFirmata i2c;
@@ -68,6 +70,12 @@ FirmataExt firmataExt;
 #include <utility/FirmataScheduler.h>
 FirmataScheduler scheduler;
 
+
+// dependencies. Do not comment out the following lines
+#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
+#include <utility/AnalogWrite.h>
+#endif
+
 #if defined AnalogInputFirmata_h || defined I2CFirmata_h
 #include <utility/FirmataReporting.h>
 FirmataReporting reporting;
@@ -80,7 +88,6 @@ FirmataReporting reporting;
 void systemResetCallback()
 {
   // initialize a defalt state
-  // TODO: option to load config from EEPROM instead of default
 
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
@@ -162,11 +169,11 @@ void loop()
 {
 #ifdef DigitalInputFirmata_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
-   * FTDI buffer using Serial.print()  */
+   * stream buffer using Firmata.write()  */
   digitalInput.report();
 #endif
 
-  /* SERIALREAD - processing incoming messagse as soon as possible, while still
+  /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while(Firmata.available()) {
     Firmata.processInput();
@@ -180,7 +187,7 @@ runtasks: scheduler.runTasks();
 #endif
   }
 
-  /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
+  /* SEND STREAM WRITE BUFFER - TO DO: make sure that the stream buffer doesn't go over
    * 60 bytes. use a timer to sending an event character every 4 ms to
    * trigger the buffer to dump. */
 
