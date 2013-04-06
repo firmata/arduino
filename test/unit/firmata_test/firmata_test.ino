@@ -23,17 +23,17 @@ void assertStringsEqual(Test& __test__, const char* expected, const String& actu
   }
 }
 
-test(setFirmwareVersionDoesNotLeakMemory)
-{
-  Firmata.setFirmwareVersion(1, 0);
-  int initialMemory = freeMemory();
+// test(setFirmwareVersionDoesNotLeakMemory)
+// {
+//   Firmata.setFirmwareVersion(1, 0);
+//   int initialMemory = freeMemory();
 
-  Firmata.setFirmwareVersion(1, 0);
+//   Firmata.setFirmwareVersion(1, 0);
 
-  assertEquals(0, initialMemory - freeMemory());
+//   assertEquals(0, initialMemory - freeMemory());
   
-  Firmata.unsetFirmwareVersion();
-}
+//   Firmata.unsetFirmwareVersion();
+// }
 
 test(beginPrintsVersion)
 {
