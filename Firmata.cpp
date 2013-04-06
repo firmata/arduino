@@ -50,7 +50,8 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
-  systemReset();
+  //systemReset();
+  init();
 }
 
 //******************************************************************************
@@ -412,10 +413,8 @@ void FirmataClass::detach(byte command)
 //* Private Methods
 //******************************************************************************
 
-
-
-// resets the system state upon a SYSTEM_RESET message from the host software
-void FirmataClass::systemReset(void)
+// initialize to a known state
+void FirmataClass::init(void)
 {
   byte i;
 
@@ -429,11 +428,17 @@ void FirmataClass::systemReset(void)
 
   parsingSysex = false;
   sysexBytesRead = 0;
+}
+
+// resets the system state upon a SYSTEM_RESET message from the host software
+void FirmataClass::systemReset(void)
+{
+  init();
 
   if(currentSystemResetCallback)
     (*currentSystemResetCallback)();
 
-  //flush(); //TODO uncomment when Firmata is a subclass of HardwareSerial
+  FirmataSerial->flush();
 }
 
 
