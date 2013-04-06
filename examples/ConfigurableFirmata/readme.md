@@ -11,12 +11,11 @@ limited memory (< 16k) are not able to support all features simultaneously.
 
 1. Copy ConfigurableFirmata to you Arduino sketch folder (or other working 
 directory).
-2. In the ConfigurableFirmata.ino sketch, on lines 35 - 74, comment out the 
-feature class declaration and associated included for any features you do not 
-need for your project. *In the future this process will be greatly simplified 
-by running a GUI app that enables you to simply select the features you need 
-for your project.*
-3. Save the sketch under a new name for your project.
+2. In the ConfigurableFirmata.ino sketch, on lines 41 - 71, comment out the 
+feature class declaration and associated include for any features you do not 
+need for your project. For example, if you don't need servo then comment out 
+lines 53 - 55.
+3. Save the sketch under a new name for your project, compile and upload.
 
 
 ##TO DO
