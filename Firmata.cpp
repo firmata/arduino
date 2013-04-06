@@ -49,7 +49,8 @@ void FirmataClass::endSysex(void)
 FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
-  init();
+  firmwareVersionVector = 0;
+  systemReset();
 }
 
 //******************************************************************************
@@ -67,13 +68,13 @@ void FirmataClass::begin(long speed)
 {
   Serial.begin(speed);
   begin(Serial);
+  blinkVersion();  
 }
 
 /* begin method for overriding default stream */
 void FirmataClass::begin(Stream &s)
 {
   FirmataSerial = &s;
-  blinkVersion();
   printVersion();
   printFirmwareVersion();
 }
@@ -89,9 +90,9 @@ void FirmataClass::blinkVersion(void)
 {
   // flash the pin with the protocol version
   pinMode(VERSION_BLINK_PIN,OUTPUT);
-  pin13strobe(FIRMATA_MAJOR_VERSION, 40, 210);
+  strobeBlinkPin(FIRMATA_MAJOR_VERSION, 40, 210);
   delay(250);
-  pin13strobe(FIRMATA_MINOR_VERSION, 40, 210);
+  strobeBlinkPin(FIRMATA_MINOR_VERSION, 40, 210);
   delay(125);
 }
 
@@ -126,6 +127,9 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
     firmwareVersionCount = strlen(name) + 2;
     filename = name;
   }
+
+  free(firmwareVersionVector);
+
   firmwareVersionVector = (byte *) malloc(firmwareVersionCount);
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
@@ -136,6 +140,14 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   //             (char)major, (char)minor, firmwareVersionVector);
 }
 
+// this method is only used for unit testing
+// void FirmataClass::unsetFirmwareVersion()
+// {
+//   firmwareVersionCount = 0;
+//   free(firmwareVersionVector); 
+//   firmwareVersionVector = 0;
+// }
+ 
 //------------------------------------------------------------------------------
 // Serial Receive Handling
 
@@ -179,7 +191,7 @@ void FirmataClass::processInput(void)
   int command;
     
   // TODO make sure it handles -1 properly
-
+  
   if (parsingSysex) {
     if(inputData == END_SYSEX) {
       //stop sysex byte      
@@ -400,8 +412,10 @@ void FirmataClass::detach(byte command)
 //* Private Methods
 //******************************************************************************
 
-// initialize to a known state
-void FirmataClass::init(void)
+
+
+// resets the system state upon a SYSTEM_RESET message from the host software
+void FirmataClass::systemReset(void)
 {
   byte i;
 
@@ -414,24 +428,19 @@ void FirmataClass::init(void)
   }
 
   parsingSysex = false;
-  sysexBytesRead = 0;  
-}
-
-// resets the system state upon a SYSTEM_RESET message from the host software
-void FirmataClass::systemReset(void)
-{
-  init();
+  sysexBytesRead = 0;
 
   if(currentSystemResetCallback)
     (*currentSystemResetCallback)();
 
-  FirmataSerial->flush();
+  //flush(); //TODO uncomment when Firmata is a subclass of HardwareSerial
 }
+
 
 
 // =============================================================================
 // used for flashing the pin for the version number
-void FirmataClass::pin13strobe(int count, int onInterval, int offInterval) 
+void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval) 
 {
   byte i;
   pinMode(VERSION_BLINK_PIN, OUTPUT);
