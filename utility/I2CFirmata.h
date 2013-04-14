@@ -21,7 +21,6 @@
 #include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
 
-// move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
 #define I2C_READ_CONTINUOUSLY B00010000
