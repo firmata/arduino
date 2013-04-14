@@ -27,7 +27,6 @@
 class ShiftFirmata:public FirmataFeature
 {
 public:
-  //ShiftFirmata();
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte* argv);
