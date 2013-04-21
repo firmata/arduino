@@ -62,13 +62,12 @@ boolean ShiftFirmata::handleSysex(byte command, byte argc, byte* argv)
       argv += 5;
       Encoder7Bit.readBinary(numBytes, argv, argv); // decode in place
 
+      digitalWrite(latchPin, LOW);
       for (int i = 0; i < numBytes; i++) {
         shiftOutData = argv[i];
-
-        digitalWrite(latchPin, LOW);
         shiftOut(dataPin, clockPin, bitOrder, shiftOutData);
-        digitalWrite(latchPin, HIGH);
       }
+      digitalWrite(latchPin, HIGH);
 
     } else if (shiftCommand == SHIFT_IN) {
       numBytes = argv[5];
