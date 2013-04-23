@@ -109,6 +109,8 @@ public:
     void sendString(const char* string);
     void sendString(byte command, const char* string);
     void sendSysex(byte command, byte bytec, byte* bytev);
+	byte* deserializeBitStream(byte* src, byte length, byte fromBit = 7, byte toBit = 8);
+    void sendSysexBinary(byte command, byte bytec, byte* bytev, byte subcmdc = 0, byte* subcmdv = 0);
     void write(byte c);
 /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
@@ -147,6 +149,7 @@ private:
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
     void endSysex(void);
+	byte* serializeBitStream(const byte* src, byte* length, byte fromBit = 8, byte toBit = 7);
 };
 
 extern FirmataClass Firmata;
