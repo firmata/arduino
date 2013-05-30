@@ -20,7 +20,7 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES 64 // max number of data bytes in non-Sysex messages
@@ -105,6 +105,7 @@ public:
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+    //void unsetFirmwareVersion(); // only used for unit test
 /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -166,7 +167,7 @@ private:
 /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
-    void pin13strobe(int count, int onInterval, int offInterval);
+    void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
     void endSysex(void);

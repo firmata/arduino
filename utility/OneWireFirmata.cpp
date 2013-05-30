@@ -100,6 +100,7 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
             if (subcommand & ONEWIRE_WITHDATA_REQUEST_BITS) {
               int numBytes=num7BitOutbytes(argc-2);
               int numReadBytes=0;
+              int correlationId;
               argv+=2;
               Encoder7Bit.readBinary(numBytes,argv,argv); //decode inplace
 
@@ -114,10 +115,12 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
               }
 
               if (subcommand & ONEWIRE_READ_REQUEST_BIT) {
-                if (numBytes<2) break;
+                if (numBytes<4) break;
                 numReadBytes = *((int*)argv);
                 argv+=2;
-                numBytes-=2;
+                correlationId = *((int*)argv);
+                argv+=2;
+                numBytes-=4;
               }
 
               if (subcommand & ONEWIRE_DELAY_REQUEST_BIT) {
@@ -139,9 +142,8 @@ boolean OneWireFirmata::handleSysex(byte command, byte argc, byte* argv)
                 Firmata.write(ONEWIRE_READ_REPLY);
                 Firmata.write(pin);
                 Encoder7Bit.startBinaryWrite();
-                for (int i=0;i<8;i++) {
-                  Encoder7Bit.writeBinary(info->addr[i]);
-                }
+                Encoder7Bit.writeBinary(correlationId&0xFF);
+                Encoder7Bit.writeBinary((correlationId>>8)&0xFF);
                 for (int i=0;i<numReadBytes;i++) {
                   Encoder7Bit.writeBinary(device->read());
                 }
