@@ -105,6 +105,7 @@ public:
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+    //void unsetFirmwareVersion(); // only used for unit test
 /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -166,7 +167,7 @@ private:
 /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
-    void pin13strobe(int count, int onInterval, int offInterval);
+    void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
     void startSysex(void);
     void endSysex(void);
