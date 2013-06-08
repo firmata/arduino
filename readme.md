@@ -39,6 +39,8 @@ Most of the time you will be interacting with arduino with a client library on t
 * Flash/AS3
   * [http://funnel.cc]
   * [http://code.google.com/p/as3glue/]
+* PHP
+  * [https://bitbucket.org/ThomasWeinert/carica-firmata]
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
