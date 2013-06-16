@@ -128,8 +128,6 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 
 void StepperFirmata::reset()
 {
-  // initialize a defalt state
-  // TODO: option to load config from EEPROM instead of default
   for (byte i=0;i<MAX_STEPPERS;i++) {
     if (stepper[i]) {
       free(stepper[i]);

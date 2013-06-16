@@ -20,9 +20,31 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
-#define SHIFT_OUT 1
-#define SHIFT_IN 2
-#define SHIFT_IN_REPLY 3
+// shift commands
+#define SHIFT_CONFIG 1
+#define SHIFT_OUT 2
+#define SHIFT_IN 3
+#define SHIFT_IN_REPLY 4
+
+// shift types
+// SHIFT_OUT 2
+// SHIFT_IN 3
+#define LATCH_L_SHIFT_OUT 4
+#define SHIFT_OUT_LATCH_H 5
+#define LATCH_L_SHIFT_OUT_LATCH_H 6
+#define TOGGLE_LOAD_SHIFT_IN 7
+
+#define SHIFT_COMMAND_MASK  B00000111
+#define SHIFT_TYPE_MASK  B00111000
+
+struct shift_info
+{
+  byte type;
+  byte dataPin;
+  byte clockPin;
+  byte bitOrder;
+  byte latchPin; // optional
+};
 
 class ShiftFirmata:public FirmataFeature
 {
@@ -34,6 +56,7 @@ public:
 
 private:
   byte shift_In(byte dataPin, byte clockPin, byte bitOrder);
+  shift_info pinShift[TOTAL_PINS];
 };
 
 #endif

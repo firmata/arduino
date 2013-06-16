@@ -20,11 +20,32 @@
 
 boolean ShiftFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_DIGITAL(pin)) {
-    if (mode == SHIFT) {
-      // pin modes for data and clock pins need to be set separately
-      return true;
+  shift_info *info = &pinShift[pin];
+  if (IS_PIN_DIGITAL(pin) && mode == SHIFT) {
+
+    pinMode(PIN_TO_DIGITAL(info->clockPin), OUTPUT);
+    if (info->latchPin) {
+      pinMode(PIN_TO_DIGITAL(info->latchPin), OUTPUT);
     }
+
+    switch (info->type) {
+      case SHIFT_OUT:
+      case LATCH_L_SHIFT_OUT:
+      case SHIFT_OUT_LATCH_H:
+      case LATCH_L_SHIFT_OUT_LATCH_H:
+        pinMode(PIN_TO_DIGITAL(info->dataPin), OUTPUT);
+        break;
+      case SHIFT_IN:
+      case TOGGLE_LOAD_SHIFT_IN:
+        pinMode(PIN_TO_DIGITAL(info->dataPin), INPUT);
+        break;
+      default:
+        // this would be an error
+        break;
+    }
+
+    return true;
+
   }
   return false;
 }
@@ -40,42 +61,76 @@ void ShiftFirmata::handleCapability(byte pin)
 boolean ShiftFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if(command == SHIFT_DATA) {
-    byte shiftCommand, dataPin, clockPin, bitOrder;
-    byte shiftInData, shiftOutData;
+    byte shiftCommand, dataPin, shiftType, shiftInData, shiftOutData;
     int numBytes;
 
     numBytes = 0;
 
-    shiftCommand = argv[0];
+    shiftCommand = argv[0] & SHIFT_COMMAND_MASK;
     dataPin = argv[1];
-    clockPin = argv[2];
-    bitOrder = argv[4];
 
-    // set only the data pin to SHIFT
-    if (Firmata.getPinMode(dataPin != SHIFT)) {
-      Firmata.setPinMode(dataPin, SHIFT);
-    }
+    shift_info *info = &pinShift[dataPin];
 
-    if (shiftCommand == SHIFT_OUT) {
-      numBytes = num7BitOutbytes(argc - 4); // data starts after bitOrder (argv[4])
-      argv += 4;
-      Encoder7Bit.readBinary(numBytes, argv, argv); // decode in place
+    /********************* SHIFT CONFIG *********************/
+    if (shiftCommand == SHIFT_CONFIG) {
+      shiftType = argv[0] & SHIFT_TYPE_MASK;
 
-      for (int i = 0; i < numBytes; i++) {
-        shiftOutData = argv[i];
-        shiftOut(dataPin, clockPin, bitOrder, shiftOutData);
+      info->type = shiftType;
+      info->dataPin = dataPin;
+      info->clockPin = argv[2];
+      info->bitOrder = argv[3];
+
+      if (shiftType > 3 && shiftType < 8) {
+        info->latchPin = argv[4];
+      } else {
+        info->latchPin = NULL;
       }
 
+      Firmata.setPinMode(dataPin, SHIFT);
+
+    /********************* SHIFT OUT *********************/
+    } else if (shiftCommand == SHIFT_OUT) {
+      numBytes = num7BitOutbytes(argc - 2); // data starts after dataPin
+      argv += 2;
+      Encoder7Bit.readBinary(numBytes, argv, argv); // decode in place
+
+      if (info->latchPin && info->type > 3) {
+        switch (info->type) {
+          case LATCH_L_SHIFT_OUT:
+          case LATCH_L_SHIFT_OUT_LATCH_H:
+            digitalWrite(info->latchPin, LOW);
+            break;
+        }
+      }
+      for (int i = 0; i < numBytes; i++) {
+        shiftOutData = argv[i];
+        shiftOut(dataPin, info->clockPin, info->bitOrder, shiftOutData);
+      }
+      if (info->latchPin && info->type > 3) {
+        switch (info->type) {
+          case SHIFT_OUT_LATCH_H:
+          case LATCH_L_SHIFT_OUT_LATCH_H:
+            digitalWrite(info->latchPin, HIGH);
+            break;
+        }
+      }
+
+    /********************* SHIFT IN *********************/  
     } else if (shiftCommand == SHIFT_IN) {
-      numBytes = argv[4];
+      numBytes = argv[2];
+
+      if (info->latchPin && info->type == TOGGLE_LOAD_SHIFT_IN) {
+        digitalWrite(info->latchPin, LOW);
+        digitalWrite(info->latchPin, HIGH);
+      }
 
       Firmata.write(START_SYSEX);
       Firmata.write(SHIFT_DATA);
       Firmata.write(SHIFT_IN_REPLY);
-      Firmata.write(dataPin);
+      Firmata.write(info->dataPin);
       Encoder7Bit.startBinaryWrite();
       for (int i = 0; i < numBytes; i++) {
-        shiftInData = shift_In(dataPin, clockPin, bitOrder);
+        shiftInData = shift_In(info->dataPin, info->clockPin, info->bitOrder);
         Encoder7Bit.writeBinary(shiftInData);
       }
       Encoder7Bit.endBinaryWrite();
@@ -106,5 +161,9 @@ byte ShiftFirmata::shift_In(byte dataPin, byte clockPin, byte bitOrder)
 
 void ShiftFirmata::reset()
 {
-  // to do: any necessary cleanup
+  for (int i = 0; i < TOTAL_PINS; i++) {
+    if (pinShift[i].dataPin) {
+      //free(pinShift[i]).dataPin;
+    }
+  }
 }
