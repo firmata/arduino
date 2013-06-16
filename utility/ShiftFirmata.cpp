@@ -22,7 +22,7 @@ boolean ShiftFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == SHIFT) {
-      // pin modes for data, clock and latch pins need to be set separately
+      // pin modes for data and clock pins need to be set separately
       return true;
     }
   }
@@ -40,7 +40,7 @@ void ShiftFirmata::handleCapability(byte pin)
 boolean ShiftFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
   if(command == SHIFT_DATA) {
-    byte shiftCommand, dataPin, clockPin, latchPin, bitOrder;
+    byte shiftCommand, dataPin, clockPin, bitOrder;
     byte shiftInData, shiftOutData;
     int numBytes;
 
@@ -49,7 +49,6 @@ boolean ShiftFirmata::handleSysex(byte command, byte argc, byte* argv)
     shiftCommand = argv[0];
     dataPin = argv[1];
     clockPin = argv[2];
-    latchPin = argv[3];
     bitOrder = argv[4];
 
     // set only the data pin to SHIFT
@@ -58,28 +57,24 @@ boolean ShiftFirmata::handleSysex(byte command, byte argc, byte* argv)
     }
 
     if (shiftCommand == SHIFT_OUT) {
-      numBytes = num7BitOutbytes(argc - 5); // data starts after bitOrder (argv[4])
-      argv += 5;
+      numBytes = num7BitOutbytes(argc - 4); // data starts after bitOrder (argv[4])
+      argv += 4;
       Encoder7Bit.readBinary(numBytes, argv, argv); // decode in place
 
-      digitalWrite(latchPin, LOW);
       for (int i = 0; i < numBytes; i++) {
         shiftOutData = argv[i];
         shiftOut(dataPin, clockPin, bitOrder, shiftOutData);
       }
-      digitalWrite(latchPin, HIGH);
 
     } else if (shiftCommand == SHIFT_IN) {
-      numBytes = argv[5];
+      numBytes = argv[4];
+
       Firmata.write(START_SYSEX);
       Firmata.write(SHIFT_DATA);
       Firmata.write(SHIFT_IN_REPLY);
       Firmata.write(dataPin);
       Encoder7Bit.startBinaryWrite();
       for (int i = 0; i < numBytes; i++) {
-        digitalWrite(latchPin, LOW); // load bits
-        digitalWrite(latchPin, HIGH);
-
         shiftInData = shift_In(dataPin, clockPin, bitOrder);
         Encoder7Bit.writeBinary(shiftInData);
       }
