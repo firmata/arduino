@@ -192,6 +192,13 @@ void FirmataClass::processSysexMessage(void)
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataSerial->read(); // this is 'int' to handle -1 when no data
+  if (inputData!=-1) {
+    parse(inputData);
+  }
+}
+
+void FirmataClass::parse(byte inputData)
+{
   int command;
     
   // TODO make sure it handles -1 properly
@@ -227,8 +234,7 @@ void FirmataClass::processInput(void)
         }
         break;
       case SET_PIN_MODE:
-        if(currentPinModeCallback)
-          (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
+        setPinMode(storedInputData[1], storedInputData[0]);
         break;
       case REPORT_ANALOG:
         if(currentReportAnalogCallback)
@@ -276,6 +282,10 @@ void FirmataClass::processInput(void)
   }
 }
 
+boolean FirmataClass::isParsingMessage(void)
+{
+  return (waitForData>0 || parsingSysex);
+}
 //------------------------------------------------------------------------------
 // Serial Send Handling
 
@@ -393,6 +403,46 @@ void FirmataClass::detach(byte command)
     attach(command, (callbackFunction)NULL);
   }
 }
+
+void FirmataClass::attachDelayTask(delayTaskCallbackFunction newFunction)
+{
+  delayTaskCallback = newFunction;
+}
+
+void FirmataClass::delayTask(long delay)
+{
+  if (delayTaskCallback) {
+    (*delayTaskCallback)(delay);
+  }
+}
+
+/* access pin config */
+byte FirmataClass::getPinMode(byte pin)
+{
+  return pinConfig[pin];
+}
+
+void FirmataClass::setPinMode(byte pin, byte config)
+{
+  if (pinConfig[pin]==IGNORE)
+    return;
+  pinState[pin] = 0;
+  pinConfig[pin] = config;
+  if(currentPinModeCallback)
+    (*currentPinModeCallback)(pin, config);
+}
+
+/* access pin state */
+int FirmataClass::getPinState(byte pin)
+{
+  return pinState[pin];
+}
+
+void FirmataClass::setPinState(byte pin, int state)
+{
+  pinState[pin] = state;
+}
+
 
 // sysex callbacks
 /*
