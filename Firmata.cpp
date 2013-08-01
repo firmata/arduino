@@ -181,6 +181,8 @@ void FirmataClass::processSysexMessage(void)
         j++;
       }
       (*currentStringCallback)(buffer);
+      free(buffer);
+      buffer = 0;
     }
     break;
   default:
