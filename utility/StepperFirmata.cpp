@@ -131,7 +131,7 @@ void StepperFirmata::reset()
   for (byte i=0;i<MAX_STEPPERS;i++) {
     if (stepper[i]) {
       free(stepper[i]);
-      stepper[i] = NULL;
+      stepper[i] = 0;
     }
   }
   numSteppers=0;
