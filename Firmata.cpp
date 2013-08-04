@@ -170,17 +170,24 @@ void FirmataClass::processSysexMessage(void)
   case STRING_DATA:
     if(currentStringCallback) {
       byte bufferLength = (sysexBytesRead - 1) / 2;
-      char *buffer = (char*)malloc(bufferLength * sizeof(char));
       byte i = 1;
       byte j = 0;
       while(j < bufferLength) {
-        buffer[j] = (char)storedInputData[i];
+        // The string length will only be at most half the size of the
+        // stored input buffer so we can decode the string within the buffer.
+        storedInputData[j] = storedInputData[i];
         i++;
-        buffer[j] += (char)(storedInputData[i] << 7);
+        storedInputData[j] += (storedInputData[i] << 7);
         i++;
         j++;
       }
-      (*currentStringCallback)(buffer);
+      // Make sure string is null terminated. This may be the case for data
+      // coming from client libraries in languages that don't null terminate
+      // strings.
+      if (storedInputData[j-1] != '\0') {
+        storedInputData[j] = '\0';
+      }
+      (*currentStringCallback)((char*)&storedInputData[0]);
     }
     break;
   default:
