@@ -46,10 +46,6 @@ void processMessage(const byte* message, size_t length)
   }
 }
 
-void stringCallback(char *myString)
-{
-}
-
 byte _digitalPort;
 int _digitalPortValue;
 void writeToDigitalPort(byte port, int value)
@@ -128,21 +124,6 @@ test(specifiedDigitalWritePort)
   processMessage(message, 3);
 
   assertEqual(1, _digitalPort);
-}
-
-test(stringDataDoesNotLeakMemory)
-{
-  Firmata.attach(STRING_DATA, stringCallback);
-  
-  int initialMemory = freeMemory();
-
-  byte stringMsg[] = { START_SYSEX, STRING_DATA, 72, 0, 101, 0, 108, 0, 108, 0, 111, 0, END_SYSEX };
-  
-  for (int i = 0; i < 4; i++) {
-    processMessage(stringMsg, 13);
-  }
-
-  assertEqual(0, initialMemory - freeMemory());
 }
 
 test(setFirmwareVersionDoesNotLeakMemory)
