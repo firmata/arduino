@@ -28,18 +28,18 @@ extern "C" {
 
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
-  FirmataSerial->write(value & B01111111); // LSB
-  FirmataSerial->write(value >> 7 & B01111111); // MSB
+  FirmataStream->write(value & B01111111); // LSB
+  FirmataStream->write(value >> 7 & B01111111); // MSB
 }
 
 void FirmataClass::startSysex(void)
 {
-  FirmataSerial->write(START_SYSEX);
+  FirmataStream->write(START_SYSEX);
 }
 
 void FirmataClass::endSysex(void)
 {
-  FirmataSerial->write(END_SYSEX);
+  FirmataStream->write(END_SYSEX);
 }
 
 //******************************************************************************
@@ -67,7 +67,7 @@ void FirmataClass::begin(void)
 void FirmataClass::begin(long speed)
 {
   Serial.begin(speed);
-  FirmataSerial = &Serial;
+  FirmataStream = &Serial;
   blinkVersion();
   printVersion();
   printFirmwareVersion();
@@ -76,7 +76,7 @@ void FirmataClass::begin(long speed)
 /* begin method for overriding default stream */
 void FirmataClass::begin(Stream &s)
 {
-  FirmataSerial = &s;
+  FirmataStream = &s;
   // do not call blinkVersion() here because some hardware such as the
   // Ethernet shield use pin 13
   printVersion();
@@ -85,9 +85,9 @@ void FirmataClass::begin(Stream &s)
 
 // output the protocol version message to the serial port
 void FirmataClass::printVersion(void) {
-  FirmataSerial->write(REPORT_VERSION);
-  FirmataSerial->write(FIRMATA_MAJOR_VERSION);
-  FirmataSerial->write(FIRMATA_MINOR_VERSION);
+  FirmataStream->write(REPORT_VERSION);
+  FirmataStream->write(FIRMATA_MAJOR_VERSION);
+  FirmataStream->write(FIRMATA_MINOR_VERSION);
 }
 
 void FirmataClass::blinkVersion(void)
@@ -106,9 +106,9 @@ void FirmataClass::printFirmwareVersion(void)
 
   if(firmwareVersionCount) { // make sure that the name has been set before reporting
     startSysex();
-    FirmataSerial->write(REPORT_FIRMWARE);
-    FirmataSerial->write(firmwareVersionVector[0]); // major version number
-    FirmataSerial->write(firmwareVersionVector[1]); // minor version number
+    FirmataStream->write(REPORT_FIRMWARE);
+    FirmataStream->write(firmwareVersionVector[0]); // major version number
+    FirmataStream->write(firmwareVersionVector[1]); // minor version number
     for(i=2; i<firmwareVersionCount; ++i) {
       sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
     }
@@ -159,7 +159,7 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
 
 int FirmataClass::available(void)
 {
-  return FirmataSerial->available();
+  return FirmataStream->available();
 }
 
 
@@ -200,7 +200,7 @@ void FirmataClass::processSysexMessage(void)
 
 void FirmataClass::processInput(void)
 {
-  int inputData = FirmataSerial->read(); // this is 'int' to handle -1 when no data
+  int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
   int command;
     
   // TODO make sure it handles -1 properly
@@ -292,7 +292,7 @@ void FirmataClass::processInput(void)
 void FirmataClass::sendAnalog(byte pin, int value) 
 {
   // pin can only be 0-15, so chop higher bits
-  FirmataSerial->write(ANALOG_MESSAGE | (pin & 0xF));
+  FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
   sendValueAsTwo7bitBytes(value);
 }
 
@@ -323,9 +323,9 @@ void FirmataClass::sendDigital(byte pin, int value)
 // send an 8-bit port in a single digital message (protocol v2)
 void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 {
-  FirmataSerial->write(DIGITAL_MESSAGE | (portNumber & 0xF));
-  FirmataSerial->write((byte)portData % 128); // Tx bits 0-6
-  FirmataSerial->write(portData >> 7);  // Tx bits 7-13
+  FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
+  FirmataStream->write((byte)portData % 128); // Tx bits 0-6
+  FirmataStream->write(portData >> 7);  // Tx bits 7-13
 }
 
 
@@ -333,7 +333,7 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte* bytev)
 {
   byte i;
   startSysex();
-  FirmataSerial->write(command);
+  FirmataStream->write(command);
   for(i=0; i<bytec; i++) {
     sendValueAsTwo7bitBytes(bytev[i]);        
   }
@@ -355,7 +355,7 @@ void FirmataClass::sendString(const char* string)
 // expose the write method
 void FirmataClass::write(byte c)
 {
-  FirmataSerial->write(c);
+  FirmataStream->write(c);
 }
 
 
