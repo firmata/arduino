@@ -98,7 +98,6 @@ public:
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
-    //void unsetFirmwareVersion(); // only used for unit test
 /* serial receive handling */
     int available(void);
     void processInput(void);

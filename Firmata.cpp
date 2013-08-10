@@ -153,14 +153,6 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   firmwareVersionVector[1] = minor;
   strncpy((char*)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
 }
-
-// this method is only used for unit testing
-// void FirmataClass::unsetFirmwareVersion()
-// {
-//   firmwareVersionCount = 0;
-//   free(firmwareVersionVector); 
-//   firmwareVersionVector = 0;
-// }
  
 //------------------------------------------------------------------------------
 // Serial Receive Handling
