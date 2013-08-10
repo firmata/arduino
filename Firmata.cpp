@@ -50,7 +50,6 @@ FirmataClass::FirmataClass()
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
-  //systemReset();
   init();
 }
 
