@@ -468,5 +468,3 @@ void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
 
 // make one instance for the user to use
 FirmataClass Firmata;
-
-
