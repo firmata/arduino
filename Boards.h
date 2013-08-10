@@ -400,6 +400,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 		PORTC = (PORTC & maskC) | valC;
 		sei();
 	}
+    return 1;
 #else
 	byte pin=port*8;
 	if ((bitmask & 0x01)) digitalWrite(PIN_TO_DIGITAL(pin+0), (value & 0x01));
@@ -410,6 +411,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 	if ((bitmask & 0x20)) digitalWrite(PIN_TO_DIGITAL(pin+5), (value & 0x20));
 	if ((bitmask & 0x40)) digitalWrite(PIN_TO_DIGITAL(pin+6), (value & 0x40));
 	if ((bitmask & 0x80)) digitalWrite(PIN_TO_DIGITAL(pin+7), (value & 0x80));
+    return 1;
 #endif
 }
 
