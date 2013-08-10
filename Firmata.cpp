@@ -446,7 +446,7 @@ void FirmataClass::systemReset(void)
   if(currentSystemResetCallback)
     (*currentSystemResetCallback)();
 
-  //flush(); //TODO uncomment when Firmata is a subclass of HardwareSerial
+  //FirmataSerial->flush(); // TO DO test this
 }
 
 
