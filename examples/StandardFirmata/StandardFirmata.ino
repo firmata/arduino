@@ -383,7 +383,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       query[queryIndex].bytes = argv[4] + (argv[5] << 7);
       break;
     case I2C_STOP_READING:
-	  byte queryIndexToSkip;      
+      byte queryIndexToSkip;      
       // if read continuous mode is enabled for only 1 i2c device, disable
       // read continuous reporting for that device
       if (queryIndex <= 0) {
@@ -393,7 +393,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // determine which device to stop reading and remove it's data from
         // the array, shifiting other array data to fill the space
         for (byte i = 0; i < queryIndex + 1; i++) {
-          if (query[i].addr = slaveAddress) {
+          if (query[i].addr == slaveAddress) {
             queryIndexToSkip = i;
             break;
           }
@@ -496,9 +496,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
         Firmata.write((byte)pinConfig[pin]);
-	Firmata.write((byte)pinState[pin] & 0x7F);
-	if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-	if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+  Firmata.write((byte)pinState[pin] & 0x7F);
+  if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
+  if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
       }
       Firmata.write(END_SYSEX);
     }
@@ -550,11 +550,11 @@ void systemResetCallback()
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
   if (isI2CEnabled) {
-  	disableI2CPins();
+    disableI2CPins();
   }
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
-    portConfigInputs[i] = 0;	// until activated
+    portConfigInputs[i] = 0;  // until activated
     previousPINs[i] = 0;
   }
   // pins with analog capability default to analog input
