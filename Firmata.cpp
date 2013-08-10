@@ -118,30 +118,40 @@ void FirmataClass::printFirmwareVersion(void)
 
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
-  const char *filename;
-  char *extension;
+  const char *firmwareName;
+  const char *extension;
 
   // parse out ".cpp" and "applet/" that comes from using __FILE__
   extension = strstr(name, ".cpp");
-  filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
-  // add two bytes for version numbers
-  if(extension && filename) {
-    firmwareVersionCount = extension - filename + 2;
-  } else {
-    firmwareVersionCount = strlen(name) + 2;
-    filename = name;
+  firmwareName = strrchr(name, '/');
+
+  if (!firmwareName) {
+    // windows
+    firmwareName = strrchr(name, '\\');
+  }
+  if (!firmwareName) {
+    // user passed firmware name
+    firmwareName = name;
+  }
+  else {
+    firmwareName ++;
   }
 
+  if (!extension) {
+    firmwareVersionCount = strlen(firmwareName) + 2;
+  }
+  else {
+    firmwareVersionCount = extension - firmwareName + 2;
+  }
+    
+  // in case anyone calls setFirmwareNameAndVersion more than once
   free(firmwareVersionVector);
 
   firmwareVersionVector = (byte *) malloc(firmwareVersionCount);
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
   firmwareVersionVector[1] = minor;
-  strncpy((char*)firmwareVersionVector + 2, filename, firmwareVersionCount - 2);
-  // alas, no snprintf on Arduino
-  //    snprintf(firmwareVersionVector, MAX_DATA_BYTES, "%c%c%s", 
-  //             (char)major, (char)minor, firmwareVersionVector);
+  strncpy((char*)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
 }
 
 // this method is only used for unit testing
