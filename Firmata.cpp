@@ -445,8 +445,6 @@ void FirmataClass::systemReset(void)
 
   if(currentSystemResetCallback)
     (*currentSystemResetCallback)();
-
-  //FirmataSerial->flush(); // TO DO test this
 }
 
 
