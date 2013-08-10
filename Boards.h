@@ -338,7 +338,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #endif
 
 // as long this is not defined for all boards:
-#ifndef IS_PIN_SPI(p)
+#ifndef IS_PIN_SPI
 #define IS_PIN_SPI(p)           0
 #endif
 
