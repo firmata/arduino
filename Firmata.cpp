@@ -1,5 +1,5 @@
 /*
-  Firmata.cpp - Firmata library
+  Firmata.cpp - Firmata library v2.4.0 - 2013-08-09
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -68,14 +68,18 @@ void FirmataClass::begin(void)
 void FirmataClass::begin(long speed)
 {
   Serial.begin(speed);
-  begin(Serial);
-  blinkVersion();  
+  FirmataSerial = &Serial;
+  blinkVersion();
+  printVersion();
+  printFirmwareVersion();
 }
 
 /* begin method for overriding default stream */
 void FirmataClass::begin(Stream &s)
 {
   FirmataSerial = &s;
+  // do not call blinkVersion() here because some hardware such as the
+  // Ethernet shield use pin 13
   printVersion();
   printFirmwareVersion();
 }
@@ -115,39 +119,41 @@ void FirmataClass::printFirmwareVersion(void)
 
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
-  const char *filename;
-  char *extension;
+  const char *firmwareName;
+  const char *extension;
 
   // parse out ".cpp" and "applet/" that comes from using __FILE__
   extension = strstr(name, ".cpp");
-  filename = strrchr(name, '/') + 1; //points to slash, +1 gets to start of filename
-  // add two bytes for version numbers
-  if(extension && filename) {
-    firmwareVersionCount = extension - filename + 2;
-  } else {
-    firmwareVersionCount = strlen(name) + 2;
-    filename = name;
+  firmwareName = strrchr(name, '/');
+
+  if (!firmwareName) {
+    // windows
+    firmwareName = strrchr(name, '\\');
+  }
+  if (!firmwareName) {
+    // user passed firmware name
+    firmwareName = name;
+  }
+  else {
+    firmwareName ++;
   }
 
+  if (!extension) {
+    firmwareVersionCount = strlen(firmwareName) + 2;
+  }
+  else {
+    firmwareVersionCount = extension - firmwareName + 2;
+  }
+    
+  // in case anyone calls setFirmwareNameAndVersion more than once
   free(firmwareVersionVector);
 
   firmwareVersionVector = (byte *) malloc(firmwareVersionCount);
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
   firmwareVersionVector[1] = minor;
-  strncpy((char*)firmwareVersionVector + 2, filename, firmwareVersionCount - 2);
-  // alas, no snprintf on Arduino
-  //    snprintf(firmwareVersionVector, MAX_DATA_BYTES, "%c%c%s", 
-  //             (char)major, (char)minor, firmwareVersionVector);
+  strncpy((char*)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
 }
-
-// this method is only used for unit testing
-// void FirmataClass::unsetFirmwareVersion()
-// {
-//   firmwareVersionCount = 0;
-//   free(firmwareVersionVector); 
-//   firmwareVersionVector = 0;
-// }
  
 //------------------------------------------------------------------------------
 // Serial Receive Handling
@@ -167,17 +173,24 @@ void FirmataClass::processSysexMessage(void)
   case STRING_DATA:
     if(currentStringCallback) {
       byte bufferLength = (sysexBytesRead - 1) / 2;
-      char *buffer = (char*)malloc(bufferLength * sizeof(char));
       byte i = 1;
       byte j = 0;
       while(j < bufferLength) {
-        buffer[j] = (char)storedInputData[i];
+        // The string length will only be at most half the size of the
+        // stored input buffer so we can decode the string within the buffer.
+        storedInputData[j] = storedInputData[i];
         i++;
-        buffer[j] += (char)(storedInputData[i] << 7);
+        storedInputData[j] += (storedInputData[i] << 7);
         i++;
         j++;
       }
-      (*currentStringCallback)(buffer);
+      // Make sure string is null terminated. This may be the case for data
+      // coming from client libraries in languages that don't null terminate
+      // strings.
+      if (storedInputData[j-1] != '\0') {
+        storedInputData[j] = '\0';
+      }
+      (*currentStringCallback)((char*)&storedInputData[0]);
     }
     break;
   default:
@@ -256,7 +269,7 @@ void FirmataClass::processInput(void)
       break;
     case REPORT_ANALOG:
     case REPORT_DIGITAL:
-      waitForData = 1; // two data bytes needed
+      waitForData = 1; // one data byte needed
       executeMultiByteCommand = command;
       break;
     case START_SYSEX:
@@ -438,6 +451,8 @@ void FirmataClass::systemReset(void)
   if(currentSystemResetCallback)
     (*currentSystemResetCallback)();
 
+  // for this to work, systemReset cannot be called before FirmataSerial
+  // points to a Stream
   FirmataSerial->flush();
 }
 
@@ -460,5 +475,3 @@ void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
 
 // make one instance for the user to use
 FirmataClass Firmata;
-
-

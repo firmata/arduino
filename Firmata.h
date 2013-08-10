@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library
+  Firmata.h - Firmata library v2.4.0 - 2013-08-09
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -20,10 +20,10 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   3 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  4 // for bugfix releases
+#define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
+#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES 32 // max number of data bytes in non-Sysex messages
+#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
@@ -43,6 +43,8 @@
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
+#define STEPPER_DATA            0x72 // control a stepper motor
+#define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
@@ -56,6 +58,7 @@
 #define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
 #define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
+#define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
 // these are DEPRECATED to make the naming more consistent
@@ -72,7 +75,10 @@
 #define SERVO                   0x04 // digital pin in Servo output mode
 #define SHIFT                   0x05 // shiftIn/shiftOut mode
 #define I2C                     0x06 // pin included in I2C setup
-#define TOTAL_PIN_MODES         7
+#define ONEWIRE                 0x07 // pin configured for 1-wire
+#define STEPPER                 0x08 // pin configured for stepper motor
+#define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
+#define TOTAL_PIN_MODES         10
 
 extern "C" {
 // callback function types
@@ -98,7 +104,6 @@ public:
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
-    //void unsetFirmwareVersion(); // only used for unit test
 /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -163,4 +168,3 @@ extern FirmataClass Firmata;
 #define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
 
 #endif /* Firmata_h */
-

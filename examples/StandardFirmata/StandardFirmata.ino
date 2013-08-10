@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -124,9 +124,9 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   }
   else {
     if(numBytes > Wire.available()) {
-      Firmata.sendString("I2C Read Error: Too many bytes received");
+      Firmata.sendString("I2C: Too many bytes received");
     } else {
-      Firmata.sendString("I2C Read Error: Too few bytes received"); 
+      Firmata.sendString("I2C: Too few bytes received"); 
     }
   }
 
@@ -337,7 +337,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
     if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
-      Firmata.sendString("10-bit addressing mode is not yet supported");
+      Firmata.sendString("10-bit addressing not supported");
       return;
     }
     else {
