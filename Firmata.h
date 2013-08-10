@@ -21,9 +21,9 @@
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
 #define FIRMATA_MINOR_VERSION   3 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  6 // for bugfix releases
+#define FIRMATA_BUGFIX_VERSION  7 // for bugfix releases
 
-#define MAX_DATA_BYTES 32 // max number of data bytes in non-Sysex messages
+#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
