@@ -328,7 +328,9 @@ void FirmataClass::sendDigitalPort(byte portNumber, int portData)
   FirmataStream->write(portData >> 7);  // Tx bits 7-13
 }
 
-
+// send an error code (0-127) to the client application
+// the client application should provide a string message corresponding to the
+// error code or otherwise handle the error as necessary
 void FirmataClass::sendErrorCode(byte errorCode)
 {
   startSysex();
