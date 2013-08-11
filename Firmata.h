@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library
+  Firmata.h - Firmata library v2.4.0 - 2013-08-09
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 #define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES 64 // max number of data bytes in non-Sysex messages
+#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
@@ -105,7 +105,6 @@ public:
     void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
-    //void unsetFirmwareVersion(); // only used for unit test
 /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -137,7 +136,7 @@ public:
 
 
 private:
-    Stream *FirmataSerial;
+    Stream *FirmataStream;
 /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
@@ -186,4 +185,3 @@ extern FirmataClass Firmata;
 #define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
 
 #endif /* Firmata_h */
-
