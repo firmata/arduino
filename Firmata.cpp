@@ -329,6 +329,15 @@ void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 }
 
 
+void FirmataClass::sendErrorCode(byte errorCode)
+{
+  startSysex();
+  FirmataStream->write(ERROR_CODE);
+  FirmataStream->write(errorCode & 0x7F);
+  endSysex();  
+}
+
+
 void FirmataClass::sendSysex(byte command, byte bytec, byte* bytev) 
 {
   byte i;
@@ -351,6 +360,7 @@ void FirmataClass::sendString(const char* string)
 {
   sendString(STRING_DATA, string);
 }
+
 
 // expose the write method
 void FirmataClass::write(byte c)

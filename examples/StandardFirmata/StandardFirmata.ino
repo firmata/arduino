@@ -33,7 +33,6 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-// move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
 #define I2C_READ_CONTINUOUSLY B00010000
@@ -45,6 +44,15 @@
 #define MINIMUM_SAMPLING_INTERVAL 10
 
 #define REGISTER_NOT_SPECIFIED -1
+
+// error codes (see ERROR_CODE sysex message)
+// in your client appliaction, add a lookup to the corresponding strings in the comments below
+#define UNKNOWN_PIN_MODE        0  // "Unknown pin mode."
+#define I2C_TOO_MANY_BYTES      1  // "I2C Read Error: Too many bytes received."
+#define I2C_TOO_FEW_BYTES       2  // "I2C Read Error: Too few bytes received."
+#define I2C_10BIT_ADDR          3  // "I2C Error: 10-bit addressing mode is not supported."
+#define I2C_TOO_MANY_QUERIES    4  // "I2C Error: Too many queries."
+#define SAMPINT_TOO_FEW_BYTES   5  // "Sampling Interval: Too few bytes received."
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -83,6 +91,7 @@ signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
@@ -124,9 +133,9 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   }
   else {
     if(numBytes > Wire.available()) {
-      Firmata.sendString("I2C: Too many bytes received");
+      Firmata.sendErrorCode(I2C_TOO_MANY_BYTES);
     } else {
-      Firmata.sendString("I2C: Too few bytes received"); 
+      Firmata.sendErrorCode(I2C_TOO_FEW_BYTES);
     }
   }
 
@@ -243,7 +252,7 @@ void setPinModeCallback(byte pin, int mode)
     }
     break;
   default:
-    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+    Firmata.sendErrorCode(UNKNOWN_PIN_MODE);
   }
   // TODO: save status to EEPROM here, if changed
 }
@@ -337,7 +346,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
     if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
-      Firmata.sendString("10-bit addressing not supported");
+      Firmata.sendErrorCode(I2C_10BIT_ADDR);
       return;
     }
     else {
@@ -374,7 +383,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     case I2C_READ_CONTINUOUSLY:
       if ((queryIndex + 1) >= MAX_QUERIES) {
         // too many queries, just ignore
-        Firmata.sendString("too many queries");
+        Firmata.sendErrorCode(I2C_TOO_MANY_QUERIES);
         break;
       }
       queryIndex++;
@@ -433,8 +442,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
       int maxPulse = argv[3] + (argv[4] << 7);
 
       if (IS_PIN_SERVO(pin)) {
-        if (servos[PIN_TO_SERVO(pin)].attached())
+        if (servos[PIN_TO_SERVO(pin)].attached()) {
           servos[PIN_TO_SERVO(pin)].detach();
+        }
         servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
         setPinModeCallback(pin, SERVO);
       }
@@ -447,7 +457,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         samplingInterval = MINIMUM_SAMPLING_INTERVAL;
       }      
     } else {
-      //Firmata.sendString("Not enough data");
+      Firmata.sendErrorCode(SAMPINT_TOO_FEW_BYTES);
     }
     break;
   case EXTENDED_ANALOG:
@@ -496,9 +506,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
         Firmata.write((byte)pinConfig[pin]);
-  Firmata.write((byte)pinState[pin] & 0x7F);
-  if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-  if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+        Firmata.write((byte)pinState[pin] & 0x7F);
+        if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
+        if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
       }
       Firmata.write(END_SYSEX);
     }
@@ -611,8 +621,9 @@ void loop()
 
   /* SERIALREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
-  while(Firmata.available())
+  while(Firmata.available()) {
     Firmata.processInput();
+  }
 
   /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
    * 60 bytes. use a timer to sending an event character every 4 ms to
