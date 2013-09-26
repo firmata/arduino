@@ -1,29 +1,31 @@
+
 /*
  * Firmata is a generic protocol for communicating with microcontrollers
  * from software on a host computer. It is intended to work with
  * any host computer software package.
  *
  * To download a host software package, please clink on the following link
- * to open the download page in your default browser.
+ * to open the download page in your default browser.ser
  *
  * http://firmata.org/wiki/Download
  */
 
 /*
-  Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
-  Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
-  
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
- 
-  See file LICENSE.txt for further informations on licensing terms.
+ Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+ Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
+ Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
+ Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
 
-  formatted using the GNU C formatting and indenting
-*/
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ See file LICENSE.txt for further informations on licensing terms.
+ 
+ formatted using the GNU C formatting and indenting
+ */
 
 /* 
  * TODO: use Program Control to load stored profiles from EEPROM
@@ -32,6 +34,8 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
+#include <ooPinChangeInt.h> https://code.google.com/p/arduino-pinchangeint/downloads/detail?name=pinchangeint-v2.19beta.zip
+#include <AdaEncoder.h> https://code.google.com/p/adaencoder/downloads/detail?name=adaencoder-v0.7beta.zip
 
 // move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
@@ -45,6 +49,9 @@
 #define MINIMUM_SAMPLING_INTERVAL 10
 
 #define REGISTER_NOT_SPECIFIED -1
+
+#define ENCODER_NOT_PRESENT 0
+#define ENCODER_IS_PRESENT  1
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -83,6 +90,14 @@ signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
 Servo servos[MAX_SERVOS];
+
+/* Rotary Encoder Support */
+byte  encoderMSB, encoderLSB ;     // sysex data registers
+uint8_t encoderPin1, encoderPin2 ; // user specified encoder pins
+int encoderPostion = 0;            // current position of encoder
+int8_t clicks = 0 ;                // encoder click counter
+boolean encoderPresent = false ;   // encoder installed flag
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
@@ -93,18 +108,19 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   // do not always require the register read so upon interrupt you call Wire.requestFrom()  
   if (theRegister != REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-    #if ARDUINO >= 100
+#if ARDUINO >= 100
     Wire.write((byte)theRegister);
-    #else
+#else
     Wire.send((byte)theRegister);
-    #endif
+#endif
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
       // delay is necessary for some devices such as WiiNunchuck
       delayMicroseconds(i2cReadDelayTime);
     }
-  } else {
+  } 
+  else {
     theRegister = 0;  // fill the register with a dummy value
   }
 
@@ -115,17 +131,18 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
     i2cRxData[0] = address;
     i2cRxData[1] = theRegister;
     for (int i = 0; i < numBytes; i++) {
-      #if ARDUINO >= 100
+#if ARDUINO >= 100
       i2cRxData[2 + i] = Wire.read();
-      #else
+#else
       i2cRxData[2 + i] = Wire.receive();
-      #endif
+#endif
     }
   }
   else {
     if(numBytes > Wire.available()) {
       Firmata.sendString("I2C Read Error: Too many bytes received");
-    } else {
+    } 
+    else {
       Firmata.sendString("I2C Read Error: Too few bytes received"); 
     }
   }
@@ -191,7 +208,8 @@ void setPinModeCallback(byte pin, int mode)
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
       portConfigInputs[pin/8] |= (1 << (pin & 7));
-    } else {
+    } 
+    else {
       portConfigInputs[pin/8] &= ~(1 << (pin & 7));
     }
   }
@@ -231,7 +249,7 @@ void setPinModeCallback(byte pin, int mode)
     if (IS_PIN_SERVO(pin)) {
       pinConfig[pin] = SERVO;
       if (!servos[PIN_TO_SERVO(pin)].attached()) {
-          servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin));
+        servos[PIN_TO_SERVO(pin)].attach(PIN_TO_DIGITAL(pin));
       }
     }
     break;
@@ -242,6 +260,17 @@ void setPinModeCallback(byte pin, int mode)
       pinConfig[pin] = I2C;
     }
     break;
+  case ENCODER:
+    // enable the pullups for an encoder pin
+    pinMode(pin, INPUT); 
+    digitalWrite(pin, HIGH);
+
+    // used as part of encoder sysex message
+    pinConfig[pin] = ENCODER ;
+    break ;
+  case TONE:
+    pinConfig[pin] = TONE ;
+    break ;
   default:
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
@@ -255,12 +284,12 @@ void analogWriteCallback(byte pin, int value)
     case SERVO:
       if (IS_PIN_SERVO(pin))
         servos[PIN_TO_SERVO(pin)].write(value);
-        pinState[pin] = value;
+      pinState[pin] = value;
       break;
     case PWM:
       if (IS_PIN_PWM(pin))
         analogWrite(PIN_TO_PWM(pin), value);
-        pinState[pin] = value;
+      pinState[pin] = value;
       break;
     }
   }
@@ -301,7 +330,8 @@ void reportAnalogCallback(byte analogPin, int value)
   if (analogPin < TOTAL_ANALOG_PINS) {
     if(value == 0) {
       analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
-    } else {
+    } 
+    else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
     }
   }
@@ -332,7 +362,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
   byte slaveRegister;
   byte data;
   unsigned int delayTime; 
-  
+  byte pin ;// used for tone
+  int frequency ;
+  int duration ;
+
+
   switch(command) {
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
@@ -349,11 +383,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Wire.beginTransmission(slaveAddress);
       for (byte i = 2; i < argc; i += 2) {
         data = argv[i] + (argv[i + 1] << 7);
-        #if ARDUINO >= 100
+#if ARDUINO >= 100
         Wire.write(data);
-        #else
+#else
         Wire.send(data);
-        #endif
+#endif
       }
       Wire.endTransmission();
       delayMicroseconds(70);
@@ -383,12 +417,13 @@ void sysexCallback(byte command, byte argc, byte *argv)
       query[queryIndex].bytes = argv[4] + (argv[5] << 7);
       break;
     case I2C_STOP_READING:
-	  byte queryIndexToSkip;      
+      byte queryIndexToSkip;      
       // if read continuous mode is enabled for only 1 i2c device, disable
       // read continuous reporting for that device
       if (queryIndex <= 0) {
         queryIndex = -1;        
-      } else {
+      } 
+      else {
         // if read continuous mode is enabled for multiple devices,
         // determine which device to stop reading and remove it's data from
         // the array, shifiting other array data to fill the space
@@ -398,7 +433,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             break;
           }
         }
-        
+
         for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
           if (i < MAX_QUERIES) {
             query[i].addr = query[i+1].addr;
@@ -423,7 +458,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     if (!isI2CEnabled) {
       enableI2CPins();
     }
-    
+
     break;
   case SERVO_CONFIG:
     if(argc > 4) {
@@ -446,7 +481,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
       if (samplingInterval < MINIMUM_SAMPLING_INTERVAL) {
         samplingInterval = MINIMUM_SAMPLING_INTERVAL;
       }      
-    } else {
+    } 
+    else {
       //Firmata.sendString("Not enough data");
     }
     break;
@@ -496,9 +532,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
         Firmata.write((byte)pinConfig[pin]);
-	Firmata.write((byte)pinState[pin] & 0x7F);
-	if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-	if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+        Firmata.write((byte)pinState[pin] & 0x7F);
+        if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
+        if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
       }
       Firmata.write(END_SYSEX);
     }
@@ -511,7 +547,27 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     Firmata.write(END_SYSEX);
     break;
-  }
+
+
+  case ENCODER_CONFIG:
+    // instantiate an encoder object with user's
+    // requested pin designators
+    encoderPin1 = argv[0] ;
+    encoderPin2 = argv[1] ;
+    static AdaEncoder encoder = 
+      AdaEncoder('a', encoderPin1, encoderPin2) ;
+    //thisEncoder = &encoder ;
+    encoderPresent = true ;
+    break ;   
+
+  case TONE_REQUEST:
+    pin = argv[0];
+    frequency = argv[1] + (argv[2] << 7);
+    duration = argv[3] + (argv[4] << 7);
+    tone(pin, frequency, duration) ;
+    break ; 
+
+  }     
 }
 
 void enableI2CPins()
@@ -525,20 +581,20 @@ void enableI2CPins()
       setPinModeCallback(i, I2C);
     } 
   }
-   
+
   isI2CEnabled = true; 
-  
+
   // is there enough time before the first I2C request to call this here?
   Wire.begin();
 }
 
 /* disable the i2c pins so they can be used for other functions */
 void disableI2CPins() {
-    isI2CEnabled = false;
-    // disable read continuous mode for all devices
-    queryIndex = -1;
-    // uncomment the following if or when the end() method is added to Wire library
-    // Wire.end();
+  isI2CEnabled = false;
+  // disable read continuous mode for all devices
+  queryIndex = -1;
+  // uncomment the following if or when the end() method is added to Wire library
+  // Wire.end();
 }
 
 /*==============================================================================
@@ -550,7 +606,7 @@ void systemResetCallback()
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
   if (isI2CEnabled) {
-  	disableI2CPins();
+    disableI2CPins();
   }
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
@@ -563,7 +619,8 @@ void systemResetCallback()
     if (IS_PIN_ANALOG(i)) {
       // turns off pullup, configures everything
       setPinModeCallback(i, ANALOG);
-    } else {
+    } 
+    else {
       // sets the output to 0, configures portConfigInputs
       setPinModeCallback(i, OUTPUT);
     }
@@ -575,15 +632,17 @@ void systemResetCallback()
    * since once in the loop(), this firmware will only send on change */
   /*
   TODO: this can never execute, since no pins default to digital input
-        but it will be needed when/if we support EEPROM stored config
-  for (byte i=0; i < TOTAL_PORTS; i++) {
-    outputPort(i, readPort(i, portConfigInputs[i]), true);
-  }
-  */
+   but it will be needed when/if we support EEPROM stored config
+   for (byte i=0; i < TOTAL_PORTS; i++) {
+   outputPort(i, readPort(i, portConfigInputs[i]), true);
+   }
+   */
 }
 
 void setup() 
 {
+
+
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
@@ -596,6 +655,7 @@ void setup()
 
   Firmata.begin(57600);
   systemResetCallback();  // reset to default config
+
 }
 
 /*==============================================================================
@@ -636,5 +696,37 @@ void loop()
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
       }
     }
+
+    // if encoder was installed, return its data 
+    if( encoderPresent == true)
+    {
+      // read encoder data and return it        
+      encoderMSB = 0 ;   
+      encoderLSB = 0 ;    
+      clicks = 0 ;
+
+      AdaEncoder *encoder = NULL;
+      encoder = AdaEncoder::genie() ;
+      if( encoder != NULL) {
+        clicks = encoder->query() ;   
+        if (clicks > 0) {
+          encoderPostion += clicks ;
+        }
+        if (clicks < 0) {
+          encoderPostion += clicks ;
+        }
+      }
+
+      encoderLSB = encoderPostion & 0x7f ;
+      encoderMSB = (encoderPostion >> 7) & 0x7f ;
+
+      Firmata.write(START_SYSEX);
+      Firmata.write(ENCODER_DATA) ;
+      Firmata.write(encoderPin1) ;
+      Firmata.write(encoderLSB) ;
+      Firmata.write(encoderMSB) ;
+      Firmata.write(END_SYSEX);  
+    }
   }
 }
+

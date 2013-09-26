@@ -41,6 +41,14 @@
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
+
+/* user defined commands */
+#define ENCODER_CONFIG          0x20 // create and enable encoder object
+#define ENCODER_DATA            0x21 // current encoder data
+#define TONE_REQUEST            0x22 // request a tone be played
+
+
+/* standard commands */
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
@@ -72,7 +80,9 @@
 #define SERVO                   0x04 // digital pin in Servo output mode
 #define SHIFT                   0x05 // shiftIn/shiftOut mode
 #define I2C                     0x06 // pin included in I2C setup
-#define TOTAL_PIN_MODES         7
+#define ENCODER                 0x07 // Analog pin output pin in ENCODER mode
+#define TONE                    0x08 // Any pin in TONE mode
+#define TOTAL_PIN_MODES         9
 
 extern "C" {
 // callback function types
@@ -162,4 +172,3 @@ extern FirmataClass Firmata;
 #define setFirmwareVersion(x, y)   setFirmwareNameAndVersion(__FILE__, x, y)
 
 #endif /* Firmata_h */
-
