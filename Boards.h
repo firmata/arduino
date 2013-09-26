@@ -35,7 +35,7 @@ best, but such mapping should not be assumed.  This hardware abstraction
 layer allows Firmata to implement any number of pins which map onto the
 Arduino implemented pins in almost any arbitrary way.
 
-
+ 
 General Constants:
 
 These constants provide basic information Firmata requires.
