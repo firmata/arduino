@@ -200,6 +200,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+// Arduino DUE
+#elif defined(__SAM3X8E__)
+#define TOTAL_ANALOG_PINS       12
+#define TOTAL_PINS              66 // 54 digital + 12 analog
+#define VERSION_BLINK_PIN       13
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 54 && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 2 && (p) - 2 < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // 70 71
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 54)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         ((p) - 2)
+
+
 // Teensy 1.0
 #elif defined(__AVR_AT90USB162__)
 #define TOTAL_ANALOG_PINS       0
@@ -232,6 +248,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        (((p)<22)?21-(p):11)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
+
+
+// Teensy 3.0
+#elif defined(__MK20DX128__)
+#define TOTAL_ANALOG_PINS       14
+#define TOTAL_PINS              38 // 24 digital + 10 analog-digital + 4 analog
+#define VERSION_BLINK_PIN       13
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 34)
+#define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 23) || ((p) >= 34 && (p) <= 38))
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (((p)<=23)?(p)-14:(p)-24)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) 
 
 
 // Teensy++ 1.0 and 2.0
@@ -306,7 +338,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #endif
 
 // as long this is not defined for all boards:
-#ifndef IS_PIN_SPI(p)
+#ifndef IS_PIN_SPI
 #define IS_PIN_SPI(p)           0
 #endif
 
@@ -368,6 +400,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 		PORTC = (PORTC & maskC) | valC;
 		sei();
 	}
+    return 1;
 #else
 	byte pin=port*8;
 	if ((bitmask & 0x01)) digitalWrite(PIN_TO_DIGITAL(pin+0), (value & 0x01));
@@ -378,6 +411,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 	if ((bitmask & 0x20)) digitalWrite(PIN_TO_DIGITAL(pin+5), (value & 0x20));
 	if ((bitmask & 0x40)) digitalWrite(PIN_TO_DIGITAL(pin+6), (value & 0x40));
 	if ((bitmask & 0x80)) digitalWrite(PIN_TO_DIGITAL(pin+7), (value & 0x80));
+    return 1;
 #endif
 }
 
