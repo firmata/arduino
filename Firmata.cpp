@@ -249,7 +249,7 @@ void FirmataClass::processInput(void)
         break;
       }
       executeMultiByteCommand = 0;
-    }	
+    } 
   } else {
     // remove channel info from command byte if less than 0xF0
     if(inputData < 0xF0) {
