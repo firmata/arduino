@@ -15,6 +15,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2013 Alan Yorinks. All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -37,6 +38,7 @@
 // following features enabled is about 22.4k. If you are using an older Arduino
 // or other microcontroller with less memory you will not be able to include
 // all of the following feature classes.
+
 
 #include <utility/DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
@@ -63,6 +65,12 @@ OneWireFirmata oneWire;
 
 #include <utility/StepperFirmata.h>
 StepperFirmata stepper;
+
+#include <utility/RotaryEncoderFirmata.h>
+RotaryEncoderFirmata rotaryEncoder ;
+
+#include <utility/ToneFirmata.h>
+ToneFirmata toneDevice ;
 
 #include <utility/FirmataExt.h>
 FirmataExt firmataExt;
@@ -148,6 +156,12 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef Rotary_Encoder_Firmata_h
+  firmataExt.addFeature(rotaryEncoder) ;
+#endif
+#ifdef Tone_Firmata_h
+  firmataExt.addFeature(toneDevice) ;
+#endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
@@ -205,5 +219,8 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#ifdef Rotary_Encoder_Firmata_h
+  rotaryEncoder.report();
 #endif
 }
