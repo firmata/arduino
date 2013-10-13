@@ -41,6 +41,9 @@
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
+#define ENCODER_CONFIG          0x5D // create and enable encoder object
+#define ENCODER_DATA            0x5E // current encoder data
+#define TONE_REQUEST            0x5F // request a tone be played
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
