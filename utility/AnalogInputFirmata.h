@@ -19,7 +19,7 @@
 
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
-#include <FirmataReporting.h>
+#include <utility/FirmataReporting.h>
 
 void reportAnalogInputCallback(byte analogPin, int value);
 

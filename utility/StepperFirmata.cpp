@@ -128,11 +128,10 @@ boolean StepperFirmata::handleSysex(byte command, byte argc, byte *argv)
 
 void StepperFirmata::reset()
 {
-  // initialize a defalt state
-  // TODO: option to load config from EEPROM instead of default
   for (byte i=0;i<MAX_STEPPERS;i++) {
     if (stepper[i]) {
       free(stepper[i]);
+      stepper[i] = 0;
     }
   }
   numSteppers=0;
@@ -151,7 +150,7 @@ void StepperFirmata::update()
         // send command to client application when stepping is complete
         if (done) {
           Firmata.write(START_SYSEX);
-          Firmata.write(STEPPER);
+          Firmata.write(STEPPER_DATA);
           Firmata.write(i);
           Firmata.write(END_SYSEX);
         }
