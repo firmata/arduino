@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   
   This library is free software; you can redistribute it and/or
@@ -34,6 +34,15 @@
 #include <Ethernet.h>
 #include <Firmata.h>
 
+// To configure, save this file to your working directory so you can edit it
+// then comment out the include and declaration for any features that you do 
+// not need on lines 41 - 71.
+
+// Also note that the current compile size for an Arduino Uno with all of the
+// following features enabled is about 22.4k. If you are using an older Arduino
+// or other microcontroller with less memory you will not be able to include
+// all of the following feature classes.
+
 #include <utility/DigitalInputFirmata.h>
 DigitalInputFirmata digitalInput;
 
@@ -49,10 +58,6 @@ AnalogOutputFirmata analogOutput;
 #include <Servo.h> //wouldn't load from ServoFirmata.h in Arduino1.0.3
 #include <utility/ServoFirmata.h>
 ServoFirmata servo;
-
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-#include <utility/AnalogWrite.h>
-#endif
 
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/I2CFirmata.h>
@@ -70,6 +75,12 @@ FirmataExt firmataExt;
 #include <utility/FirmataScheduler.h>
 FirmataScheduler scheduler;
 
+
+// dependencies. Do not comment out the following lines
+#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
+#include <utility/AnalogWrite.h>
+#endif
+
 #if defined AnalogInputFirmata_h || defined I2CFirmata_h
 #include <utility/FirmataReporting.h>
 FirmataReporting reporting;
@@ -82,10 +93,22 @@ FirmataReporting reporting;
 EthernetClient client;
 //replace with ethernet shield mac
 byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
+
+bool started = false;
+bool connected = false;
+unsigned long time_connected;
+
+/*==============================================================================
+ * other Ethernet configuration
+ *============================================================================*/
 //replace with ip of server you want to connect to
-byte ip[] = {192,168,1,118};
+#define ip IPAddress(192,168,0,1)
 //replace with the port that your server is listening on
-int port = 3030;
+#define port 3030;
+//replace with arduinos ip-address. Remove if Ethernet-startup should use dhcp
+#define myip IPAddress(192,168,0,6)
+//replace with reconnect-interval of your choice
+#define MILLIS_RECONNECT 5000
 
 /*==============================================================================
  * FUNCTIONS
@@ -121,18 +144,15 @@ void systemResetCallback()
  * SETUP()
  *============================================================================*/
 
-// setup EtherntClient and start firmata
-void setupEthernetClient()
-{
-  Ethernet.begin(mac);  //start ethernet 
-  delay(1000); // wait 1 second before connecting
-  client.connect(ip,port);
-  Firmata.begin(client);
-  systemResetCallback();  // reset to default config
-}
-
 void setup() 
 {
+#ifdef myip
+  Ethernet.begin(mac,myip);  //start ethernet
+#else
+  Ethernet.begin(mac);
+#endif
+  delay(1000);
+  time_connected = millis();
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
@@ -177,14 +197,20 @@ void setup()
   
   // ignore pins 0 and 1 (Serial), SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i=0; i < TOTAL_PINS; i++) { 
-    if (IS_PIN_SPI(i) || 0==i || 1==i || 4==i) {
+    if (IS_PIN_SPI(i)
+        || 0==i 
+        || 1==i 
+        || 4==i
+        // || 10==i //explicitly ignore pin 10 on MEGA as 53 is hardware-SS but Ethernet-shield uses pin 10 for SS  
+        ) {
       Firmata.setPinMode(i, IGNORE);
     }
   }
+//  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
   pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
-  setupEthernetClient();  
+  systemResetCallback();
 }
 
 /*==============================================================================
@@ -192,47 +218,71 @@ void setup()
  *============================================================================*/
 void loop() 
 {
-  if (client.connected()) {
+  if (client && client.connected())
+    {
+      if (!started)
+        {
+          Firmata.begin(client);
+          started = true;
+        }
+      time_connected = millis();
+      
 #ifdef DigitalInputFirmata_h
-    /* DIGITALREAD - as fast as possible, check for changes and output them to the
-     * FTDI buffer using Serial.print()  */
-    digitalInput.report();
+      /* DIGITALREAD - as fast as possible, check for changes and output them to the
+       * stream buffer using Firmata.write()  */
+      digitalInput.report();
 #endif
 
-    /* SERIALREAD - processing incoming messagse as soon as possible, while still
-     * checking digital inputs.  */
-    while(Firmata.available()) {
-      Firmata.processInput();
+      /* STREAMREAD - processing incoming messagse as soon as possible, while still
+       * checking digital inputs.  */
+      while(Firmata.available() > 0)
+        {
+          Firmata.processInput();
 #ifdef FirmataScheduler_h
-      if (!Firmata.isParsingMessage()) {
-        goto runtasks;
-      }
-    }
-    if (!Firmata.isParsingMessage()) {
+          if (!Firmata.isParsingMessage())
+            {
+              goto runtasks;
+            }
+        }
+      if (!Firmata.isParsingMessage())
+        {
 runtasks: scheduler.runTasks();
 #endif
-    }
+        }
 
-    /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
-     * 60 bytes. use a timer to sending an event character every 4 ms to
-     * trigger the buffer to dump. */
+      /* SEND STREAM WRITE BUFFER - TO DO: make sure that the stream buffer doesn't go over
+       * 60 bytes. use a timer to sending an event character every 4 ms to
+       * trigger the buffer to dump. */
 
 #ifdef FirmataReporting_h
-    if (reporting.elapsed()) {
+      if (reporting.elapsed())
+        {
 #ifdef AnalogInputFirmata_h
-      /* ANALOGREAD - do all analogReads() at the configured sampling interval */
-      analogInput.report();
+          /* ANALOGREAD - do all analogReads() at the configured sampling interval */
+          analogInput.report();
 #endif
 #ifdef I2CFirmata_h
-      // report i2c data for all device with read continuous mode enabled
-      i2c.report();
+          // report i2c data for all device with read continuous mode enabled
+          i2c.report();
 #endif
-    }
+        }
 #endif
 #ifdef StepperFirmata_h
-    stepper.update();
+      stepper.update();
 #endif
-  } else {
-    setupEthernetClient();
-  }
+    }
+  else
+    {
+      if ((unsigned long)(millis()-time_connected) >= MILLIS_RECONNECT)
+        {
+          if (connected)
+            {
+              client.stop();
+              delay(1000);
+            }
+          started = false;
+          connected = client.connect(ip,3030);
+          time_connected = millis();
+        }
+    }
 }
