@@ -36,7 +36,7 @@
 
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do 
-// not need on lines 41 - 71.
+// not need below.
 
 // Also note that the current compile size for an Arduino Uno with all of the
 // following features enabled is about 22.4k. If you are using an older Arduino
@@ -109,6 +109,13 @@ unsigned long time_connected;
 #define myip IPAddress(192,168,0,6)
 //replace with reconnect-interval of your choice
 #define MILLIS_RECONNECT 5000
+
+#ifndef RX
+#define RX 0
+#endif
+#ifndef TX
+#define TX 1
+#endif
 
 /*==============================================================================
  * FUNCTIONS
@@ -198,8 +205,8 @@ void setup()
   // ignore pins 0 and 1 (Serial), SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i=0; i < TOTAL_PINS; i++) { 
     if (IS_PIN_SPI(i)
-        || 0==i 
-        || 1==i 
+        || RX==i 
+        || TX==i 
         || 4==i
         // || 10==i //explicitly ignore pin 10 on MEGA as 53 is hardware-SS but Ethernet-shield uses pin 10 for SS  
         ) {
