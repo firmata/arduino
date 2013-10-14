@@ -29,26 +29,39 @@
 
 #include <Firmata.h>
 
+/* 
+ * by default Firmata uses the Serial-port (over USB) of Arduino. 
+ * ConfigurableFirmata may also comunicate over ethernet using tcp/ip. 
+ * To configure this 'Network Firmata' to use the original WIZ5100-based
+ * ethernet-shield or Arduino Ethernet uncomment the includes of 'SPI.h' and 'Ethernet.h':
+ */
+
 //#include <SPI.h>
 //#include <Ethernet.h>
+
+/*
+ * To configure 'Network Firmata' to use an ENC28J60 based board include
+ * 'UIPEthernet.h' (no SPI.h required). The UIPEthernet-library can be downloaded
+ * from: https://github.com/ntruchsess/arduino_uip
+ */
 
 //#include <UIPEthernet.h>
 
 #if defined ethernet_h || defined UIPETHERNET_H
 /*==============================================================================
- * Network configuration
+ * Network configuration for Network Firmata
  *============================================================================*/
 #define NETWORK_FIRMATA
-//replace with ip of server you want to connect to, remove if using hostname
+//replace with ip of server you want to connect to, comment out if using 'remote_host'
 #define remote_ip IPAddress(192,168,0,1)
-//replace with hostname of server you want to connect to, remove if using ip
+//replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 #define remote_host "server.local"
 //replace with the port that your server is listening on
 #define remote_port 3030
-//replace with arduinos ip-address. Remove if Ethernet-startup should use dhcp
+//replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp
 #define local_ip IPAddress(192,168,0,6)
-//replace with ethernet shield mac
-byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
+//replace with ethernet shield mac. It's mandatory every device is assigned a unique mac
+const byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
 #endif
 
 // To configure, save this file to your working directory so you can edit it
@@ -103,16 +116,12 @@ FirmataScheduler scheduler;
 FirmataReporting reporting;
 #endif
 
+// dependencies for Network Firmata. Do not comment out.
 #ifdef NETWORK_FIRMATA
 #if defined remote_ip && defined remote_host
 #error "cannot define both remote_ip and remote_host at the same time!"
 #endif
 #include <utility/EthernetClientStream.h>
-
-/*==============================================================================
- * GLOBAL VARIABLES
- *============================================================================*/
-
 EthernetClient client;
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
@@ -167,9 +176,9 @@ void setup()
 {
 #ifdef NETWORK_FIRMATA
 #ifdef local_ip
-  Ethernet.begin(mac,local_ip);  //start ethernet
+  Ethernet.begin((uint8_t*)mac,local_ip);  //start ethernet
 #else
-  Ethernet.begin(mac);
+  Ethernet.begin((uint8_t*)mac); //start ethernet using dhcp
 #endif
   delay(1000);
 #endif
@@ -215,6 +224,10 @@ void setup()
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
+  // Network Firmata communicates with Ethernet-shields over SPI. Therefor all
+  // SPI-pins must be set to IGNORE. Otherwise Firmata would break SPI-communication.
+  // add Pin 10 and configure pin 53 as output if using a MEGA with Ethernetshield.
+  // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 #ifdef NETWORK_FIRMATA
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i=0; i < TOTAL_PINS; i++) {
@@ -229,8 +242,10 @@ void setup()
   pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
+  // start up Network Firmata:
   Firmata.begin(stream);
 #else
+  // start up the default Firmata using Serial interface:
   Firmata.begin(57600);
 #endif
   systemResetCallback();  // reset to default config
