@@ -29,9 +29,31 @@
 
 #include <Firmata.h>
 
+//#include <SPI.h>
+//#include <Ethernet.h>
+
+//#include <UIPEthernet.h>
+
+#if defined ethernet_h || defined UIPETHERNET_H
+/*==============================================================================
+ * Network configuration
+ *============================================================================*/
+#define NETWORK_FIRMATA
+//replace with ip of server you want to connect to, remove if using hostname
+#define remote_ip IPAddress(192,168,0,1)
+//replace with hostname of server you want to connect to, remove if using ip
+#define remote_host "server.local"
+//replace with the port that your server is listening on
+#define remote_port 3030
+//replace with arduinos ip-address. Remove if Ethernet-startup should use dhcp
+#define local_ip IPAddress(192,168,0,6)
+//replace with ethernet shield mac
+byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
+#endif
+
 // To configure, save this file to your working directory so you can edit it
 // then comment out the include and declaration for any features that you do 
-// not need on lines 41 - 71.
+// not need below.
 
 // Also note that the current compile size for an Arduino Uno with all of the
 // following features enabled is about 22.4k. If you are using an older Arduino
@@ -81,6 +103,33 @@ FirmataScheduler scheduler;
 FirmataReporting reporting;
 #endif
 
+#ifdef NETWORK_FIRMATA
+#if defined remote_ip && defined remote_host
+#error "cannot define both remote_ip and remote_host at the same time!"
+#endif
+#include <utility/EthernetClientStream.h>
+
+/*==============================================================================
+ * GLOBAL VARIABLES
+ *============================================================================*/
+
+EthernetClient client;
+#if defined remote_ip && !defined remote_host
+#ifdef local_ip
+  EthernetClientStream stream(client,local_ip,remote_ip,NULL,remote_port);
+#else
+  EthernetClientStream stream(client,IPAddress(0,0,0,0),remote_ip,NULL,remote_port);
+#endif
+#endif
+#if !defined remote_ip && defined remote_host
+#ifdef local_ip
+  EthernetClientStream stream(client,local_ip,IPAddress(0,0,0,0),remote_host,remote_port);
+#else
+  EthernetClientStream stream(client,IPAddress(0,0,0,0),IPAddress(0,0,0,0),remote_host,remote_port);
+#endif
+#endif
+#endif
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
@@ -97,7 +146,7 @@ void systemResetCallback()
       // turns off pullup, configures everything
       Firmata.setPinMode(i, ANALOG);
 #endif
-    } else {
+    } else if (IS_PIN_DIGITAL(i)) {
 #ifdef DigitalOutputFirmata_h
       // sets the output to 0, configures portConfigInputs
       Firmata.setPinMode(i, OUTPUT);
@@ -116,6 +165,14 @@ void systemResetCallback()
 
 void setup() 
 {
+#ifdef NETWORK_FIRMATA
+#ifdef local_ip
+  Ethernet.begin(mac,local_ip);  //start ethernet
+#else
+  Ethernet.begin(mac);
+#endif
+  delay(1000);
+#endif
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
@@ -158,7 +215,24 @@ void setup()
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
+#ifdef NETWORK_FIRMATA
+  // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
+  for (byte i=0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_SPI(i)
+        || 4==i
+        // || 10==i //explicitly ignore pin 10 on MEGA as 53 is hardware-SS but Ethernet-shield uses pin 10 for SS
+        ) {
+      Firmata.setPinMode(i, IGNORE);
+    }
+  }
+//  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
+  pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
+  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+
+  Firmata.begin(stream);
+#else
   Firmata.begin(57600);
+#endif
   systemResetCallback();  // reset to default config
 }
 
@@ -205,5 +279,11 @@ runtasks: scheduler.runTasks();
 #endif
 #ifdef StepperFirmata_h
   stepper.update();
+#endif
+#if defined NETWORK_FIRMATA && !defined local_ip
+  if (Ethernet.maintain())
+    {
+      stream.maintain(Ethernet.localIP());
+    }
 #endif
 }
