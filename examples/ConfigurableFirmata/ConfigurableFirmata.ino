@@ -99,6 +99,9 @@ OneWireFirmata oneWire;
 #include <utility/StepperFirmata.h>
 StepperFirmata stepper;
 
+#include <utility/ToneFirmata.h>
+ToneFirmata toneFirmata;
+
 #include <utility/FirmataExt.h>
 FirmataExt firmataExt;
 
@@ -214,6 +217,9 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef ToneFirmata_h
+  firmataExt.addFeature(toneFirmata);
+#endif  
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
