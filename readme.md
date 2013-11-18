@@ -18,6 +18,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [https://github.com/firmata/pyduino]
   * [https://github.com/lupeke/python-firmata]
   * [https://github.com/tino/pyFirmata]
+  * [https://github.com/MrYsLab/PyMata]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
   * [https://github.com/rcaputo/rx-firmata]
@@ -41,6 +42,10 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://code.google.com/p/as3glue/]
 * PHP
   * [https://bitbucket.org/ThomasWeinert/carica-firmata]
+* Haskell
+  * [http://hackage.haskell.org/package/hArduino]
+* iOS
+  * [https://github.com/jacobrosenthal/iosfirmata]
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
