@@ -41,6 +41,7 @@
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
+#define ERROR_CODE              0x68 // send an error code (0-127)
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
@@ -111,6 +112,7 @@ public:
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
     void sendDigitalPort(byte portNumber, int portData);
+    void sendErrorCode(byte errorCode);
     void sendString(const char* string);
     void sendString(byte command, const char* string);
     void sendSysex(byte command, byte bytec, byte* bytev);
