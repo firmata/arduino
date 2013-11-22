@@ -44,6 +44,7 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
       analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
     } else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
+      Firmata.sendAnalog(analogPin, analogRead(analogPin));
     }
   }
   // TODO: save status to EEPROM here, if changed
