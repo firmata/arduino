@@ -333,7 +333,7 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte* bytev)
 
 void FirmataClass::sendString(byte command, const char* string) 
 {
-  sendSysex(command, strlen(string), (byte *)string);
+  sendSysex(command, sizeof(string), (byte *)string);
 }
 
 
