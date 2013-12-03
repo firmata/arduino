@@ -402,7 +402,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
           if (i < MAX_QUERIES) {
             query[i].addr = query[i+1].addr;
-            query[i].reg = query[i+1].addr;
+            query[i].reg = query[i+1].reg;
             query[i].bytes = query[i+1].bytes; 
           }
         }
