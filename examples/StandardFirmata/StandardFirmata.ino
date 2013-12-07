@@ -111,23 +111,21 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
 
   // check to be sure correct number of bytes were returned by slave
-  if(numBytes == Wire.available()) {
-    i2cRxData[0] = address;
-    i2cRxData[1] = theRegister;
-    for (int i = 0; i < numBytes; i++) {
-      #if ARDUINO >= 100
-      i2cRxData[2 + i] = Wire.read();
-      #else
-      i2cRxData[2 + i] = Wire.receive();
-      #endif
-    }
-  }
-  else {
-    if(numBytes > Wire.available()) {
+  if(numBytes < Wire.available()) {
       Firmata.sendString("I2C Read Error: Too many bytes received");
-    } else {
+  } else if(numBytes > Wire.available()) {
       Firmata.sendString("I2C Read Error: Too few bytes received"); 
-    }
+  }
+
+  i2cRxData[0] = address;
+  i2cRxData[1] = theRegister;
+
+  for (int i = 0; i < numBytes && Wire.available(); i++) {
+    #if ARDUINO >= 100
+    i2cRxData[2 + i] = Wire.read();
+    #else
+    i2cRxData[2 + i] = Wire.receive();
+    #endif
   }
 
   // send slave address, register and received bytes
