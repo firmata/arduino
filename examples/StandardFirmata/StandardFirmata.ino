@@ -120,7 +120,7 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   i2cRxData[0] = address;
   i2cRxData[1] = theRegister;
 
-  for (int i = 0; i < numBytes && i < Wire.available(); i++) {
+  for (int i = 0; i < numBytes && Wire.available(); i++) {
     #if ARDUINO >= 100
     i2cRxData[2 + i] = Wire.read();
     #else
