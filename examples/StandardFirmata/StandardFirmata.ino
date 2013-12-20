@@ -29,10 +29,18 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
+#define HAS_SERVO
+#define HAS_I2C
+
+#ifdef HAS_SERVO
 #include <Servo.h>
+#endif // HAS_SERVO
+#ifdef HAS_I2C
 #include <Wire.h>
+#endif // HAS_I2C
 #include <Firmata.h>
 
+#ifdef HAS_I2C
 // move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
 #define I2C_READ B00001000
@@ -42,9 +50,10 @@
 #define I2C_10BIT_ADDRESS_MODE_MASK B00100000
 
 #define MAX_QUERIES 8
-#define MINIMUM_SAMPLING_INTERVAL 10
-
 #define REGISTER_NOT_SPECIFIED -1
+#endif // HAS_I2C
+
+#define MINIMUM_SAMPLING_INTERVAL 10
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -67,6 +76,7 @@ unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
 int samplingInterval = 19;          // how often to run the main loop (in ms)
 
+#ifdef HAS_I2C
 /* i2c data */
 struct i2c_device_info {
   byte addr;
@@ -81,23 +91,28 @@ byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+#endif // HAS_I2C
 
+#ifdef HAS_SERVO
 Servo servos[MAX_SERVOS];
+#endif // HAS_SERVO
+
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
 
+#ifdef HAS_I2C
 void readAndReportData(byte address, int theRegister, byte numBytes) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()  
   if (theRegister != REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-    #if ARDUINO >= 100
+#if ARDUINO >= 100
     Wire.write((byte)theRegister);
-    #else
+#else
     Wire.send((byte)theRegister);
-    #endif
+#endif
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
@@ -115,11 +130,11 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
     i2cRxData[0] = address;
     i2cRxData[1] = theRegister;
     for (int i = 0; i < numBytes; i++) {
-      #if ARDUINO >= 100
+#if ARDUINO >= 100
       i2cRxData[2 + i] = Wire.read();
-      #else
+#else
       i2cRxData[2 + i] = Wire.receive();
-      #endif
+#endif
     }
   }
   else {
@@ -133,6 +148,7 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   // send slave address, register and received bytes
   Firmata.sendSysex(SYSEX_I2C_REPLY, numBytes + 2, i2cRxData);
 }
+#endif // HAS_I2C
 
 void outputPort(byte portNumber, byte portValue, byte forceSend)
 {
@@ -177,14 +193,18 @@ void checkDigitalInputs(void)
  */
 void setPinModeCallback(byte pin, int mode)
 {
+#ifdef HAS_I2C
   if (pinConfig[pin] == I2C && isI2CEnabled && mode != I2C) {
     // disable i2c so pins can be used for other functions
     // the following if statements should reconfigure the pins properly
     disableI2CPins();
   }
+#endif // HAS_I2C
+#ifdef HAS_SERVO
   if (IS_PIN_SERVO(pin) && mode != SERVO && servos[PIN_TO_SERVO(pin)].attached()) {
     servos[PIN_TO_SERVO(pin)].detach();
   }
+#endif // HAS_SERVO
   if (IS_PIN_ANALOG(pin)) {
     reportAnalogCallback(PIN_TO_ANALOG(pin), mode == ANALOG ? 1 : 0); // turn on/off reporting
   }
@@ -227,6 +247,7 @@ void setPinModeCallback(byte pin, int mode)
       pinConfig[pin] = PWM;
     }
     break;
+#ifdef HAS_SERVO
   case SERVO:
     if (IS_PIN_SERVO(pin)) {
       pinConfig[pin] = SERVO;
@@ -235,6 +256,8 @@ void setPinModeCallback(byte pin, int mode)
       }
     }
     break;
+#endif // HAS_SERVO
+#ifdef HAS_I2C
   case I2C:
     if (IS_PIN_I2C(pin)) {
       // mark the pin as i2c
@@ -242,6 +265,7 @@ void setPinModeCallback(byte pin, int mode)
       pinConfig[pin] = I2C;
     }
     break;
+#endif // HAS_I2C
   default:
     Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
@@ -252,11 +276,13 @@ void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
     switch(pinConfig[pin]) {
+#ifdef HAS_SERVO
     case SERVO:
       if (IS_PIN_SERVO(pin))
         servos[PIN_TO_SERVO(pin)].write(value);
         pinState[pin] = value;
       break;
+#endif // HAS_SERVO
     case PWM:
       if (IS_PIN_PWM(pin))
         analogWrite(PIN_TO_PWM(pin), value);
@@ -334,6 +360,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   unsigned int delayTime; 
   
   switch(command) {
+#ifdef HAS_I2C
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
     if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
@@ -425,6 +452,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     
     break;
+#endif // HAS_I2C
+#ifdef HAS_SERVO
   case SERVO_CONFIG:
     if(argc > 4) {
       // these vars are here for clarity, they'll optimized away by the compiler
@@ -440,6 +469,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
     }
     break;
+#endif // HAS_SERVO
   case SAMPLING_INTERVAL:
     if (argc > 1) {
       samplingInterval = argv[0] + (argv[1] << 7);
@@ -476,14 +506,18 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Firmata.write(PWM);
         Firmata.write(8);
       }
+#ifdef HAS_SERVO
       if (IS_PIN_SERVO(pin)) {
         Firmata.write(SERVO);
         Firmata.write(14);
       }
+#endif // HAS_SERVO
+#ifdef HAS_I2C
       if (IS_PIN_I2C(pin)) {
         Firmata.write(I2C);
         Firmata.write(1);  // to do: determine appropriate value 
       }
+#endif // HAS_I2C
       Firmata.write(127);
     }
     Firmata.write(END_SYSEX);
@@ -514,6 +548,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   }
 }
 
+#ifdef HAS_I2C
 void enableI2CPins()
 {
   byte i;
@@ -540,6 +575,7 @@ void disableI2CPins() {
     // uncomment the following if or when the end() method is added to Wire library
     // Wire.end();
 }
+#endif // HAS_I2C
 
 /*==============================================================================
  * SETUP()
@@ -548,10 +584,12 @@ void disableI2CPins() {
 void systemResetCallback()
 {
   // initialize a defalt state
+#ifdef HAS_I2C
   // TODO: option to load config from EEPROM instead of default
   if (isI2CEnabled) {
   	disableI2CPins();
   }
+#endif // HAS_I2C
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
     portConfigInputs[i] = 0;	// until activated
@@ -630,11 +668,13 @@ void loop()
         }
       }
     }
+#ifdef HAS_I2C
     // report i2c data for all device with read continuous mode enabled
     if (queryIndex > -1) {
       for (byte i = 0; i < queryIndex + 1; i++) {
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
       }
     }
+#endif // HAS_I2C
   }
 }
