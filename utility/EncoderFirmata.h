@@ -14,19 +14,20 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Provide encoder implementation based on Arduino external interrupts
-  see http://arduino.cc/en/Reference/attachInterrupt for more informations
+  Provide encoder feature based on PJRC implementation.
+  See http://www.pjrc.com/teensy/td_libs_Encoder.html for more informations
   
-  Usage : 
-  EncoderFirmata manages the following sysex instructions : 
+  EncoderFirmata handle sysex instructions and is able to automatically report positions.
+  
+  Sysex queries : 
     1. Attach encoder
      * ------------------
      * 0 START_SYSEX                (0xF0)
      * 1 ENCODER_DATA               (0x61)
      * 2 ENCODER_ATTACH             (0x00)
      * 3 encoder #                  ([0 - MAX_ENCODERS-1])
-     * 4 pin1 #                     (first pin) 
-     * 5 pin2 #                     (second pin)
+     * 4 pin A #                    (first pin) 
+     * 5 pin B #                    (second pin)
      * 6 END_SYSEX                  (0xF7)
      *--------------------
     2. Report encoder position
@@ -69,7 +70,7 @@
      * 4 END_SYSEX                  (0xF7)
      *--------------------
     
-    It is also able to automatically report positions
+    
 */
 
 #ifndef EncoderFirmata_h
@@ -79,6 +80,11 @@
 #include <utility/FirmataFeature.h>
 #include <FirmataReporting.h>
 
+// This optional setting causes Encoder to use more optimized code
+// safe only if 'attachInterrupt' is never used in the same time
+#define ENCODER_OPTIMIZE_INTERRUPTS 
+#include <Encoder.h>
+
 #define MAX_ENCODERS                5 // arbitrary value, may need to adjust
 #define ENCODER_ATTACH              0x00
 #define ENCODER_REPORT_POSITION     0x01
@@ -86,30 +92,30 @@
 #define ENCODER_RESET_POSITION      0x03
 #define ENCODER_REPORT_AUTO         0x04
 #define ENCODER_DETACH              0x05
+#define ENCODER_DATA                0x61 // TODO : Move to Firmata.h
+#define ENCODER_MESSAGE             0x80 // TODO : Move to Firmata.h
 
 class EncoderFirmata:public FirmataFeature
 {
 public:
   EncoderFirmata();
+  ~EncoderFirmata();
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte *argv);
   void reset();
   void report();
-  volatile signed long encoderPositions[MAX_ENCODERS];
-  byte pins[MAX_ENCODERS][2]; // [ pinA index, pinB index]
-  volatile byte pinStates[MAX_ENCODERS][2]; // [ pinA state, pinB state ]
   boolean isEncoderAttached(byte encoderNum);
 
 private:
-  void attachEncoder(byte encoderNum, byte pin1Num, byte pin2Num);
+  void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
   void detachEncoder(byte encoderNum);
   void reportEncoder(byte encoderNum);
   void reportEncodersPositions();
-  void toggleAutoReport(bool report)
-  bool attachedEncoders[MAX_ENCODERS]; 
-  bool autoReport;
+  void resetEncoderPosition(byte encoderNum);
+  void toggleAutoReport(bool report);
+  Encoder* encoders[MAX_ENCODERS]; 
+  volatile bool autoReport;
 };
-
 
 #endif
