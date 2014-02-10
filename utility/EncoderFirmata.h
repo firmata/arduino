@@ -107,9 +107,8 @@ private:
   void reportEncoder(byte encoderNum);
   void reportEncodersPositions();
   void toggleAutoReport(bool report)
-  bool _isEncoderAttached[MAX_ENCODERS]; 
-  byte numEncoders;
-  bool auto_report;
+  bool attachedEncoders[MAX_ENCODERS]; 
+  bool autoReport;
 };
 
 
