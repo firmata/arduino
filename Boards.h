@@ -149,7 +149,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     ((p) - 2)
 #define ARDUINO_PINOUT_OPTIMIZE 1
 
 
@@ -167,7 +166,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - FIRST_ANALOG_PIN)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) 
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // old Arduinos
@@ -185,7 +183,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     ((p) - 2)
 #define ARDUINO_PINOUT_OPTIMIZE 1
 
 
@@ -205,7 +202,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 54)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     ((p)==2 ? 0 : (p)==3 ? 1 : (p)==21 ? 2 : (p)==20 ? 3 : (p)==19 ? 4 : 5 )
 
 
 // Arduino DUE
@@ -218,12 +214,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 2 && (p) - 2 < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // 70 71
-#define IS_PIN_INTERRUPT(p)     IS_PIN_DIGITAL(p) // see http://arduino.cc/en/Reference/attachInterrupt
+#define IS_PIN_INTERRUPT(p)     IS_PIN_DIGITAL(p) 
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 54)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     PIN_TO_DIGITAL(p)
 
 
 // Teensy 1.0
@@ -237,12 +232,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           (0)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     (0)
+#define IS_PIN_INTERRUPT(p)     ((p) == 0 || (p) == 1 || (p) == 2 ||(p) == 3 || (p) == 4 || (p) == 6 ||(p) == 7 ||(p) == 16)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (0)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // Teensy 2.0
@@ -256,12 +250,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 5 || (p) == 6)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     (0)
+#define IS_PIN_INTERRUPT(p)     ((p) == 5 || (p) == 6 || (p) == 7 || (p) == 8)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p)<22)?21-(p):11)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // Teensy 3.0
@@ -274,12 +267,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
-#define IS_PIN_INTERRUPT(p)     (0)
+#define IS_PIN_INTERRUPT(p)     IS_PIN_DIGITAL(p)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p)<=23)?(p)-14:(p)-24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) 
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // Teensy++ 1.0 and 2.0
@@ -293,12 +285,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 0 || (p) == 1)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_INTERRUPT(p)     (0)
+#define IS_PIN_INTERRUPT(p)     ((p) == 0 || (p) == 1 || (p) == 2 ||(p) == 3 ||(p) == 18 ||(p) == 19 ||(p) == 36 ||(p) == 37)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 38)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // Leonardo
@@ -317,7 +308,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        (p) - 18
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)  
-#define PIN_TO_INTERRUPT(p)     ((p)==3 ? 0 : (p)==2 ? 1 : (p)==0 ? 2 : (p)==1 ? 3 : 4)
 
 
 // Sanguino
@@ -330,12 +320,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 16 || (p) == 17)
-#define IS_PIN_INTERRUPT(p)     (0)
+#define IS_PIN_INTERRUPT(p)     ((p)==2 || (p)==10 || (p)==11)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // Illuminato
@@ -353,7 +342,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 36)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
-#define PIN_TO_INTERRUPT(p)     (p)
 
 
 // anything else
