@@ -102,6 +102,7 @@ private:
   void attachEncoder(byte encoderNum, byte pin1Num, byte pin2Num);
   void detachEncoder(byte encoderNum);
   void reportEncoder(byte encoderNum);
+  void reportEncodersPositions();
   void toggleAutoReport(bool report)
   bool _isEncoderAttached[MAX_ENCODERS]; 
   byte numEncoders;
