@@ -72,7 +72,7 @@ Firmata protocol and the actual pin numbers used by the Arduino
 functions.  Even though such mappings are often simple, pin
 numbers received by Firmata protocol should always be used as
 input to these macros, and the result of the macro should be
-used with with any Arduino function.
+used with any Arduino function.
 
 When Firmata is extended to support a new pin mode or feature,
 a pair of macros should be added and used for all hardware
