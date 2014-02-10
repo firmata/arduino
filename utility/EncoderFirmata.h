@@ -77,13 +77,12 @@
 #define EncoderFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <FirmataReporting.h>
+#include "FirmataFeature.h"
 
 // This optional setting causes Encoder to use more optimized code
 // safe only if 'attachInterrupt' is never used in the same time
-#define ENCODER_OPTIMIZE_INTERRUPTS 
-#include <Encoder.h>
+//#define ENCODER_OPTIMIZE_INTERRUPTS 
+#include "Encoder.h"
 
 #define MAX_ENCODERS                5 // arbitrary value, may need to adjust
 #define ENCODER_ATTACH              0x00
@@ -114,7 +113,7 @@ private:
   void reportEncodersPositions();
   void resetEncoderPosition(byte encoderNum);
   void toggleAutoReport(bool report);
-  Encoder* encoders[MAX_ENCODERS]; 
+  Encoder *encoders[MAX_ENCODERS]; 
   volatile bool autoReport;
 };
 

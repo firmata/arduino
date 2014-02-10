@@ -19,16 +19,15 @@
 */
 
 #include <Firmata.h>
-#include <EncoderFirmata.h>
+#include "EncoderFirmata.h"
 // This optional setting causes Encoder to use more optimized code
 // safe only if 'attachInterrupt' is never used in the same time
 #define ENCODER_OPTIMIZE_INTERRUPTS 
-#include <Encoder.h>
+#include "Encoder.h"
 
 /* Constructor */
 EncoderFirmata::EncoderFirmata()
 {
-  encoders = new Encoder[MAX_ENCODERS];
   autoReport = false;
 }
 EncoderFirmata::~EncoderFirmata()
@@ -40,7 +39,7 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
-    Firmata.sendString("Encoder Warning: encoder#" + encoderNum + " is already attached. Operation cancelled.");
+    Firmata.sendString("Encoder Warning: encoder is already attached. Operation cancelled.");
     return;
   }
   
@@ -48,8 +47,7 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   {
     Firmata.sendString("Encoder Warning: For better performences, you should only use Interrput pins." );
   }
-  Encoder enc = new Encoder(pinANum, pinBNum);
-  encoders[encoderNum] = enc;
+  encoders[encoderNum] = new Encoder(pinANum, pinBNum);
 }
 
 void EncoderFirmata::detachEncoder(byte encoderNum)
@@ -185,8 +183,8 @@ boolean EncoderFirmata::isEncoderAttached(byte encoderNum)
 {
   if (encoderNum>=MAX_ENCODERS)
   {
-    Firmata.sendString("Encoder Error: encoder number should be between 0 and" + MAX_ENCODERS - 1 + ". Operation cancelled.");
-    return;
+    Firmata.sendString("Encoder Error: encoder number should be less than 5. Operation cancelled.");
+    return false;
   }
   if (encoders[encoderNum]) 
   {
@@ -202,7 +200,7 @@ void EncoderFirmata::resetEncoderPosition(byte encoderNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
-    encoders[encoderNum].write(0);
+    encoders[encoderNum]->write(0);
   }
 }
 
@@ -222,10 +220,10 @@ void EncoderFirmata::reportEncoder(byte encoderNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
-    signed long position = encoders[encoderNum].read();
+    signed long position = encoders[encoderNum]->read();
     long absValue = abs(position);
-    Firmata.write(ENCODER_MESSAGE | (encoder & 0xF));
-    Firmata.write(currentValue >= 0 ? 0x00 : 0x01);
+    Firmata.write(ENCODER_MESSAGE | (encoderNum & 0xF));
+    Firmata.write(position >= 0 ? 0x00 : 0x01);
     Firmata.write((byte)absValue & 0x7F);
     Firmata.write((byte)(absValue >> 7) & 0x7F);
     Firmata.write((byte)(absValue >> 14) & 0x7F);
@@ -255,17 +253,7 @@ void EncoderFirmata::reportEncodersPositions()
   byte encoder;
   for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
   {
-    if (isEncoderAttached(encoder)) 
-    {
-      signed long position = encoders[encoderNum].read();
-      long absValue = abs(position);
-      Firmata.write(encoder);
-      Firmata.write(currentValue >= 0 ? 0x00 : 0x01);
-      Firmata.write((byte)absValue & 0x7F);
-      Firmata.write((byte)(absValue >> 7) & 0x7F);
-      Firmata.write((byte)(absValue >> 14) & 0x7F);
-      Firmata.write((byte)(absValue >> 21) & 0x7F);
-    }
+    reportEncoder(encoder);
   }
   Firmata.write(END_SYSEX);
 }
