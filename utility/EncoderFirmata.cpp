@@ -28,6 +28,11 @@
 /* Constructor */
 EncoderFirmata::EncoderFirmata()
 {
+  byte encoder;
+  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
+  {
+    encoders[encoder]=NULL;
+  }
   autoReport = false;
 }
 EncoderFirmata::~EncoderFirmata()
@@ -55,6 +60,7 @@ void EncoderFirmata::detachEncoder(byte encoderNum)
   if (isEncoderAttached(encoderNum)) 
   {
     delete encoders[encoderNum];
+    encoders[encoderNum] = NULL;
   }
 }
 
@@ -124,39 +130,42 @@ boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
       attachEncoder(encoderNum, pinA, pinB);
       return true;
     }
-    else if (encoderCommand == ENCODER_REPORT_POSITION)
+    
+    
+    if (encoderCommand == ENCODER_REPORT_POSITION)
     {
       encoderNum = argv[1];
       reportEncoder(encoderNum);
       return true;
     }
-    else if (encoderCommand == ENCODER_REPORT_POSITIONS)
+    
+    if (encoderCommand == ENCODER_REPORT_POSITIONS)
     {
       reportEncodersPositions();
       return true;
     }
-    else if (encoderCommand == ENCODER_RESET_POSITION)
+    
+    if (encoderCommand == ENCODER_RESET_POSITION)
     {
       encoderNum = argv[1];
       resetEncoderPosition(encoderNum);
       return true;
     }
-    else if (encoderCommand == ENCODER_REPORT_AUTO)
+    if (encoderCommand == ENCODER_REPORT_AUTO)
     {
       enableReports = argv[1];
       toggleAutoReport(enableReports == 0x00 ? false : true);
       return true;
     }
-    else if (encoderCommand == ENCODER_DETACH)
+    
+    if (encoderCommand == ENCODER_DETACH)
     {
       encoderNum = argv[1];
       detachEncoder(encoderNum);
       return true;
     }
-    else
-    {
-      Firmata.sendString("Encoder Error: Invalid command");
-    }
+    
+    Firmata.sendString("Encoder Error: Invalid command");
   }
   return false;
 }

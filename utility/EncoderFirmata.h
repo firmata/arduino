@@ -85,14 +85,14 @@
 #include "Encoder.h"
 
 #define MAX_ENCODERS                5 // arbitrary value, may need to adjust
-#define ENCODER_ATTACH              0x00
-#define ENCODER_REPORT_POSITION     0x01
-#define ENCODER_REPORT_POSITIONS    0x02
-#define ENCODER_RESET_POSITION      0x03
-#define ENCODER_REPORT_AUTO         0x04
-#define ENCODER_DETACH              0x05
-#define ENCODER_DATA                0x61 // TODO : Move to Firmata.h
-#define ENCODER_MESSAGE             0x80 // TODO : Move to Firmata.h
+#define ENCODER_ATTACH              (0x00)
+#define ENCODER_REPORT_POSITION     (0x01)
+#define ENCODER_REPORT_POSITIONS    (0x02)
+#define ENCODER_RESET_POSITION      (0x03)
+#define ENCODER_REPORT_AUTO         (0x04)
+#define ENCODER_DETACH              (0x05)
+#define ENCODER_DATA                (0x61) // TODO : Move to Firmata.h
+#define ENCODER_MESSAGE             (0x80) // TODO : Move to Firmata.h
 
 class EncoderFirmata:public FirmataFeature
 {
@@ -104,7 +104,8 @@ public:
   boolean handleSysex(byte command, byte argc, byte *argv);
   void reset();
   void report();
-  boolean isEncoderAttached(byte encoderNum);
+  boolean isEncoderAttached(byte encoderNum); 
+  volatile bool autoReport;
 
 private:
   void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
@@ -113,8 +114,7 @@ private:
   void reportEncodersPositions();
   void resetEncoderPosition(byte encoderNum);
   void toggleAutoReport(bool report);
-  Encoder *encoders[MAX_ENCODERS]; 
-  volatile bool autoReport;
+  Encoder *encoders[MAX_ENCODERS];
 };
 
 #endif
