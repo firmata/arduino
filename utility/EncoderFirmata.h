@@ -14,6 +14,9 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
+  Provide encoder implementation based on Arduino external interrupts
+  see http://arduino.cc/en/Reference/attachInterrupt for more informations
+  
   Usage : 
   EncoderFirmata manages the following sysex instructions : 
     1. Attach encoder
