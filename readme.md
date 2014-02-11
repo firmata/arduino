@@ -49,8 +49,8 @@ Most of the time you will be interacting with arduino with a client library on t
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
-##Updating Firmata in the Arduino IDE (< Arduino 1.5)
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
+##Updating Firmata in the Arduino IDE
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application. If you are using Arduino 1.5.x, you'll need to delete the avr specific Firmata folder per the instructions in the next section.
 
 **Mac OSX**:
 
@@ -81,27 +81,26 @@ $ rm -r ~/arduino-1.x/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
 ```
 
-##Updating Firmata in the Arduino IDE (>= Arduino 1.5.2)
-As of Arduino 1.5.2 and there are separate library directories for the sam and
-avr architectures. To update Firmata in Arduino 1.5.2 or higher, follow the 
-instructions above for pre Arduino 1.5 versions but update the path as follows:
+##Updating Firmata in the Arduino 1.5.0, 1.5.1 or 1.5.2 IDE
+Follow the instructions above to copy Firmata to the libraries directory. However
+you will also need to delete the version of Firmata that is included in the avr
+platform specific libraries directory. You'll find it in the following locations
+depending on your OS. Delete the Firmata folder. Beginning with Arduino 1.5.3 this
+step will no longer be necessary.
 
 **Mac OSX**:
 ```
 /Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/avr/libraries/Firmata
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/sam/libraries/Firmata
 ```
 
 **Windows**:
 ```
 /Program\ Files/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-/Program\ Files/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
 ```
 
 **Linux**
 ```
 ~/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-~/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
 ```
 
 <a name="contributing" />
