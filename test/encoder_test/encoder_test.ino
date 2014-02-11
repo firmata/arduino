@@ -22,136 +22,167 @@ void setup()
 }
 
 test(attachEncoder)
-{
-  int initial_memory = freeMemory();
-  
-  EncoderFirmata *encoder = new EncoderFirmata();
+{  
+  EncoderFirmata encoder;
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
   
-  assertFalse(encoder->isEncoderAttached(encoderNum));
+  assertFalse(encoder.isEncoderAttached(encoderNum));
   
-  encoder->attachEncoder(encoderNum, pin1, pin2);
+  encoder.attachEncoder(encoderNum, pin1, pin2);
 
-  assertTrue(encoder->isEncoderAttached(encoderNum));
+  assertTrue(encoder.isEncoderAttached(encoderNum));
+}
+
+test(handleAttachEncoderMessage)
+{  
+  assertTestPass(attachEncoder);
+  EncoderFirmata encoder;
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
   
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  assertFalse(encoder.isEncoderAttached(encoderNum));
+  byte message[]={ENCODER_ATTACH, encoderNum, pin1, pin2};
+  encoder.handleSysex(ENCODER_DATA, 4, message);
+
+  assertTrue(encoder.isEncoderAttached(encoderNum));
 }
 
 test(detachEncoder)
 {
-  assertTestPass(attachEncoder);
-  int initial_memory = freeMemory();
-  
-  EncoderFirmata *encoder = new EncoderFirmata();
+  EncoderFirmata encoder;
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
-  encoder->attachEncoder(encoderNum, pin1, pin2);
+  encoder.attachEncoder(encoderNum, pin1, pin2);
 
-  encoder->detachEncoder(encoderNum);
-  assertFalse(encoder->isEncoderAttached(encoderNum));
-  
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  encoder.detachEncoder(encoderNum);
+  assertFalse(encoder.isEncoderAttached(encoderNum));
 }
+
+test(handeDetachEncoderMessage)
+{
+  
+  EncoderFirmata encoder;
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  encoder.attachEncoder(encoderNum, pin1, pin2);
+
+  byte message[]={ENCODER_DETACH, encoderNum};
+  encoder.handleSysex(ENCODER_DATA, 2, message);
+  assertFalse(encoder.isEncoderAttached(encoderNum));
+}
+
 
 test(handlePinModes)
 {
-  int initial_memory = freeMemory();
+  EncoderFirmata encoder;
   
-  EncoderFirmata *encoder = new EncoderFirmata();
-  
-  assertTrue(encoder->handlePinMode(2, INPUT));  // 2 is interrupt
-  assertFalse(encoder->handlePinMode(1, INPUT)); // 1 is NOT interrupt
-  
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  assertTrue(encoder.handlePinMode(2, INPUT));  // 2 is interrupt
+  assertFalse(encoder.handlePinMode(1, INPUT)); // 1 is NOT interrupt
 }
 
 test(reportEncoderPosition)
 {
   assertTestPass(attachEncoder);
-  int initial_memory = freeMemory();
   
-  EncoderFirmata *encoder = new EncoderFirmata();
+  EncoderFirmata encoder;
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
-  encoder->attachEncoder(encoderNum, pin1, pin2);
+  encoder.attachEncoder(encoderNum, pin1, pin2);
   
   stream.flush();
-  encoder->reportPosition(encoderNum);
+  encoder.reportPosition(encoderNum);
   assertEqual(stream.bytesWritten().length(), 6);
+}
+
+test(handeReportEncoderPositionMessage)
+{
+  EncoderFirmata encoder;
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  stream.flush();
+  byte message[]={ENCODER_REPORT_POSITION, encoderNum};
+  encoder.handleSysex(ENCODER_DATA, 2, message);
+  assertEqual(stream.bytesWritten().length(), 6);
 }
 
 test(reportEncodersPositions)
 {
   assertTestPass(attachEncoder);
-  int initial_memory = freeMemory();
   
-  EncoderFirmata *encoder = new EncoderFirmata();
+  EncoderFirmata encoder;
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
-  encoder->attachEncoder(encoderNum, pin1, pin2);
+  encoder.attachEncoder(encoderNum, pin1, pin2);
   
   stream.flush();
-  encoder->reportPositions();
+  encoder.reportPositions();
   assertEqual(stream.bytesWritten().length(), 9);
+}
+
+test(handleReportEncodersPositionsMessage)
+{
   
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  EncoderFirmata encoder;
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  encoder.attachEncoder(encoderNum, pin1, pin2);
+  
+  stream.flush();
+  byte message[]={ENCODER_REPORT_POSITIONS};
+  encoder.handleSysex(ENCODER_DATA, 1, message);
+  assertEqual(stream.bytesWritten().length(), 9);
 }
 
 test(enableAutomaticReports)
 {
-  int initial_memory = freeMemory();
-  
-  EncoderFirmata *encoder = new EncoderFirmata();
-  assertFalse(encoder->isReportingEnabled());
-  encoder->toggleAutoReport(true);
-  assertTrue(encoder->isReportingEnabled());
-  encoder->toggleAutoReport(false);
-  assertFalse(encoder->isReportingEnabled());
-  
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  EncoderFirmata encoder;
+  assertFalse(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(true);
+  assertTrue(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(false);
+  assertFalse(encoder.isReportingEnabled());
+}
+
+test(handleEnableAutomaticReportsMessage)
+{
+  EncoderFirmata encoder;
+  assertFalse(encoder.isReportingEnabled());
+
+  byte enableMessage[]={ENCODER_REPORT_AUTO, 0x01};
+  encoder.handleSysex(ENCODER_DATA, 2, enableMessage);
+
+  assertTrue(encoder.isReportingEnabled());
+
+  byte disableMessage[]={ENCODER_REPORT_AUTO, 0x00};
+  encoder.handleSysex(ENCODER_DATA, 2, disableMessage);
+
+  assertFalse(encoder.isReportingEnabled());
 }
 
 test(fullReport)
 {
   assertTestPass(enableAutomaticReports);
-  int initial_memory = freeMemory();
   
-  EncoderFirmata *encoder = new EncoderFirmata();
+  EncoderFirmata encoder;
   
   stream.flush();
-  encoder->report();
+  encoder.report();
   assertEqual(stream.bytesWritten().length(), 0); // reports disable
   
-  encoder->toggleAutoReport(true);
+  encoder.toggleAutoReport(true);
   
   stream.flush();
-  encoder->report();
+  encoder.report();
   assertEqual(stream.bytesWritten().length(), 3); // reports enable
-  
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
 }
 
 test(resetEncoder)
 {
   assertTestPass(attachEncoder);
-  int initial_memory = freeMemory();
   
-  EncoderFirmata *encoder = new EncoderFirmata();
+  EncoderFirmata encoder;
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
-  encoder->attachEncoder(encoderNum, pin1, pin2);
+  encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  encoder->reset();
-  assertFalse(encoder->isEncoderAttached(encoderNum));
-  
-  delete encoder;
-  assertEqual(0, initialMemory - freeMemory()); // no memory leak
+  encoder.reset();
+  assertFalse(encoder.isEncoderAttached(encoderNum));
 }
+
 
 void loop()
 {
