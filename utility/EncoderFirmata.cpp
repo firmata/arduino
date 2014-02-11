@@ -272,3 +272,9 @@ void EncoderFirmata::toggleAutoReport(bool report)
 {
   autoReport = report;
 }
+
+bool EncoderFirmata::isReportingEnabled()
+{
+  return autoReport;
+}
+

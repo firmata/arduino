@@ -81,7 +81,7 @@
 
 // This optional setting causes Encoder to use more optimized code
 // safe only if 'attachInterrupt' is never used in the same time
-//#define ENCODER_OPTIMIZE_INTERRUPTS 
+//#define ENCODER_OPTIMIZE_INTERRUPTS // => not compiling
 #include "Encoder.h"
 
 #define MAX_ENCODERS                5 // arbitrary value, may need to adjust
@@ -99,22 +99,25 @@ class EncoderFirmata:public FirmataFeature
 public:
   EncoderFirmata();
   ~EncoderFirmata();
+  // FirmataFeature implementation
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte *argv);
   void reset();
+  
   void report();
   boolean isEncoderAttached(byte encoderNum); 
-  volatile bool autoReport;
-
-private:
   void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
   void detachEncoder(byte encoderNum);
   void reportEncoder(byte encoderNum);
   void reportEncodersPositions();
   void resetEncoderPosition(byte encoderNum);
   void toggleAutoReport(bool report);
+  bool isReportingEnabled();
+
+private:
   Encoder *encoders[MAX_ENCODERS];
+  volatile bool autoReport;
 };
 
 #endif
