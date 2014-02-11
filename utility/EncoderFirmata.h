@@ -17,59 +17,8 @@
   Provide encoder feature based on PJRC implementation.
   See http://www.pjrc.com/teensy/td_libs_Encoder.html for more informations
   
-  EncoderFirmata handle sysex instructions and is able to automatically report positions.
-  
-  Sysex queries : 
-    1. Attach encoder
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_ATTACH             (0x00)
-     * 3 encoder #                  ([0 - MAX_ENCODERS-1])
-     * 4 pin A #                    (first pin) 
-     * 5 pin B #                    (second pin)
-     * 6 END_SYSEX                  (0xF7)
-     *--------------------
-    2. Report encoder position
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_REPORT_POSITION    (0x01)
-     * 3 encoder #                  ([0 - MAX_ENCODERS-1])
-     * 4 END_SYSEX                  (0xF7)
-     *--------------------
-    3. Report encoders positions
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_REPORT_POSITIONS   (0x02)
-     * 3 END_SYSEX                  (0xF7)
-     *--------------------
-    4. Reset encoder position to zero
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_RESET_POSITION     (0x03)
-     * 3 encoder #                  ([0 - MAX_ENCODERS-1])
-     * 4 END_SYSEX                  (0xF7)
-     *--------------------
-    5. Enable/disable reporting ()
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_REPORT_AUTO        (0x04)
-     * 3 enable                     (0x00 => false, true otherwise)
-     * 4 END_SYSEX                  (0xF7)
-     *--------------------
-    6. Detach encoder
-     * ------------------
-     * 0 START_SYSEX                (0xF0)
-     * 1 ENCODER_DATA               (0x61)
-     * 2 ENCODER_DETACH             (0x05)
-     * 3 encoder #                  ([0 - MAX_ENCODERS-1])
-     * 4 END_SYSEX                  (0xF7)
-     *--------------------
-    
+  EncoderFirmata handle instructions and is able to automatically report positions.
+  See protocol details in "examples / SimpleEncoderFirmata / SimpleEncoderFirmata.ino"
     
 */
 
@@ -80,7 +29,7 @@
 #include "FirmataFeature.h"
 
 // This optional setting causes Encoder to use more optimized code
-// safe only if 'attachInterrupt' is never used in the same time
+// safe iif 'attachInterrupt' is never used in the same time
 //#define ENCODER_OPTIMIZE_INTERRUPTS // => not compiling
 #include "Encoder.h"
 
@@ -105,11 +54,12 @@ public:
   boolean handleSysex(byte command, byte argc, byte *argv);
   void reset();
   
+  // EncoderFirmata implementation
   void report();
   boolean isEncoderAttached(byte encoderNum); 
   void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
   void detachEncoder(byte encoderNum);
-  void reportEncoder(byte encoderNum);
+  void reportPosition(byte encoderNum);
   void reportEncodersPositions();
   void resetEncoderPosition(byte encoderNum);
   void toggleAutoReport(bool report);

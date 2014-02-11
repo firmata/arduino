@@ -14,15 +14,12 @@
 
   See file LICENSE.txt for further informations on licensing terms.
   
-  Provide encoder implementation based on Arduino external interrupts
-  see http://arduino.cc/en/Reference/attachInterrupt for more informations
+  Provide encoder feature based on PJRC implementation.
+  See http://www.pjrc.com/teensy/td_libs_Encoder.html for more informations
 */
 
 #include <Firmata.h>
 #include "EncoderFirmata.h"
-// This optional setting causes Encoder to use more optimized code
-// safe only if 'attachInterrupt' is never used in the same time
-#define ENCODER_OPTIMIZE_INTERRUPTS 
 #include "Encoder.h"
 
 /* Constructor */
@@ -87,37 +84,7 @@ void EncoderFirmata::handleCapability(byte pin)
 
 
 /* Handle ENCODER_DATA (0x61) sysex commands
-1. Attach encoder
-   * ------------------
-   * 0 ENCODER_ATTACH             (0x00)
-   * 1 encoder #                  ([0 - MAX_ENCODERS-1])
-   * 2 pin A #                    (first pin) 
-   * 3 pin B #                    (second pin)
-   *--------------------
-  2. Report encoder position
-   * ------------------
-   * 0 ENCODER_REPORT_POSITION    (0x01)
-   * 1 encoder #                  ([0 - MAX_ENCODERS-1])
-   *--------------------
-  3. Report encoders positions
-   * ------------------
-   * 0 ENCODER_REPORT_POSITIONS   (0x02)
-   *--------------------
-  4. Reset encoder position to zero
-   * ------------------
-   * 0 ENCODER_RESET_POSITION     (0x03)
-   * 1 encoder #                  ([0 - MAX_ENCODERS-1])
-   *--------------------
-  5. Enable/disable reporting ()
-   * ------------------
-   * 0 ENCODER_REPORT_AUTO        (0x04)
-   * 1 enable                     (0x00 => false, true otherwise)
-   *--------------------
-  6. Detach encoder
-   * ------------------
-   * 0 ENCODER_DETACH             (0x05)
-   * 1 encoder #                  ([0 - MAX_ENCODERS-1])
-   *--------------------
+ * See protocol details in "examples/SimpleEncoderFirmata/SimpleEncoderFirmata.ino"
 */
 boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
@@ -140,7 +107,7 @@ boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
     if (encoderCommand == ENCODER_REPORT_POSITION)
     {
       encoderNum = argv[1];
-      reportEncoder(encoderNum);
+      reportPosition(encoderNum);
       return true;
     }
     
@@ -218,19 +185,8 @@ void EncoderFirmata::resetEncoderPosition(byte encoderNum)
   }
 }
 
-/* Report encoder's postion (one message per encoder) 
- * 
- * MIDI protocol
- *---------------------
- * 0 ENCODER_MESSAGE (0x80) | Channel (encoder #, 0-4)
- * 1 direction (positive = 0, negative = 1)
- * 2 current position, bits 0-6
- * 3 current position, bits 7-13
- * 4 current position, bits 14-20
- * 5 current position, bits 21-27
- *--------------------
-*/
-void EncoderFirmata::reportEncoder(byte encoderNum)
+// Report specify encoder postion using midi protocol
+void EncoderFirmata::reportPosition(byte encoderNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
@@ -244,22 +200,7 @@ void EncoderFirmata::reportEncoder(byte encoderNum)
     Firmata.write((byte)(absValue >> 21) & 0x7F);
   }
 }
-/* Report encoders postions (one message for all encoders) 
- * 
- * Sysex message
- *---------------------
-   * 0 START_SYSEX                (0xF0)
-   * 1 ENCODER_DATA               (0x61)
-   * 2 first encoder #            ([0 - MAX_ENCODERS-1])
-   * 3 first enc. dir.            (positive = 0, negative = 1)
-   * 4 first enc. position, bits 0-6
-   * 5 first enc. position, bits 7-13
-   * 6 first enc. position, bits 14-20
-   * 7 first enc. position, bits 21-27
-   * ...
-   * N END_SYSEX                  (0xF7)
- *--------------------
-*/
+// Report all attached encoders positions (one message for all encoders) 
 void EncoderFirmata::reportEncodersPositions()
 {
   Firmata.write(START_SYSEX);
@@ -267,7 +208,7 @@ void EncoderFirmata::reportEncodersPositions()
   byte encoder;
   for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
   {
-    reportEncoder(encoder);
+    reportPosition(encoder);
   }
   Firmata.write(END_SYSEX);
 }
