@@ -37,6 +37,11 @@ EncoderFirmata::EncoderFirmata()
 }
 EncoderFirmata::~EncoderFirmata()
 {
+  byte encoder;
+  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
+  {
+    detachEncoder(encoder);
+  }
   delete[] encoders;
 }
 
@@ -44,13 +49,13 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
-    Firmata.sendString("Encoder Warning: encoder is already attached. Operation cancelled.");
+    Firmata.sendString(F("Encoder Warning: encoder is already attached. Operation cancelled."));
     return;
   }
   
   if (!IS_PIN_INTERRUPT(pinANum) || !IS_PIN_INTERRUPT(pinBNum))
   {
-    Firmata.sendString("Encoder Warning: For better performences, you should only use Interrput pins." );
+    Firmata.sendString(F("Encoder Warning: For better performences, you should only use Interrput pins."));
   }
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
 }
@@ -165,7 +170,7 @@ boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
       return true;
     }
     
-    Firmata.sendString("Encoder Error: Invalid command");
+    Firmata.sendString(F("Encoder Error: Invalid command"));
   }
   return false;
 }
@@ -192,7 +197,7 @@ boolean EncoderFirmata::isEncoderAttached(byte encoderNum)
 {
   if (encoderNum>=MAX_ENCODERS)
   {
-    Firmata.sendString("Encoder Error: encoder number should be less than 5. Operation cancelled.");
+    Firmata.sendString(F("Encoder Error: encoder number should be less than 5. Operation cancelled."));
     return false;
   }
   if (encoders[encoderNum]) 
