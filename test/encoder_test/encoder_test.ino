@@ -38,7 +38,7 @@ test(attachEncoder)
   assertTrue(encoder.isEncoderAttached(encoderNum));
 }
 
-test(requiredMemoryPerEncoder)
+test(requiredMemoryPerInstance)
 {  
   assertTestPass(attachEncoder);
   EncoderFirmata encoder;
