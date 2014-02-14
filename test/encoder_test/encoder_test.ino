@@ -3,8 +3,11 @@
  * the ArduinoUnit library to your Arduino/libraries/ directory. 
  * available  here: https://github.com/mmurdoch/arduinounit (2.0 or greater.)
  */
+
+//* Due to arduino issue, Wire and Servo libraries need to be included. Should be fixed in later versions
 #include <Wire.h>
 #include <Servo.h>
+//*/
 #include <ArduinoUnit.h>
 #include "Firmata.h"
 #include "utility/EncoderFirmata.h" 
@@ -21,6 +24,8 @@ void setup()
   Serial.begin(57600); // must match port configuration
 }
 
+
+
 test(attachEncoder)
 {  
   EncoderFirmata encoder;
@@ -31,6 +36,17 @@ test(attachEncoder)
   encoder.attachEncoder(encoderNum, pin1, pin2);
 
   assertTrue(encoder.isEncoderAttached(encoderNum));
+}
+
+test(requiredMemoryPerEncoder)
+{  
+  assertTestPass(attachEncoder);
+  EncoderFirmata encoder;
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  int initialMemory = freeMemory();
+  encoder.attachEncoder(encoderNum, pin1, pin2);
+
+  assertTrue((initialMemory - freeMemory()) < 1 );
 }
 
 test(handleAttachEncoderMessage)
