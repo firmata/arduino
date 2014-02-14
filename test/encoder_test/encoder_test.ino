@@ -45,8 +45,11 @@ test(requiredMemoryPerInstance)
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
   int initialMemory = freeMemory();
   encoder.attachEncoder(encoderNum, pin1, pin2);
-
-  assertTrue((initialMemory - freeMemory()) < 1 );
+  int afterInitializationMemory = freeMemory();
+  int requiredMemory = initialMemory - afterInitializationMemory;
+  Serial.print(requiredMemory, HEX);
+  Serial.println(" mem req. per instance");
+  assertTrue(requiredMemory < 100 );
 }
 
 test(handleAttachEncoderMessage)
@@ -89,8 +92,8 @@ test(handlePinModes)
 {
   EncoderFirmata encoder;
   
-  assertTrue(encoder.handlePinMode(2, INPUT));  // 2 is interrupt
-  assertFalse(encoder.handlePinMode(1, INPUT)); // 1 is NOT interrupt
+  assertTrue(encoder.handlePinMode(2, ENCODER));  // 2 is interrupt
+  assertFalse(encoder.handlePinMode(1, ENCODER)); // 1 is NOT interrupt
 }
 
 test(reportEncoderPosition)
