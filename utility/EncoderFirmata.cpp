@@ -45,8 +45,6 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   {
     //Firmata.sendString("Encoder Warning: For better performences, you should only use Interrput pins.");
   }
-  if (Firmata.getPinMode(pinANum)==IGNORE || Firmata.getPinMode(pinBNum)==IGNORE)
-    return false;
   Firmata.setPinMode(pinANum, ENCODER);
   Firmata.setPinMode(pinBNum, ENCODER);
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
@@ -99,6 +97,10 @@ boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
       encoderNum = argv[1];
       pinA = argv[2];
       pinB = argv[3];
+      if (Firmata.getPinMode(pinA)==IGNORE || Firmata.getPinMode(pinB)==IGNORE)
+      {
+        return false;
+      }  
       attachEncoder(encoderNum, pinA, pinB);
       return true;
     }
