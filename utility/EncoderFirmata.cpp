@@ -203,7 +203,7 @@ void EncoderFirmata::reportPositions()
   byte encoder;
   for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
   {
-    if (isEncoderAttached(encoderNum)) 
+    if (isEncoderAttached(encoder)) 
     {
       signed long position = encoders[encoder]->read();
       long absValue = abs(position);
