@@ -147,7 +147,11 @@ void EncoderFirmata::report()
 {
   if (autoReport)
   {
-    reportPositions();
+    byte encoder;
+    for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
+    {
+      reportPosition(encoder);
+    }
   }
 }
 
@@ -199,7 +203,17 @@ void EncoderFirmata::reportPositions()
   byte encoder;
   for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
   {
-    reportPosition(encoder);
+    if (isEncoderAttached(encoderNum)) 
+    {
+      signed long position = encoders[encoder]->read();
+      long absValue = abs(position);
+      Firmata.write(encoder);
+      Firmata.write(position >= 0 ? 0x00 : 0x01);
+      Firmata.write((byte)absValue & 0x7F);
+      Firmata.write((byte)(absValue >> 7) & 0x7F);
+      Firmata.write((byte)(absValue >> 14) & 0x7F);
+      Firmata.write((byte)(absValue >> 21) & 0x7F);
+    }
   }
   Firmata.write(END_SYSEX);
 }
