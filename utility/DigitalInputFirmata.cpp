@@ -15,7 +15,7 @@
 */
 
 #include <Firmata.h>
-#include <DigitalInputFirmata.h>
+#include <utility/DigitalInputFirmata.h>
 
 DigitalInputFirmata *DigitalInputFirmataInstance;
 

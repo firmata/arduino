@@ -12,9 +12,9 @@
 
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
-#include <Encoder7Bit.h>
-#include <FirmataScheduler.h>
-#include <FirmataExt.h>
+#include <utility/Encoder7Bit.h>
+#include <utility/FirmataScheduler.h>
+#include <utility/FirmataExt.h>
 
 FirmataScheduler *FirmataSchedulerInstance;
 

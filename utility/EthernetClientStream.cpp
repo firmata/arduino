@@ -19,7 +19,7 @@
 
 #include "EthernetClientStream.h"
 #include <Arduino.h>
-#include <Ethernet.h>
+#include <utility/Ethernet.h>
 
 #define MILLIS_RECONNECT 5000
 

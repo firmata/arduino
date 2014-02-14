@@ -15,7 +15,7 @@
 */
 
 #include <Firmata.h>
-#include <FirmataExt.h>
+#include <utility/FirmataExt.h>
 
 FirmataExt *FirmataExtInstance;
 

@@ -15,7 +15,7 @@
 */
 
 #include <Firmata.h>
-#include <DigitalOutputFirmata.h>
+#include <utility/DigitalOutputFirmata.h>
 
 DigitalOutputFirmata *DigitalOutputFirmataInstance;
 

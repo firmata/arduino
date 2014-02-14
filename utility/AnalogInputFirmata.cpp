@@ -15,8 +15,8 @@
 */
 
 #include <Firmata.h>
-#include <AnalogFirmata.h>
-#include <AnalogInputFirmata.h>
+#include <utility/AnalogFirmata.h>
+#include <utility/AnalogInputFirmata.h>
 
 AnalogInputFirmata *AnalogInputFirmataInstance;
 

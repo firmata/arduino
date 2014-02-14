@@ -15,8 +15,8 @@
 */
 
 #include <Firmata.h>
-#include <AnalogFirmata.h>
-#include <AnalogOutputFirmata.h>
+#include <utility/AnalogFirmata.h>
+#include <utility/AnalogOutputFirmata.h>
 
 //AnalogOutputFirmata::AnalogOutputFirmata()
 //{

@@ -19,8 +19,8 @@
 */
 
 #include <Firmata.h>
-#include "EncoderFirmata.h"
-#include "Encoder.h"
+#include "utility/EncoderFirmata.h"
+#include "utility/Encoder.h"
 
 /* Constructor */
 EncoderFirmata::EncoderFirmata()
