@@ -52,7 +52,7 @@ void EncoderFirmata::detachEncoder(byte encoderNum)
 {
   if (isEncoderAttached(encoderNum)) 
   {
-    delete encoders[encoderNum];
+    free(encoders[encoderNum]);
     encoders[encoderNum] = NULL;
   }
 }
