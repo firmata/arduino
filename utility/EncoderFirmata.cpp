@@ -45,6 +45,10 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   {
     //Firmata.sendString("Encoder Warning: For better performences, you should only use Interrput pins.");
   }
+  if (Firmata.getPinMode(pinANum)==IGNORE || Firmata.getPinMode(pinBNum)==IGNORE)
+    return false;
+  Firmata.setPinMode(pinANum, ENCODER);
+  Firmata.setPinMode(pinBNum, ENCODER);
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
 }
 
@@ -59,18 +63,23 @@ void EncoderFirmata::detachEncoder(byte encoderNum)
 
 boolean EncoderFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_INTERRUPT(pin)) 
-  {
-    // nothing to do, pins states are managed 
-    // in "attach/detachEncoder" methods
-    return true;
+  if (mode == ENCODER) {
+    if (IS_PIN_INTERRUPT(pin)) 
+    {
+      // nothing to do, pins states are managed 
+      // in "attach/detach Encoder" methods
+      return true;
+    }
   }
   return false;
 }
 
 void EncoderFirmata::handleCapability(byte pin)
 {
-  // nothing to do
+  if (IS_PIN_INTERRUPT(pin)) {
+    Firmata.write(ENCODER);
+    Firmata.write(28); //28 bits used for absolute position
+  }
 }
 
 
