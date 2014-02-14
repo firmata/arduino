@@ -47,9 +47,9 @@ test(requiredMemoryPerInstance)
   encoder.attachEncoder(encoderNum, pin1, pin2);
   int afterInitializationMemory = freeMemory();
   int requiredMemory = initialMemory - afterInitializationMemory;
-  Serial.print(requiredMemory, HEX);
+  Serial.print(requiredMemory, DEC);
   Serial.println(" mem req. per instance");
-  assertTrue(requiredMemory < 100 );
+  assertTrue(requiredMemory < 16);
 }
 
 test(handleAttachEncoderMessage)
