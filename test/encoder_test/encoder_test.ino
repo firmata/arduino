@@ -168,7 +168,15 @@ test(fullReport)
   
   stream.flush();
   encoder.report();
-  assertEqual(stream.bytesWritten().length(), 3); // reports enable
+  assertEqual(stream.bytesWritten().length(), 0); // no encoder attached
+
+
+  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  encoder.attachEncoder(encoderNum, pin1, pin2);
+
+  stream.flush();
+  encoder.report();
+  assertEqual(stream.bytesWritten().length(), 6); // 1 encoder attached
 }
 
 test(resetEncoder)
