@@ -112,6 +112,8 @@
  *--------------------
  */
 
+#include <Wire.h>
+#include <Servo.h>
 #include <Firmata.h>
 #include <utility/FirmataExt.h>
 #include <utility/FirmataReporting.h>

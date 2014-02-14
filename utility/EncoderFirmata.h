@@ -47,7 +47,8 @@ class EncoderFirmata:public FirmataFeature
 {
 public:
   EncoderFirmata();
-  ~EncoderFirmata();
+  //~EncoderFirmata(); => never destroy in practice
+  
   // FirmataFeature implementation
   boolean handlePinMode(byte pin, int mode);
   void handleCapability(byte pin);
@@ -60,8 +61,8 @@ public:
   void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
   void detachEncoder(byte encoderNum);
   void reportPosition(byte encoderNum);
-  void reportEncodersPositions();
-  void resetEncoderPosition(byte encoderNum);
+  void reportPositions();
+  void resetPosition(byte encoderNum);
   void toggleAutoReport(bool report);
   bool isReportingEnabled();
 
