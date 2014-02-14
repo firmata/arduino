@@ -112,8 +112,10 @@
  *--------------------
  */
 
+//* Due to arduino issue, Wire and Servo libraries need to be included. Should be fixed in later versions
 #include <Wire.h>
 #include <Servo.h>
+//*/
 #include <Firmata.h>
 #include <utility/FirmataExt.h>
 #include <utility/FirmataReporting.h>
