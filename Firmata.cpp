@@ -350,6 +350,19 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte* bytev)
   endSysex();
 }
 
+void FirmataClass::sendSysex(byte command, const __FlashStringHelper* ifsh)
+{
+	  const char PROGMEM *p = (const char PROGMEM *)ifsh;
+	  startSysex();
+	  FirmataStream->write(command);
+	  while (1) {
+	    unsigned char c = pgm_read_byte(p++);
+	    if (c == 0) break;
+	    sendValueAsTwo7bitBytes(c);
+	  }
+	  endSysex();
+}
+
 void FirmataClass::sendString(byte command, const char* string) 
 {
   sendSysex(command, strlen(string), (byte *)string);
@@ -360,6 +373,16 @@ void FirmataClass::sendString(byte command, const char* string)
 void FirmataClass::sendString(const char* string) 
 {
   sendString(STRING_DATA, string);
+}
+
+void FirmataClass::sendString(const __FlashStringHelper* ifsh)
+{
+	sendString(STRING_DATA, ifsh);
+}
+
+void FirmataClass::sendString(byte command, const __FlashStringHelper* ifsh)
+{
+	sendSysex(command, ifsh);
 }
 
 // expose the write method
@@ -516,3 +539,6 @@ void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
 
 // make one instance for the user to use
 FirmataClass Firmata;
+
+
+

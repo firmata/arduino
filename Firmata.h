@@ -115,8 +115,11 @@ public:
     void sendDigital(byte pin, int value); // TODO implement this
     void sendDigitalPort(byte portNumber, int portData);
     void sendString(const char* string);
+    void sendString(const __FlashStringHelper *ifsh);
     void sendString(byte command, const char* string);
+    void sendString(byte command, const __FlashStringHelper *ifsh);
     void sendSysex(byte command, byte bytec, byte* bytev);
+    void sendSysex(byte command, const __FlashStringHelper *ifsh);
     void write(byte c);
 /* attach & detach callback functions to messages */
     void attach(byte command, callbackFunction newFunction);
