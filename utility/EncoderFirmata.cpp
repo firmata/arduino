@@ -50,6 +50,7 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   Firmata.setPinMode(pinBNum, ENCODER);
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
   numEncoders++;
+  reportPosition(encoderNum);
 }
 
 void EncoderFirmata::detachEncoder(byte encoderNum)
