@@ -207,9 +207,6 @@ void EncoderFirmata::reportPosition(byte encoder)
 // Report all attached encoders positions (one message for all encoders) 
 void EncoderFirmata::reportPositions()
 {
-  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
-  {
-  }
   Firmata.write(START_SYSEX);
   Firmata.write(ENCODER_DATA);
   byte encoder;
