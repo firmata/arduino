@@ -107,14 +107,6 @@ test(reportEncoderPosition)
   stream.flush();
   encoder.reportPosition(encoderNum);
   assertEqual(stream.bytesWritten().length(), 8);
-  assertEqual(stream.bytesWritten()[0], 0xF0);
-  assertEqual(stream.bytesWritten()[1], 0x61);
-  assertEqual(stream.bytesWritten()[2], 0x01); // dir = 0, channel=1
-  assertEqual(stream.bytesWritten()[3], 0x00); // position = 0
-  assertEqual(stream.bytesWritten()[4], 0x00); // position = 0
-  assertEqual(stream.bytesWritten()[5], 0x00); // position = 0
-  assertEqual(stream.bytesWritten()[6], 0x00); // position = 0
-  assertEqual(stream.bytesWritten()[7], 0xF7);
 }
 
 test(handeReportEncoderPositionMessage)
@@ -126,7 +118,7 @@ test(handeReportEncoderPositionMessage)
   stream.flush();
   byte message[]={ENCODER_REPORT_POSITION, encoderNum};
   encoder.handleSysex(ENCODER_DATA, 2, message);
-  assertEqual(stream.bytesWritten().length(), 6);
+  assertEqual(stream.bytesWritten().length(), 8);
 }
 
 test(reportEncodersPositions)
@@ -139,7 +131,7 @@ test(reportEncodersPositions)
   
   stream.flush();
   encoder.reportPositions();
-  assertEqual(stream.bytesWritten().length(), 9);
+  assertEqual(stream.bytesWritten().length(), 8);
 }
 
 test(handleReportEncodersPositionsMessage)
@@ -152,7 +144,7 @@ test(handleReportEncodersPositionsMessage)
   stream.flush();
   byte message[]={ENCODER_REPORT_POSITIONS};
   encoder.handleSysex(ENCODER_DATA, 1, message);
-  assertEqual(stream.bytesWritten().length(), 9);
+  assertEqual(stream.bytesWritten().length(), 8);
 }
 
 test(enableAutomaticReports)
@@ -209,7 +201,7 @@ test(fullReport)
 
   stream.flush();
   encoder.report();
-  assertEqual(stream.bytesWritten().length(), 13); // 2 encoder attached
+  assertEqual(stream.bytesWritten().length(), 13); // 2 encoders attached
 }
 
 test(resetEncoder)

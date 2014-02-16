@@ -158,11 +158,7 @@ void EncoderFirmata::report()
 {
   if (autoReport)
   {
-    byte encoder;
-    for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
-    {
-      reportPosition(encoder);
-    }
+    reportPositions();
   }
 }
 
