@@ -223,7 +223,7 @@ void EncoderFirmata::_reportEncoderPosition(byte encoder)
     signed long position = encoders[encoder]->read();
     long absValue = abs(position);
     byte direction = position >= 0 ? 0x00 : 0x01;
-    Firmata.write((direction << 7) | (encoder));
+    Firmata.write((direction << 6) | (encoder));
     Firmata.write((byte)absValue & 0x7F);
     Firmata.write((byte)(absValue >> 7) & 0x7F);
     Firmata.write((byte)(absValue >> 14) & 0x7F);
