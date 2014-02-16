@@ -101,12 +101,20 @@ test(reportEncoderPosition)
   assertTestPass(attachEncoder);
   
   EncoderFirmata encoder;
-  byte encoderNum = 0, pin1 = 2, pin2 = 3;
+  byte encoderNum = 1, pin1 = 2, pin2 = 3;
   encoder.attachEncoder(encoderNum, pin1, pin2);
   
   stream.flush();
   encoder.reportPosition(encoderNum);
-  assertEqual(stream.bytesWritten().length(), 6);
+  assertEqual(stream.bytesWritten().length(), 8);
+  assertEqual(stream.bytesWritten()[0], 0xF0);
+  assertEqual(stream.bytesWritten()[1], 0x61);
+  assertEqual(stream.bytesWritten()[2], 0x01); // dir = 0, channel=1
+  assertEqual(stream.bytesWritten()[3], 0x00); // position = 0
+  assertEqual(stream.bytesWritten()[4], 0x00); // position = 0
+  assertEqual(stream.bytesWritten()[5], 0x00); // position = 0
+  assertEqual(stream.bytesWritten()[6], 0x00); // position = 0
+  assertEqual(stream.bytesWritten()[7], 0xF7);
 }
 
 test(handeReportEncoderPositionMessage)
@@ -190,12 +198,18 @@ test(fullReport)
   assertEqual(stream.bytesWritten().length(), 0); // no encoder attached
 
 
-  byte encoderNum = 0, pin1 = 2, pin2 = 3;
-  encoder.attachEncoder(encoderNum, pin1, pin2);
+  byte pin1 = 2, pin2 = 3;
+  encoder.attachEncoder(0, pin1, pin2);
 
   stream.flush();
   encoder.report();
-  assertEqual(stream.bytesWritten().length(), 6); // 1 encoder attached
+  assertEqual(stream.bytesWritten().length(), 8); // 1 encoder attached
+
+  encoder.attachEncoder(1, pin1, pin2);
+
+  stream.flush();
+  encoder.report();
+  assertEqual(stream.bytesWritten().length(), 13); // 2 encoder attached
 }
 
 test(resetEncoder)

@@ -41,7 +41,6 @@
 #define ENCODER_REPORT_AUTO         (0x04)
 #define ENCODER_DETACH              (0x05)
 #define ENCODER_DATA                (0x61) // TODO : Move to Firmata.h
-#define ENCODER_MESSAGE             (0x80) // TODO : Move to Firmata.h
 
 class EncoderFirmata:public FirmataFeature
 {
@@ -68,6 +67,7 @@ public:
 
 private:
   Encoder *encoders[MAX_ENCODERS];
+  void _reportEncoderPosition(byte encoder);
   volatile bool autoReport;
 };
 

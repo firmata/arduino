@@ -192,18 +192,16 @@ void EncoderFirmata::resetPosition(byte encoderNum)
 }
 
 // Report specify encoder postion using midi protocol
-void EncoderFirmata::reportPosition(byte encoderNum)
+void EncoderFirmata::reportPosition(byte encoder)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isEncoderAttached(encoder)) 
   {
-    signed long position = encoders[encoderNum]->read();
-    long absValue = abs(position);
-    Firmata.write(ENCODER_MESSAGE | (encoderNum & 0xF));
-    Firmata.write(position >= 0 ? 0x00 : 0x01);
-    Firmata.write((byte)absValue & 0x7F);
-    Firmata.write((byte)(absValue >> 7) & 0x7F);
-    Firmata.write((byte)(absValue >> 14) & 0x7F);
-    Firmata.write((byte)(absValue >> 21) & 0x7F);
+    Firmata.write(START_SYSEX);
+    Firmata.write(ENCODER_DATA);
+
+    _reportEncoderPosition(encoder);
+
+    Firmata.write(END_SYSEX);
   }
 }
 // Report all attached encoders positions (one message for all encoders) 
@@ -214,19 +212,23 @@ void EncoderFirmata::reportPositions()
   byte encoder;
   for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
   {
-    if (isEncoderAttached(encoder)) 
-    {
-      signed long position = encoders[encoder]->read();
-      long absValue = abs(position);
-      Firmata.write(encoder);
-      Firmata.write(position >= 0 ? 0x00 : 0x01);
-      Firmata.write((byte)absValue & 0x7F);
-      Firmata.write((byte)(absValue >> 7) & 0x7F);
-      Firmata.write((byte)(absValue >> 14) & 0x7F);
-      Firmata.write((byte)(absValue >> 21) & 0x7F);
-    }
+    _reportEncoderPosition(encoder);
   }
   Firmata.write(END_SYSEX);
+}
+void EncoderFirmata::_reportEncoderPosition(byte encoder)
+{
+  if (isEncoderAttached(encoder)) 
+  {
+    signed long position = encoders[encoder]->read();
+    long absValue = abs(position);
+    byte direction = position >= 0 ? 0x00 : 0x01;
+    Firmata.write((direction << 7) | (encoder));
+    Firmata.write((byte)absValue & 0x7F);
+    Firmata.write((byte)(absValue >> 7) & 0x7F);
+    Firmata.write((byte)(absValue >> 14) & 0x7F);
+    Firmata.write((byte)(absValue >> 21) & 0x7F);
+  }
 }
 
 
