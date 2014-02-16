@@ -69,6 +69,7 @@ private:
   Encoder *encoders[MAX_ENCODERS];
   void _reportEncoderPosition(byte encoder);
   volatile bool autoReport;
+  byte numEncoders; 
 };
 
 #endif

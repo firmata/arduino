@@ -31,6 +31,7 @@ EncoderFirmata::EncoderFirmata()
     encoders[encoder]=NULL;
   }
   autoReport = false;
+  numEncoders = 0;
 }
 
 void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
@@ -48,6 +49,7 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   Firmata.setPinMode(pinANum, ENCODER);
   Firmata.setPinMode(pinBNum, ENCODER);
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
+  numEncoders++;
 }
 
 void EncoderFirmata::detachEncoder(byte encoderNum)
@@ -56,6 +58,7 @@ void EncoderFirmata::detachEncoder(byte encoderNum)
   {
     free(encoders[encoderNum]);
     encoders[encoderNum] = NULL;
+    numEncoders--;
   }
 }
 
@@ -152,11 +155,12 @@ void EncoderFirmata::reset()
     detachEncoder(encoder);
   }
   autoReport = false;
+  numEncoders= 0;
 }
 
 void EncoderFirmata::report()
 {
-  if (autoReport)
+  if (autoReport && numEncoders>0)
   {
     reportPositions();
   }
@@ -203,6 +207,9 @@ void EncoderFirmata::reportPosition(byte encoder)
 // Report all attached encoders positions (one message for all encoders) 
 void EncoderFirmata::reportPositions()
 {
+  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
+  {
+  }
   Firmata.write(START_SYSEX);
   Firmata.write(ENCODER_DATA);
   byte encoder;
