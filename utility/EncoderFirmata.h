@@ -40,7 +40,6 @@
 #define ENCODER_RESET_POSITION      (0x03)
 #define ENCODER_REPORT_AUTO         (0x04)
 #define ENCODER_DETACH              (0x05)
-#define ENCODER_DATA                (0x61) // TODO : Move to Firmata.h
 
 class EncoderFirmata:public FirmataFeature
 {
