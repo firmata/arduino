@@ -150,16 +150,19 @@ test(handleReportEncodersPositionsMessage)
 test(enableAutomaticReports)
 {
   EncoderFirmata encoder;
-  assertFalse(encoder.isReportingEnabled());
-  encoder.toggleAutoReport(true);
   assertTrue(encoder.isReportingEnabled());
-  encoder.toggleAutoReport(false);
+  encoder.toggleAutoReport(1);
+  assertTrue(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(2);
+  assertTrue(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(0);
   assertFalse(encoder.isReportingEnabled());
 }
 
 test(handleEnableAutomaticReportsMessage)
 {
   EncoderFirmata encoder;
+  encoder.toggleAutoReport(0);
   assertFalse(encoder.isReportingEnabled());
 
   byte enableMessage[]={ENCODER_REPORT_AUTO, 0x01};
@@ -183,7 +186,7 @@ test(fullReport)
   encoder.report();
   assertEqual(stream.bytesWritten().length(), 0); // reports disable
   
-  encoder.toggleAutoReport(true);
+  encoder.toggleAutoReport(1);
   
   stream.reset();
   encoder.report();

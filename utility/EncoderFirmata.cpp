@@ -21,22 +21,23 @@
 #include <Firmata.h>
 #include "EncoderFirmata.h"
 #include "Encoder.h"
+#include <String.h>
+
+#define isAttached(encoderNum) (encoderNum < MAX_ENCODERS && encoders[encoderNum])
+
+static Encoder *encoders[MAX_ENCODERS];
+static int32_t positions[MAX_ENCODERS];
+static byte autoReport = 0x02;
 
 /* Constructor */
 EncoderFirmata::EncoderFirmata()
 {
-  byte encoder;
-  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
-  {
-    encoders[encoder]=NULL;
-  }
-  autoReport = false;
-  numEncoders = 0;
+  memset(encoders,0,sizeof(Encoder*)*MAX_ENCODERS);
 }
 
 void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     //Firmata.sendString("Encoder Warning: encoder is already attached. Operation cancelled.");
     return;
@@ -49,17 +50,15 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
   Firmata.setPinMode(pinANum, ENCODER);
   Firmata.setPinMode(pinBNum, ENCODER);
   encoders[encoderNum] = new Encoder(pinANum, pinBNum);
-  numEncoders++;
   reportPosition(encoderNum);
 }
 
 void EncoderFirmata::detachEncoder(byte encoderNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     free(encoders[encoderNum]);
     encoders[encoderNum] = NULL;
-    numEncoders--;
   }
 }
 
@@ -131,8 +130,7 @@ boolean EncoderFirmata::handleSysex(byte command, byte argc, byte *argv)
     }
     if (encoderCommand == ENCODER_REPORT_AUTO)
     {
-      enableReports = argv[1];
-      toggleAutoReport(enableReports == 0x00 ? false : true);
+      autoReport = argv[1];
       return true;
     }
     
@@ -155,38 +153,47 @@ void EncoderFirmata::reset()
   {
     detachEncoder(encoder);
   }
-  autoReport = false;
-  numEncoders= 0;
+  autoReport = 0x02;
 }
 
 void EncoderFirmata::report()
 {
-  if (autoReport && numEncoders>0)
+  if (autoReport > 0)
   {
-    reportPositions();
+    bool report = false;
+    for (uint8_t encoderNum=0; encoderNum < MAX_ENCODERS; encoderNum++)
+    {
+      if (isAttached(encoderNum))
+      {
+        int32_t position = encoders[encoderNum]->read();
+        if ( autoReport == 1 || positions[encoderNum] != position )
+        {
+          if (!report)
+          {
+            Firmata.write(START_SYSEX);
+            Firmata.write(ENCODER_DATA);
+            report = true;
+          }
+          positions[encoderNum] = position;
+          _reportEncoderPosition(encoderNum,position);
+        }
+      }
+    }
+    if (report)
+    {
+      Firmata.write(END_SYSEX);
+    }
   }
 }
 
 boolean EncoderFirmata::isEncoderAttached(byte encoderNum)
 {
-  if (encoderNum>=MAX_ENCODERS)
-  {
-    //Firmata.sendString("Encoder Error: encoder number should be less than 5. Operation cancelled.");
-    return false;
-  }
-  if (encoders[encoderNum]) 
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  return isAttached(encoderNum);
 }
 
 void EncoderFirmata::resetPosition(byte encoderNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     encoders[encoderNum]->write(0);
   }
@@ -195,12 +202,12 @@ void EncoderFirmata::resetPosition(byte encoderNum)
 // Report specify encoder postion using midi protocol
 void EncoderFirmata::reportPosition(byte encoder)
 {
-  if (isEncoderAttached(encoder)) 
+  if (isAttached(encoder))
   {
     Firmata.write(START_SYSEX);
     Firmata.write(ENCODER_DATA);
 
-    _reportEncoderPosition(encoder);
+    _reportEncoderPosition(encoder,encoders[encoder]->read());
 
     Firmata.write(END_SYSEX);
   }
@@ -208,38 +215,31 @@ void EncoderFirmata::reportPosition(byte encoder)
 // Report all attached encoders positions (one message for all encoders) 
 void EncoderFirmata::reportPositions()
 {
-  Firmata.write(START_SYSEX);
-  Firmata.write(ENCODER_DATA);
-  byte encoder;
-  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
-  {
-    _reportEncoderPosition(encoder);
-  }
-  Firmata.write(END_SYSEX);
+  byte tmpReport = autoReport;
+  autoReport = 1;
+  report();
+  autoReport = tmpReport;
 }
-void EncoderFirmata::_reportEncoderPosition(byte encoder)
+
+void EncoderFirmata::_reportEncoderPosition(byte encoder, int32_t position)
 {
-  if (isEncoderAttached(encoder)) 
-  {
-    signed long position = encoders[encoder]->read();
-    long absValue = abs(position);
-    byte direction = position >= 0 ? 0x00 : 0x01;
-    Firmata.write((direction << 6) | (encoder));
-    Firmata.write((byte)absValue & 0x7F);
-    Firmata.write((byte)(absValue >> 7) & 0x7F);
-    Firmata.write((byte)(absValue >> 14) & 0x7F);
-    Firmata.write((byte)(absValue >> 21) & 0x7F);
-  }
+  long absValue = abs(position);
+  byte direction = position >= 0 ? 0x00 : 0x01;
+  Firmata.write((direction << 6) | (encoder));
+  Firmata.write((byte)absValue & 0x7F);
+  Firmata.write((byte)(absValue >> 7) & 0x7F);
+  Firmata.write((byte)(absValue >> 14) & 0x7F);
+  Firmata.write((byte)(absValue >> 21) & 0x7F);
 }
 
-
-void EncoderFirmata::toggleAutoReport(bool report)
+void EncoderFirmata::toggleAutoReport(byte report)
 {
   autoReport = report;
 }
 
 bool EncoderFirmata::isReportingEnabled()
 {
-  return autoReport;
+  return autoReport > 0;
 }
+
 

@@ -29,7 +29,7 @@
 #include "FirmataFeature.h"
 
 // This optional setting causes Encoder to use more optimized code
-// safe iif 'attachInterrupt' is never used in the same time
+// safe if 'attachInterrupt' is never used in the same time
 //#define ENCODER_OPTIMIZE_INTERRUPTS // => not compiling
 #include "Encoder.h"
 
@@ -61,14 +61,11 @@ public:
   void reportPosition(byte encoderNum);
   void reportPositions();
   void resetPosition(byte encoderNum);
-  void toggleAutoReport(bool report);
+  void toggleAutoReport(byte report);
   bool isReportingEnabled();
 
 private:
-  Encoder *encoders[MAX_ENCODERS];
-  void _reportEncoderPosition(byte encoder);
-  volatile bool autoReport;
-  byte numEncoders; 
+  static void _reportEncoderPosition(byte encoder, int32_t position);
 };
 
 #endif
