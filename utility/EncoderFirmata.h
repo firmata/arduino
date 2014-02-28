@@ -55,6 +55,7 @@ public:
   
   // EncoderFirmata implementation
   void report();
+  boolean isEncoderAttached(byte encoderNum); 
   void attachEncoder(byte encoderNum, byte pinANum, byte pinBNum);
   void detachEncoder(byte encoderNum);
   void reportPosition(byte encoderNum);

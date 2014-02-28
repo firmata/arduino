@@ -23,7 +23,7 @@
 #include "Encoder.h"
 #include <String.h>
 
-#define isEncoderAttached(encoderNum) (encoderNum < MAX_ENCODERS && encoders[encoderNum])
+#define isAttached(encoderNum) (encoderNum < MAX_ENCODERS && encoders[encoderNum])
 
 static Encoder *encoders[MAX_ENCODERS];
 static int32_t positions[MAX_ENCODERS];
@@ -37,7 +37,7 @@ EncoderFirmata::EncoderFirmata()
 
 void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     //Firmata.sendString("Encoder Warning: encoder is already attached. Operation cancelled.");
     return;
@@ -55,7 +55,7 @@ void EncoderFirmata::attachEncoder(byte encoderNum, byte pinANum, byte pinBNum)
 
 void EncoderFirmata::detachEncoder(byte encoderNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     free(encoders[encoderNum]);
     encoders[encoderNum] = NULL;
@@ -158,15 +158,15 @@ void EncoderFirmata::reset()
 
 void EncoderFirmata::report()
 {
-  if (autoReport == 0x02)
+  if (autoReport > 0)
   {
     bool report = false;
     for (uint8_t encoderNum=0; encoderNum < MAX_ENCODERS; encoderNum++)
     {
-      if (isEncoderAttached(encoderNum))
+      if (isAttached(encoderNum))
       {
         int32_t position = encoders[encoderNum]->read();
-        if ( positions[encoderNum] != position )
+        if ( autoReport == 1 || positions[encoderNum] != position )
         {
           if (!report)
           {
@@ -184,15 +184,16 @@ void EncoderFirmata::report()
       Firmata.write(END_SYSEX);
     }
   }
-  else if (autoReport == 0x01)
-  {
-    reportPositions();
-  }
+}
+
+boolean EncoderFirmata::isEncoderAttached(byte encoderNum)
+{
+  return isAttached(encoderNum);
 }
 
 void EncoderFirmata::resetPosition(byte encoderNum)
 {
-  if (isEncoderAttached(encoderNum)) 
+  if (isAttached(encoderNum))
   {
     encoders[encoderNum]->write(0);
   }
@@ -201,7 +202,7 @@ void EncoderFirmata::resetPosition(byte encoderNum)
 // Report specify encoder postion using midi protocol
 void EncoderFirmata::reportPosition(byte encoder)
 {
-  if (isEncoderAttached(encoder)) 
+  if (isAttached(encoder))
   {
     Firmata.write(START_SYSEX);
     Firmata.write(ENCODER_DATA);
@@ -214,17 +215,10 @@ void EncoderFirmata::reportPosition(byte encoder)
 // Report all attached encoders positions (one message for all encoders) 
 void EncoderFirmata::reportPositions()
 {
-  Firmata.write(START_SYSEX);
-  Firmata.write(ENCODER_DATA);
-  byte encoder;
-  for(encoder=0; encoder<MAX_ENCODERS; encoder++) 
-  {
-    if (isEncoderAttached(encoder))
-    {
-      _reportEncoderPosition(encoder,encoders[encoder]->read());
-    }
-  }
-  Firmata.write(END_SYSEX);
+  byte tmpReport = autoReport;
+  autoReport = 1;
+  report();
+  autoReport = tmpReport;
 }
 
 void EncoderFirmata::_reportEncoderPosition(byte encoder, int32_t position)
@@ -245,7 +239,7 @@ void EncoderFirmata::toggleAutoReport(byte report)
 
 bool EncoderFirmata::isReportingEnabled()
 {
-  return autoReport;
+  return autoReport > 0;
 }
 
 

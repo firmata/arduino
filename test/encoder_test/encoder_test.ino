@@ -104,7 +104,7 @@ test(reportEncoderPosition)
   byte encoderNum = 1, pin1 = 2, pin2 = 3;
   encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  stream.flush();
+  stream.reset();
   encoder.reportPosition(encoderNum);
   assertEqual(stream.bytesWritten().length(), 8);
 }
@@ -115,7 +115,7 @@ test(handeReportEncoderPositionMessage)
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
   encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  stream.flush();
+  stream.reset();
   byte message[]={ENCODER_REPORT_POSITION, encoderNum};
   encoder.handleSysex(ENCODER_DATA, 2, message);
   assertEqual(stream.bytesWritten().length(), 8);
@@ -129,7 +129,7 @@ test(reportEncodersPositions)
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
   encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  stream.flush();
+  stream.reset();
   encoder.reportPositions();
   assertEqual(stream.bytesWritten().length(), 8);
 }
@@ -141,7 +141,7 @@ test(handleReportEncodersPositionsMessage)
   byte encoderNum = 0, pin1 = 2, pin2 = 3;
   encoder.attachEncoder(encoderNum, pin1, pin2);
   
-  stream.flush();
+  stream.reset();
   byte message[]={ENCODER_REPORT_POSITIONS};
   encoder.handleSysex(ENCODER_DATA, 1, message);
   assertEqual(stream.bytesWritten().length(), 8);
@@ -150,16 +150,19 @@ test(handleReportEncodersPositionsMessage)
 test(enableAutomaticReports)
 {
   EncoderFirmata encoder;
-  assertFalse(encoder.isReportingEnabled());
-  encoder.toggleAutoReport(true);
   assertTrue(encoder.isReportingEnabled());
-  encoder.toggleAutoReport(false);
+  encoder.toggleAutoReport(1);
+  assertTrue(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(2);
+  assertTrue(encoder.isReportingEnabled());
+  encoder.toggleAutoReport(0);
   assertFalse(encoder.isReportingEnabled());
 }
 
 test(handleEnableAutomaticReportsMessage)
 {
   EncoderFirmata encoder;
+  encoder.toggleAutoReport(0);
   assertFalse(encoder.isReportingEnabled());
 
   byte enableMessage[]={ENCODER_REPORT_AUTO, 0x01};
@@ -179,13 +182,13 @@ test(fullReport)
   
   EncoderFirmata encoder;
   
-  stream.flush();
+  stream.reset();
   encoder.report();
   assertEqual(stream.bytesWritten().length(), 0); // reports disable
   
-  encoder.toggleAutoReport(true);
+  encoder.toggleAutoReport(1);
   
-  stream.flush();
+  stream.reset();
   encoder.report();
   assertEqual(stream.bytesWritten().length(), 0); // no encoder attached
 
@@ -193,13 +196,13 @@ test(fullReport)
   byte pin1 = 2, pin2 = 3;
   encoder.attachEncoder(0, pin1, pin2);
 
-  stream.flush();
+  stream.reset();
   encoder.report();
   assertEqual(stream.bytesWritten().length(), 8); // 1 encoder attached
 
   encoder.attachEncoder(1, pin1, pin2);
 
-  stream.flush();
+  stream.reset();
   encoder.report();
   assertEqual(stream.bytesWritten().length(), 13); // 2 encoders attached
 }
