@@ -15,6 +15,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
+  Copyright (C) 2014 Nicolas Panel. All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -108,13 +109,16 @@ FirmataExt firmataExt;
 #include <utility/FirmataScheduler.h>
 FirmataScheduler scheduler;
 
+#include <utility/EncoderFirmata.h>
+EncoderFirmata encoder;
+
 
 // dependencies. Do not comment out the following lines
 #if defined AnalogOutputFirmata_h || defined ServoFirmata_h
 #include <utility/AnalogWrite.h>
 #endif
 
-#if defined AnalogInputFirmata_h || defined I2CFirmata_h
+#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h
 #include <utility/FirmataReporting.h>
 FirmataReporting reporting;
 #endif
@@ -226,6 +230,9 @@ void setup()
 #ifdef FirmataScheduler_h
   firmataExt.addFeature(scheduler);
 #endif
+#ifdef EncoderFirmata_h
+  firmataExt.addFeature(encoder);
+#endif
 #endif
   /* systemResetCallback is declared here (in ConfigurableFirmata.ino) */
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
@@ -295,6 +302,10 @@ runtasks: scheduler.runTasks();
 #ifdef I2CFirmata_h
     // report i2c data for all device with read continuous mode enabled
     i2c.report();
+#endif
+#ifdef EncoderFirmata_h
+    // report encoders positions if reporting enabled.
+    encoder.report();
 #endif
   }
 #endif

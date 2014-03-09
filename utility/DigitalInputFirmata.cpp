@@ -76,6 +76,7 @@ void DigitalInputFirmata::reportDigital(byte port, int value)
 {
   if (port < TOTAL_PORTS) {
     reportPINs[port] = (byte)value;
+    if (value) outputPort(port, readPort(port, portConfigInputs[port]), true);
   }
   // do not disable analog reporting on these 8 pins, to allow some
   // pins used for digital, others analog.  Instead, allow both types
