@@ -19,7 +19,7 @@ zip -r Firmata.zip ./Firmata/
 cd ..
 mv ./temp/Firmata.zip Firmata-2.6.0.zip
 
-#package for Arduino 1.5.x
+# package for Arduino 1.5.x
 cp library.properties temp/Firmata
 cd temp/Firmata
 mv readme.md ./extras/
