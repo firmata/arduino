@@ -163,7 +163,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
     query[queryIndex].bytes = argv[4] + (argv[5] << 7);
     break;
   case I2C_STOP_READING:
-        byte queryIndexToSkip;
+    byte queryIndexToSkip;
     // if read continuous mode is enabled for only 1 i2c device, disable
     // read continuous reporting for that device
     if (queryIndex <= 0) {
