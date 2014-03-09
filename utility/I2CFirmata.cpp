@@ -173,7 +173,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       // determine which device to stop reading and remove it's data from
       // the array, shifiting other array data to fill the space
       for (byte i = 0; i < queryIndex + 1; i++) {
-        if (query[i].addr = slaveAddress) {
+        if (query[i].addr == slaveAddress) {
           queryIndexToSkip = i;
           break;
         }
