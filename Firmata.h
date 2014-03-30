@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.4.0 - 2013-08-09
+  Firmata.h - Firmata library v2.6.0 - 2014-03-08
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 #define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
+#define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
