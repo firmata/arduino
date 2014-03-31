@@ -49,23 +49,21 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
   Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
 
   // check to be sure correct number of bytes were returned by slave
-  if(numBytes == Wire.available()) {
-    i2cRxData[0] = address;
-    i2cRxData[1] = theRegister;
-    for (int i = 0; i < numBytes; i++) {
-      #if ARDUINO >= 100
-      i2cRxData[2 + i] = Wire.read();
-      #else
-      i2cRxData[2 + i] = Wire.receive();
-      #endif
-    }
+  if(numBytes < Wire.available()) {
+      Firmata.sendString("I2C: Too many bytes received");
+  } else if(numBytes > Wire.available()) {
+      Firmata.sendString("I2C: Too few bytes received"); 
   }
-  else {
-    if(numBytes > Wire.available()) {
-      Firmata.sendString("I2C Read Error: Too many bytes received");
-    } else {
-      Firmata.sendString("I2C Read Error: Too few bytes received");
-    }
+
+  i2cRxData[0] = address;
+  i2cRxData[1] = theRegister;
+
+  for (int i = 0; i < numBytes && Wire.available(); i++) {
+    #if ARDUINO >= 100
+    i2cRxData[2 + i] = Wire.read();
+    #else
+    i2cRxData[2 + i] = Wire.receive();
+    #endif
   }
 
   // send slave address, register and received bytes
@@ -75,7 +73,7 @@ void I2CFirmata::readAndReportData(byte address, int theRegister, byte numBytes)
 boolean I2CFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_I2C(pin)) {
-    if (mode==I2C) {
+    if (mode == I2C) {
       // the user must call I2C_CONFIG to enable I2C for a device
       return true;
     } else if (isI2CEnabled) {
@@ -119,7 +117,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
   byte data;
   mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
   if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
-    Firmata.sendString("10-bit addressing mode is not yet supported");
+    Firmata.sendString("10-bit addressing not supported");
     return;
   }
   else {
@@ -165,7 +163,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
     query[queryIndex].bytes = argv[4] + (argv[5] << 7);
     break;
   case I2C_STOP_READING:
-        byte queryIndexToSkip;
+    byte queryIndexToSkip;
     // if read continuous mode is enabled for only 1 i2c device, disable
     // read continuous reporting for that device
     if (queryIndex <= 0) {
@@ -175,7 +173,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       // determine which device to stop reading and remove it's data from
       // the array, shifiting other array data to fill the space
       for (byte i = 0; i < queryIndex + 1; i++) {
-        if (query[i].addr = slaveAddress) {
+        if (query[i].addr == slaveAddress) {
           queryIndexToSkip = i;
           break;
         }
@@ -184,7 +182,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
         if (i < MAX_QUERIES) {
           query[i].addr = query[i+1].addr;
-          query[i].reg = query[i+1].addr;
+          query[i].reg = query[i+1].reg;
           query[i].bytes = query[i+1].bytes;
         }
       }

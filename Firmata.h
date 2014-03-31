@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.4.0 - 2013-08-09
+  Firmata.h - Firmata library v2.6.0 - 2014-03-08
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -20,10 +20,10 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
+#define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
@@ -41,6 +41,7 @@
 
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
+#define ENCODER_DATA            0x61 // reply with encoders current positions
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
@@ -61,6 +62,7 @@
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
 #define SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
+
 // these are DEPRECATED to make the naming more consistent
 #define FIRMATA_STRING          0x71 // same as STRING_DATA
 #define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
@@ -77,8 +79,9 @@
 #define I2C                     0x06 // pin included in I2C setup
 #define ONEWIRE                 0x07 // pin configured for 1-wire
 #define STEPPER                 0x08 // pin configured for stepper motor
+#define ENCODER                 0x09 // pin configured for encoders
 #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         10
+#define TOTAL_PIN_MODES         11
 
 extern "C" {
 // callback function types

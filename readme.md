@@ -18,6 +18,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [https://github.com/firmata/pyduino]
   * [https://github.com/lupeke/python-firmata]
   * [https://github.com/tino/pyFirmata]
+  * [https://github.com/MrYsLab/PyMata]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
   * [https://github.com/rcaputo/rx-firmata]
@@ -41,11 +42,15 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://code.google.com/p/as3glue/]
 * PHP
   * [https://bitbucket.org/ThomasWeinert/carica-firmata]
+* Haskell
+  * [http://hackage.haskell.org/package/hArduino]
+* iOS
+  * [https://github.com/jacobrosenthal/iosfirmata]
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application. If you are using Arduino 1.5.x, you'll need to delete the avr specific Firmata folder per the instructions in the next section.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
 
 **Mac OSX**:
 
@@ -62,8 +67,8 @@ Using the Git Shell application installed with [GitHub for Windows](http://windo
 
 update the path and arduino version as necessary
 ```bash
-$ rm -r c:/Program\ Files/arduino-1.x/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino-1.x/libraries/Firmata
+$ rm -r c:/Program\ Files/arduino/libraries/Firmata
+$ git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino/libraries/Firmata
 ```
 
 Note: If you use GitHub for Windows, you must clone the firmata/arduino repository using the Git Shell application as described above. You can use the Github for Windows GUI only after you have cloned the repository. Drag the Firmata file into the Github for Windows GUI to track it.
@@ -72,30 +77,8 @@ Note: If you use GitHub for Windows, you must clone the firmata/arduino reposito
 
 update the path and arduino version as necessary
 ```bash
-$ rm -r ~/arduino-1.x/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
-```
-
-##Updating Firmata in the Arduino 1.5.0, 1.5.1 or 1.5.2 IDE
-Follow the instructions above to copy Firmata to the libraries directory. However
-you will also need to delete the version of Firmata that is included in the avr
-platform specific libraries directory. You'll find it in the following locations
-depending on your OS. Delete the Firmata folder. Beginning with Arduino 1.5.3 this
-step will no longer be necessary.
-
-**Mac OSX**:
-```
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/avr/libraries/Firmata
-```
-
-**Windows**:
-```
-/Program\ Files/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-```
-
-**Linux**
-```
-~/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
+$ rm -r ~/arduino/libraries/Firmata
+$ git clone git@github.com:firmata/arduino.git ~/arduino/libraries/Firmata
 ```
 
 <a name="contributing" />
@@ -103,7 +86,7 @@ step will no longer be necessary.
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/arduino/issues?sort=created&state=open). Due to the limited memory of standard Arduino boards we cannot add every requested feature to StandardFirmata. Requests to add new features to StandardFirmata will be evaluated by the Firmata developers. However it is still possible to add new features to other Firmata implementations (Firmata is a protocol whereas StandardFirmata is just one of many possible implementations).
 
-To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch.
+To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch. If you are contributing a feature for configurable firmata, submit the pull request against the *configurable_dev* branch.
 
 If you would like to contribute but don't have a specific bugfix or new feature to contribute, you can take on an existing issue, see issues labeled "pull-request-encouraged". Add a comment to the issue to express your intent to begin work and/or to get any additional information about the issue.
 
