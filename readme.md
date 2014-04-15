@@ -28,6 +28,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://funnel.cc]
 * clojure
   * [https://github.com/nakkaya/clodiuno]
+  * [https://github.com/peterschwarz/clj-firmata]
 * javascript 
   * [https://github.com/jgautier/firmata]
   * [http://breakoutjs.com]
