@@ -98,7 +98,7 @@ I2CFirmata i2c;
 #include <utility/OneWireFirmata.h>
 OneWireFirmata oneWire;
 
-#include <utility/Firmata.h>
+#include <utility/StepperFirmata.h>
 StepperFirmata stepper;
 
 #include <utility/FirmataExt.h>
