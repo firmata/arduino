@@ -56,23 +56,23 @@ void NewPingFirmata::handleCapability(byte pin)
 boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   uint8_t pingerTriggerPin;
-  uint8_t pingerEchoPin ;
-  byte pingerMSB, pingerLSB ;
+  uint8_t pingerEchoPin;
+  byte pingerMSB, pingerLSB;
 
   if( command == PING_DATA)
   {
     if ( numActivePingers < MAX_PINGERS)
     {
-      pingerTriggerPin = argv[0] ;
-      pingerEchoPin = argv[1] ;
+      pingerTriggerPin = argv[0];
+      pingerEchoPin = argv[1];
       // set interval to a minium of 33 ms.
       if ( argv[2] >= 33 ) {
-        pingInterval = argv[2] ;
+        pingInterval = argv[2];
       }
       else {
-        pingInterval = 33 ;
+        pingInterval = 33;
       }
-      pingPinNumbers[numActivePingers] = pingerTriggerPin ;
+      pingPinNumbers[numActivePingers] = pingerTriggerPin;
 
       Firmata.setPinMode(pingerTriggerPin, PING);
       Firmata.setPinMode(pingerEchoPin, PING);
@@ -81,8 +81,8 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
       }
       
       pingers[numActivePingers] =
-        new NewPing(pingerTriggerPin, pingerEchoPin, pingInterval) ;
-      numActivePingers++ ;
+        new NewPing(pingerTriggerPin, pingerEchoPin, pingInterval);
+      numActivePingers++;
     }
     else {
       return false;
@@ -96,7 +96,6 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
 
 void NewPingFirmata::reset()
 {
-  // currently reset is called after all pins have been reset to default so
   currentPinger = 0;
   numActivePingers=0;
   for (byte i=0; i<MAX_PINGERS; i++) {
@@ -119,27 +118,27 @@ void NewPingFirmata::update()
 
     if (numActivePingers)
     {
-      unsigned int uS ;
+      unsigned int uS;
       unsigned long currentTime = millis();
       if( (currentTime - pingTimer) > pingInterval) {
-        pingTimer = currentTime ;
+        pingTimer = currentTime;
         // send next device ping
         uS = pingers[nextPinger]->ping();
         // Convert ping time to distance in cm and print
-        pingResult = uS / US_ROUNDTRIP_CM ;
-        currentPinger = nextPinger ;
+        pingResult = uS / US_ROUNDTRIP_CM;
+        currentPinger = nextPinger;
         if ( nextPinger++ >= numActivePingers - 1)
         {
-          nextPinger = 0 ;
+          nextPinger = 0;
         }
-        pingerLSB = pingResult & 0x7f ;
-        pingerMSB = pingResult >> 7 & 0x7f ;
+        pingerLSB = pingResult & 0x7f;
+        pingerMSB = pingResult >> 7 & 0x7f;
 
         Firmata.write(START_SYSEX);
-        Firmata.write(PING_DATA) ;
-        Firmata.write(pingPinNumbers[currentPinger]) ;
-        Firmata.write(pingerLSB) ;
-        Firmata.write(pingerMSB) ;
+        Firmata.write(PING_DATA);
+        Firmata.write(pingPinNumbers[currentPinger]);
+        Firmata.write(pingerLSB);
+        Firmata.write(pingerMSB);
         Firmata.write(END_SYSEX);
         }
     }
