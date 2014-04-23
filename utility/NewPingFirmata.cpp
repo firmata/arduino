@@ -57,6 +57,7 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   uint8_t pingerTriggerPin;
   uint8_t pingerEchoPin;
+  unsigned int max_distance;
   byte pingerMSB, pingerLSB;
 
   if( command == PING_DATA)
@@ -65,9 +66,10 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
     {
       pingerTriggerPin = argv[0];
       pingerEchoPin = argv[1];
+      max_distance = argv[2] + (argv[3] << 7);
       // set interval to a minium of 33 ms.
-      if ( argv[2] >= 33 ) {
-        pingInterval = argv[2];
+      if ( argv[4] >= 33 ) {
+        pingInterval = argv[4];
       }
       else {
         pingInterval = 33;
@@ -81,28 +83,11 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
       }
       
       pingers[numActivePingers] =
-        new NewPing(pingerTriggerPin, pingerEchoPin, pingInterval);
+        new NewPing(pingerTriggerPin, pingerEchoPin, max_distance);
       numActivePingers++;
     }
     else {
       return false;
-    }
-  }
-}
-
-/*==============================================================================
- * SETUP()
- *============================================================================*/
-
-void NewPingFirmata::reset()
-{
-  currentPinger = 0;
-  numActivePingers=0;
-  for (byte i=0; i<MAX_PINGERS; i++) {
-    if (pingers[i]) {
-      free(pingers[i]);
-      pingers[i] = 0;
-      pingPinNumbers[i] = IGNORE;
     }
   }
 }
