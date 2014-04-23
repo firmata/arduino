@@ -50,7 +50,7 @@ private:
   uint8_t nextPinger; // index of next pinger in pingers array 
   uint8_t currentPinger; // current pinger index in pingers arrary
   uint8_t pingInterval; // time between pings in ms.
-  uint8_t pingPinNumbers[MAX_PINGERS] ; // contains trigger pin #
+  uint8_t pingPinNumbers[MAX_PINGERS]; // contains trigger pin #
   unsigned long pingTimer; // next ping expiration time
 };
 
