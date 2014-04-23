@@ -52,7 +52,6 @@ void NewPingFirmata::handleCapability(byte pin)
  * SYSEX-BASED commands
  *============================================================================*/
 
-
 boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   uint8_t pingerTriggerPin;
@@ -92,9 +91,28 @@ boolean NewPingFirmata::handleSysex(byte command, byte argc, byte *argv)
   }
 }
 
+
+/*==============================================================================
+ * SETUP()
+ *============================================================================*/
+
+void NewPingFirmata::reset()
+{
+  currentPinger = 0;
+  numActivePingers=0;
+  for (byte i=0; i<MAX_PINGERS; i++) {
+    if (pingers[i]) {
+      free(pingers[i]);
+      pingers[i] = 0;
+      pingPinNumbers[i] = IGNORE;
+    }
+  }
+}
+
 /*==============================================================================
  * LOOP()
  *============================================================================*/
+ 
 void NewPingFirmata::update()
 {
     uint8_t pingerLSB;
