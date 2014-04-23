@@ -16,7 +16,8 @@
   Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  
+  Copyright (C) 2014 Alan Yorinks. All rights reserved.
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -108,6 +109,9 @@ FirmataScheduler scheduler;
 
 #include <utility/EncoderFirmata.h>
 EncoderFirmata encoder;
+
+#include <utility/NewPingFirmata.h>
+NewPingFirmata ping;
 
 
 // dependencies. Do not comment out the following lines
@@ -218,6 +222,9 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef NewPingFirmata_h
+  firmataExt.addFeature(ping);
+#endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
@@ -306,6 +313,9 @@ runtasks: scheduler.runTasks();
 #ifdef StepperFirmata_h
   stepper.update();
 #endif
+#ifdef NewPingFirmata_h
+  ping.update();
+#endif
 #if defined NETWORK_FIRMATA && !defined local_ip
   if (Ethernet.maintain())
     {
@@ -313,3 +323,4 @@ runtasks: scheduler.runTasks();
     }
 #endif
 }
+
