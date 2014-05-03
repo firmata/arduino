@@ -33,7 +33,7 @@ void setup()
 {
     byte pin;
 
-    Firmata.setFirmwareVersion(0, 2);
+    Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
     Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 
     for (pin=0; pin < TOTAL_PINS; pin++) {

@@ -50,7 +50,7 @@ Most of the time you will be interacting with arduino with a client library on t
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
-##Updating Firmata in the Arduino IDE (< Arduino 1.5)
+##Updating Firmata in the Arduino IDE
 The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
 
 **Mac OSX**:
@@ -68,8 +68,8 @@ Using the Git Shell application installed with [GitHub for Windows](http://windo
 
 update the path and arduino version as necessary
 ```bash
-$ rm -r c:/Program\ Files/arduino-1.x/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino-1.x/libraries/Firmata
+$ rm -r c:/Program\ Files/arduino/libraries/Firmata
+$ git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino/libraries/Firmata
 ```
 
 Note: If you use GitHub for Windows, you must clone the firmata/arduino repository using the Git Shell application as described above. You can use the Github for Windows GUI only after you have cloned the repository. Drag the Firmata file into the Github for Windows GUI to track it.
@@ -78,31 +78,8 @@ Note: If you use GitHub for Windows, you must clone the firmata/arduino reposito
 
 update the path and arduino version as necessary
 ```bash
-$ rm -r ~/arduino-1.x/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
-```
-
-##Updating Firmata in the Arduino IDE (>= Arduino 1.5.2)
-As of Arduino 1.5.2 and there are separate library directories for the sam and
-avr architectures. To update Firmata in Arduino 1.5.2 or higher, follow the 
-instructions above for pre Arduino 1.5 versions but update the path as follows:
-
-**Mac OSX**:
-```
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/avr/libraries/Firmata
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/sam/libraries/Firmata
-```
-
-**Windows**:
-```
-/Program\ Files/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-/Program\ Files/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
-```
-
-**Linux**
-```
-~/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-~/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
+$ rm -r ~/arduino/libraries/Firmata
+$ git clone git@github.com:firmata/arduino.git ~/arduino/libraries/Firmata
 ```
 
 <a name="contributing" />
@@ -110,7 +87,7 @@ instructions above for pre Arduino 1.5 versions but update the path as follows:
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/arduino/issues?sort=created&state=open). Due to the limited memory of standard Arduino boards we cannot add every requested feature to StandardFirmata. Requests to add new features to StandardFirmata will be evaluated by the Firmata developers. However it is still possible to add new features to other Firmata implementations (Firmata is a protocol whereas StandardFirmata is just one of many possible implementations).
 
-To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch.
+To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch. If you are contributing a feature for configurable firmata, submit the pull request against the *configurable_dev* branch.
 
 If you would like to contribute but don't have a specific bugfix or new feature to contribute, you can take on an existing issue, see issues labeled "pull-request-encouraged". Add a comment to the issue to express your intent to begin work and/or to get any additional information about the issue.
 
