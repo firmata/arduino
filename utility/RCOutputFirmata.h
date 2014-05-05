@@ -19,13 +19,6 @@
 #include <utility/FirmataFeature.h>
 #include <RCSwitch.h>
 
-/*
- * SYSEX_COMMAND_RC_DATA and PINMODE_RC_TRANSMIT
- * are to be defined within the firmata standard
- */
-#define SYSEX_COMMAND_RC_DATA   0x66  // sysex command to for RC data
-#define PINMODE_RC_TRANSMIT     0x0A  // pin mode to send RC codes
-
 /* Subcommands */
 #define UNKNOWN                 0x00
 

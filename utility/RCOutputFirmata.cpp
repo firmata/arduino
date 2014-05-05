@@ -19,7 +19,7 @@
 void RCOutputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(PINMODE_RC_TRANSMIT);
+    Firmata.write(RC_TRANSMIT);
     Firmata.write(1); // data doesn't have a fixed resolution
   }
 }
@@ -27,7 +27,7 @@ void RCOutputFirmata::handleCapability(byte pin)
 boolean RCOutputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    if (mode == PINMODE_RC_TRANSMIT) {
+    if (mode == RC_TRANSMIT) {
       attach(pin);
       return true;
     } else {
@@ -49,7 +49,7 @@ void RCOutputFirmata::reset()
 boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
   /* required: pin, subcommand, value */
-  if (command != SYSEX_COMMAND_RC_DATA || argc <= 2) {
+  if (command != RC_DATA || argc <= 2) {
     return false;
   }
   byte pin = argv[0];
@@ -175,7 +175,7 @@ byte RCOutputFirmata::setTristateBit(byte tristateByte, byte index, char tristat
 void RCOutputFirmata::sendMessage(byte pin, byte subcommand, byte length, byte *data)
 {
   Firmata.write(START_SYSEX);
-  Firmata.write(SYSEX_COMMAND_RC_DATA);
+  Firmata.write(RC_DATA);
   Firmata.write(pin);
   Firmata.write(subcommand);
   Encoder7Bit.startBinaryWrite();
