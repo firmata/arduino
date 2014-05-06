@@ -1,9 +1,9 @@
 /*
   RCOutputFirmata.cpp - Firmata library
 
-  Version: DEVELOPMENT SNAPSHOT
-  Date:    2014-05-03
-  Author:  fhem-user ( http://forum.fhem.de/index.php?action=emailuser;sa=email;uid=1713 )
+  Version: 1.0-SNAPSHOT
+  Date:    2014-05-06
+  Author:  git-developer ( https://github.com/git-developer )
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -48,11 +48,12 @@ void RCOutputFirmata::reset()
 
 boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
-  /* required: pin, subcommand, value */
+  /* required: subcommand, pin, value */
   if (command != RC_DATA || argc <= 2) {
     return false;
   }
-  byte pin = argv[0];
+  byte subcommand = argv[0];
+  byte pin = argv[1];
   if (Firmata.getPinMode(pin) == IGNORE) {
     return false;
   }
@@ -70,7 +71,6 @@ boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
     return false;
   }
   
-  byte subcommand = argv[1];
   byte *data = (byte*) argv+2;
   Encoder7Bit.readBinary(length, data, data);
   int value = *(int*) data;
@@ -88,7 +88,7 @@ boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
     }
     default: { subcommand = UNKNOWN; }
   }
-  sendMessage(pin, subcommand, length, data);
+  sendMessage(subcommand, pin, length, data);
   return true;
 }
 
@@ -172,12 +172,12 @@ byte RCOutputFirmata::setTristateBit(byte tristateByte, byte index, char tristat
   return (tristateByte & clear) | (tristateBit << shift);
 }
 
-void RCOutputFirmata::sendMessage(byte pin, byte subcommand, byte length, byte *data)
+void RCOutputFirmata::sendMessage(byte subcommand, byte pin, byte length, byte *data)
 {
   Firmata.write(START_SYSEX);
   Firmata.write(RC_DATA);
-  Firmata.write(pin);
   Firmata.write(subcommand);
+  Firmata.write(pin);
   Encoder7Bit.startBinaryWrite();
   for (int i = 0; i < length; i++) {
     Encoder7Bit.writeBinary(data[i]);

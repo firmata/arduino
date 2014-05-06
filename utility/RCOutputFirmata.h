@@ -1,9 +1,9 @@
 /*
   RCOutputFirmata.h - Firmata library
 
-  Version: DEVELOPMENT SNAPSHOT
-  Date:    2014-05-03
-  Author:  fhem-user ( http://forum.fhem.de/index.php?action=emailuser;sa=email;uid=1713 )
+  Version: 1.0-SNAPSHOT
+  Date:    2014-05-06
+  Author:  git-developer ( https://github.com/git-developer )
    
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -105,13 +105,13 @@ private:
   /**
    * Send a message to the firmata host.
    *
-   * @param pin        Pin that corresponds to the message
    * @param subcommand Details about the message
    *                     (see the constants defined above)
+   * @param pin        Pin that corresponds to the message
    * @param length     Message length
    * @param data       Message content
    */  
-  void sendMessage(byte pin, byte subcommand, byte length, byte *data);
+  void sendMessage(byte subcommand, byte pin, byte length, byte *data);
 
 };
 
