@@ -1,7 +1,7 @@
 /*
   RCInputFirmata.h - Firmata library
 
-  Version: DEVELOPMENT SNAPSHOT
+  Version: 1.0-SNAPSHOT
   Date:    2014-05-06
   Author:  git-developer ( https://github.com/git-developer )
    
@@ -17,7 +17,6 @@
 #define RCInputFirmata_h
 
 #include <utility/FirmataFeature.h>
-#include <utility/RCOutputFirmata.h> // only as long as common constants are defined there
 #include <RCSwitch.h>
 
 /* Subcommands */
@@ -40,21 +39,11 @@ private:
   RCSwitch* receivers[TOTAL_PINS];
   
   /** Initializes a receiver for the given pin */
-  void attach(byte pin);
+  boolean attach(byte pin);
   
   /** Removes the receiver for the given pin */
   void detach(byte pin);
 
-  /**
-   * Converts a long containing tristate bits to single bytes.
-   *
-   * @param tristateBytes A long containing tristate bits
-   * @param bitCount      Number of valid bits in the long
-   * @param tristateBytes Target for the tristate bits
-   * @return Number of written bytes
-   */
-  byte convert(long tristateBits, byte bitCount, byte* tristateBytes);
-  
   /**
    * Send a message to the firmata host.
    *
@@ -65,6 +54,8 @@ private:
    * @param data       Message content
    */  
   void sendMessage(byte subcommand, byte pin, byte length, byte *data);
+
+  byte getInterrupt(byte pin);
 
 };
 
