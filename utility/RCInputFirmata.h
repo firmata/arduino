@@ -32,6 +32,7 @@ public:
   void handleCapability(byte pin);
   boolean handleSysex(byte command, byte argc, byte* argv);
   void reset();
+  void report();
 
 private:
 
@@ -45,34 +46,25 @@ private:
   void detach(byte pin);
 
   /**
-   * Extracts a tristate bit from a byte.
+   * Converts a long containing tristate bits to single bytes.
    *
-   * @param tristateByte  A byte of 4 tristate bits
-   * @param index         Index of the tristate bit to read (0..3)
-   * @return Char representation of the requested tristate bit
+   * @param tristateBytes A long containing tristate bits
+   * @param bitCount      Number of valid bits in the long
+   * @param tristateBytes Target for the tristate bits
+   * @return Number of written bytes
    */
-  char getTristateChar(byte tristateByte, byte index);
-
-  /**
-   * Sets a tristate bit within a byte.
-   *
-   * @param tristateByte  A byte of 4 tristate bits
-   * @param index         Index of the tristate bit to write (0..3)
-   * @param char          Tristate bit to write
-   * @return The given byte with the requested tristate bit set
-   */
-  byte setTristateBit(byte tristateByte, byte index, char tristateChar);
-
+  byte convert(long tristateBits, byte bitCount, byte* tristateBytes);
+  
   /**
    * Send a message to the firmata host.
    *
-   * @param pin        Pin that corresponds to the message
    * @param subcommand Details about the message
    *                     (see the constants defined above)
+   * @param pin        Pin that corresponds to the message
    * @param length     Message length
    * @param data       Message content
    */  
-  void sendMessage(byte pin, byte subcommand, byte length, byte *data);
+  void sendMessage(byte subcommand, byte pin, byte length, byte *data);
 
 };
 
