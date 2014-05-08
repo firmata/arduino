@@ -48,7 +48,39 @@ void RCInputFirmata::reset()
 
 boolean RCInputFirmata::handleSysex(byte command, byte argc, byte *argv)
 {
-  return false;
+  /* required: subcommand, pin, value */
+  if (command != RC_DATA || argc <= 2) {
+    return false;
+  }
+  byte subcommand = argv[0];
+  byte pin = argv[1];
+  if (Firmata.getPinMode(pin) == IGNORE) {
+    return false;
+  }
+  RCSwitch *receiver = receivers[pin];
+  if (!receiver) { // pin was not attached yet
+    return false;
+  }
+  
+  /* 
+   * argc gives the number of 7-bit bytes (control and data),
+   * length is the number of 8-bit bytes (data only)
+   */
+  byte length = ((argc-2) * 7) >> 3;
+  if (length == 0) {
+    return false;
+  }
+  
+  byte *data = (byte*) argv+2;
+  Encoder7Bit.readBinary(length, data, data);
+  int value = *(int*) data;
+
+  if (subcommand == CONFIG_TOLERANCE) {
+    receiver->setReceiveTolerance(value);
+  }
+
+  sendMessage(subcommand, pin, length, data);
+  return true;
 }
 
 void RCInputFirmata::report()
