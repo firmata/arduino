@@ -77,6 +77,8 @@ boolean RCInputFirmata::handleSysex(byte command, byte argc, byte *argv)
 
   if (subcommand == CONFIG_TOLERANCE) {
     receiver->setReceiveTolerance(value);
+  } else {
+    subcommand = UNKNOWN;
   }
 
   sendMessage(subcommand, pin, length, data);

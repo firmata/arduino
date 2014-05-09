@@ -20,6 +20,7 @@
 #include <RCSwitch.h>
 
 /* Subcommands */
+#define UNKNOWN                 0x00
 #define CONFIG_TOLERANCE        0x31
 #define MESSAGE                 0x41
 
