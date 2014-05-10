@@ -19,7 +19,7 @@
 void RCOutputFirmata::handleCapability(byte pin)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    Firmata.write(RC_TRANSMIT);
+    Firmata.write(RC_SEND);
     Firmata.write(1); // data doesn't have a fixed resolution
   }
 }
@@ -27,7 +27,7 @@ void RCOutputFirmata::handleCapability(byte pin)
 boolean RCOutputFirmata::handlePinMode(byte pin, int mode)
 {
   if (IS_PIN_DIGITAL(pin)) {
-    if (mode == RC_TRANSMIT) {
+    if (mode == RC_SEND) {
       attach(pin);
       return true;
     } else {
