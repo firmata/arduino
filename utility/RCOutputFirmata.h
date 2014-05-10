@@ -29,6 +29,7 @@
 #define CODE_TRISTATE           0x21
 #define CODE_LONG               0x22
 #define CODE_CHAR               0x24
+#define CODE_TRISTATE_PACKED    0x28
 
 /* Tristate bit values */
 #define TRISTATE_0              0x00
@@ -59,14 +60,14 @@ private:
   /**
    * Initializes a sender for a pin.
    *
-   * @param pin Pin to connect to a sender
+   * @param pin Pin to associate to a sender
    */
   void attach(byte pin);
   
   /**
-   * Removes the sender for a pin.
+   * Removes the sender from a pin.
    *
-   * @param pin Pin that is connected to a sender
+   * @param pin Pin that has a sender associated
    */
   void detach(byte pin);
 
@@ -74,47 +75,63 @@ private:
    * Sends a tristate code via RCSwitch.
    *
    * @param sender RC sender
-   * @param data   Tristate bits
-   * @param length Length of data in bytes
-   * @return Number of processed bytes
+   * @param data   Tristate bits as char array ('0', 'F' and '1')
+   * 
+   * @return Number of processed data bytes
    */
-  byte sendTristate(RCSwitch *sender, byte *data, byte length);
+  byte sendTristate(RCSwitch *sender, byte *data);
 
   /**
-   * Sends a long value via RCSwitch.
+   * Sends a tristate code via RCSwitch.
    *
    * @param sender RC sender
-   * @param data data[0..1]: number of bits to send; data[2..5]: long value
-   * @return 
+   * @param data   Tristate bits in packed format
+   *                 (byte array with 4 tristate bits per byte)
+   * @param length Length of data in bytes
+   *
+   * @return Number of processed data bytes
+   */
+  byte sendPackedTristate(RCSwitch *sender, byte *data, byte length);
+
+  /**
+   * Sends a code given as long value via RCSwitch.
+   *
+   * @param sender RC sender
+   * @param data data[0..1]: number of bits to send; data[2..5]: bits to send
+   *
+   * @return Number of processed data bytes
    */
   byte sendLong(RCSwitch *sender, byte *data);
 
   /**
-   * Sends a character string via RCSwitch.
+   * Sends a code given as char array via RCSwitch.
    *
    * @param sender RC sender
-   * @param data   character string to send
-   * @return Number of sent characters
+   * @param data   characters to send (null-terminated char array)
+   *
+   * @return Number of processed data bytes
    */
   byte sendString(RCSwitch *sender, byte *data);
 
   /**
-   * Converts a byte[] with tristate bits to a string.
+   * Converts a byte[] with packed tristate bits to a string.
    *
    * @param tristateBytes byte[] with 4 tristate bits per byte
    * @param length        Length of the byte[]
    * @param tristateCode  Target for the string
+   *
    * @return Number of written characters
    */
   byte unpack(byte *tristateBytes, byte length, char* tristateCode);
   
   /**
-   * Converts a string with tristate bits to a byte[].
+   * Converts a string with tristate bits to a byte[] with packed tristate bits.
    *
    * @param tristateCode  String with tristate bits ('0', '1', 'F')
    * @param length        Length of the string
    * @param tristateBytes Target for the tristate bits
    *                        with 4 tristate bits per byte
+   *
    * @return Number of written bytes
    */
   byte pack(char* tristateCode, byte length, byte *tristateBytes);
@@ -122,8 +139,9 @@ private:
   /**
    * Extracts a tristate bit from a byte.
    *
-   * @param tristateByte  A byte of 4 tristate bits
+   * @param tristateByte  A byte containing 4 tristate bits
    * @param index         Index of the tristate bit to read (0..3)
+   *
    * @return Char representation of the requested tristate bit
    */
   char getTristateChar(byte tristateByte, byte index);
@@ -134,6 +152,7 @@ private:
    * @param tristateByte  A byte of 4 tristate bits
    * @param index         Index of the tristate bit to write (0..3)
    * @param char          Tristate bit to write
+   *
    * @return The given byte with the requested tristate bit set
    */
   byte setTristateBit(byte tristateByte, byte index, char tristateChar);

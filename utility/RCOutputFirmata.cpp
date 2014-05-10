@@ -72,16 +72,17 @@ boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
   }
   
   byte *data = (byte*) argv+2;
-  Encoder7Bit.readBinary(length, data, data);
+  Encoder7Bit.readBinary(length, data, data); // decode in-place
   int value = *(int*) data;
 
   switch (subcommand) {
     case CONFIG_PROTOCOL:        { sender->setProtocol(value); break; }
     case CONFIG_PULSE_LENGTH:    { sender->setPulseLength(value); break; }
     case CONFIG_REPEAT_TRANSMIT: { sender->setRepeatTransmit(value); break; }
-    case CODE_TRISTATE:          { length = sendTristate(sender, data, length); break; } 
+    case CODE_TRISTATE:          { length = sendTristate(sender, data); break; }
     case CODE_LONG:              { length = sendLong(sender, data); break; }
     case CODE_CHAR:              { length = sendString(sender, data); break; }
+    case CODE_TRISTATE_PACKED:   { length = sendPackedTristate(sender, data, length); break; } 
     default:                     { subcommand = UNKNOWN; }
   }
   sendMessage(subcommand, pin, length, data);
@@ -108,9 +109,16 @@ void RCOutputFirmata::detach(byte pin)
   }
 }
 
-byte RCOutputFirmata::sendTristate(RCSwitch *sender, byte *data, byte length)
+byte RCOutputFirmata::sendTristate(RCSwitch *sender, byte *data)
 {
-  char tristateCode[length*4];
+  char* code = (char*) data;
+  sender->sendTriState(code);
+  return strlen(code);
+}
+
+byte RCOutputFirmata::sendPackedTristate(RCSwitch *sender, byte *data, byte length)
+{
+  char tristateCode[length*4]; // 4 tristate bits per byte
   byte charCount = unpack(data, length, tristateCode);
   sender->sendTriState(tristateCode);
   return pack(tristateCode, charCount, data);
@@ -128,9 +136,7 @@ byte RCOutputFirmata::sendString(RCSwitch *sender, byte *data)
 {
   char* code = (char*) data;
   sender->send(code);
-  int length;
-  for (length = 0; data[length] != '\0'; length++) {}
-  return length;
+  return strlen(code);
 }
 
 byte RCOutputFirmata::unpack(byte *tristateBytes, byte length, char* tristateCode)
@@ -191,7 +197,7 @@ byte RCOutputFirmata::setTristateBit(byte tristateByte, byte index, char tristat
     case '1': tristateBit = TRISTATE_1; break;
   }
   
-  /* remove the requested tristate bit and set it afterwards */
+  /* remove old data from the requested position and set the tristate bit */
   return (tristateByte & clear) | (tristateBit << shift);
 }
 
