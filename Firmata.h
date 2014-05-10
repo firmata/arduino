@@ -81,7 +81,7 @@
 #define ONEWIRE                 0x07 // pin configured for 1-wire
 #define STEPPER                 0x08 // pin configured for stepper motor
 #define ENCODER                 0x09 // pin configured for encoders
-#define RC_TRANSMIT             0x0A // pin configured for a RC sender
+#define RC_SEND                 0x0A // pin configured for a RC sender
 #define RC_RECEIVE              0x0B // pin configured for a RC receiver
 #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         13
