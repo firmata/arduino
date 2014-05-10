@@ -2,7 +2,7 @@
   RCOutputFirmata.cpp - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-06
+  Date:    2014-05-10
   Author:  git-developer ( https://github.com/git-developer )
 
   This library is free software; you can redistribute it and/or
@@ -79,14 +79,10 @@ boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
     case CONFIG_PROTOCOL:        { sender->setProtocol(value); break; }
     case CONFIG_PULSE_LENGTH:    { sender->setPulseLength(value); break; }
     case CONFIG_REPEAT_TRANSMIT: { sender->setRepeatTransmit(value); break; }
-    case CODE_TRISTATE: { 
-      char tristateCode[length*4];
-      byte charCount = unpack(data, length, tristateCode);
-      sender->sendTriState(tristateCode);
-      length = pack(tristateCode, charCount, data);
-      break;
-    }
-    default: { subcommand = UNKNOWN; }
+    case CODE_TRISTATE:          { length = sendTristate(sender, data, length); break; } 
+    case CODE_LONG:              { length = sendLong(sender, data); break; }
+    case CODE_CHAR:              { length = sendString(sender, data); break; }
+    default:                     { subcommand = UNKNOWN; }
   }
   sendMessage(subcommand, pin, length, data);
   return true;
@@ -110,6 +106,31 @@ void RCOutputFirmata::detach(byte pin)
     free(sender);
     senders[pin]=NULL;
   }
+}
+
+byte RCOutputFirmata::sendTristate(RCSwitch *sender, byte *data, byte length)
+{
+  char tristateCode[length*4];
+  byte charCount = unpack(data, length, tristateCode);
+  sender->sendTriState(tristateCode);
+  return pack(tristateCode, charCount, data);
+}
+
+byte RCOutputFirmata::sendLong(RCSwitch *sender, byte *data)
+{
+  unsigned int bitCount = *(unsigned int*) data;
+  unsigned long code    = *(unsigned long*) (data+2);
+  sender->send(code, bitCount);
+  return 6; // 2 bytes bitCount + 4 bytes code
+}
+
+byte RCOutputFirmata::sendString(RCSwitch *sender, byte *data)
+{
+  char* code = (char*) data;
+  sender->send(code);
+  int length;
+  for (length = 0; data[length] != '\0'; length++) {}
+  return length;
 }
 
 byte RCOutputFirmata::unpack(byte *tristateBytes, byte length, char* tristateCode)
@@ -141,7 +162,8 @@ byte RCOutputFirmata::pack(char* tristateCode, byte length, byte *tristateBytes)
   return count/4;
 }
 
-char RCOutputFirmata::getTristateChar(byte tristateByte, byte index) {
+char RCOutputFirmata::getTristateChar(byte tristateByte, byte index)
+{
 
   /* 
    * An invalid character is used as default
@@ -158,7 +180,8 @@ char RCOutputFirmata::getTristateChar(byte tristateByte, byte index) {
   return c;
 }
 
-byte RCOutputFirmata::setTristateBit(byte tristateByte, byte index, char tristateChar) {
+byte RCOutputFirmata::setTristateBit(byte tristateByte, byte index, char tristateChar)
+{
   byte shift = 6-(2*index); // 6, 4, 2 or 0
   byte clear = ~(0x03 << shift); // bitmask to clear the requested 2 bits
   byte tristateBit = TRISTATE_RESERVED;

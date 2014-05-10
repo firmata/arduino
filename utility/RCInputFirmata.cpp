@@ -15,7 +15,6 @@
 
 #include "RCInputFirmata.h"
 #include <Encoder7Bit.h>
-#define NO_INTERRUPT -1
 
 void RCInputFirmata::handleCapability(byte pin)
 {
@@ -91,13 +90,13 @@ void RCInputFirmata::report()
     if (IS_PIN_INTERRUPT(pin)) {
       RCSwitch *receiver = receivers[pin];
       if (receiver && receiver->available()) {
-        long value    = receiver->getReceivedValue();
-        int bitlength = receiver->getReceivedBitlength();
-        int delay     = receiver->getReceivedDelay();
-        int protocol  = receiver->getReceivedProtocol();
+        unsigned long value    = receiver->getReceivedValue();
+        unsigned int bitlength = receiver->getReceivedBitlength();
+        unsigned int delay     = receiver->getReceivedDelay();
+        unsigned int protocol  = receiver->getReceivedProtocol();
         unsigned int *rawdata  = receiver->getReceivedRawdata();
         receiver->resetAvailable();
-       
+
         byte data[10];
         data[0] = (value >> 24) & 0xFF;
         data[1] = (value >> 16) & 0xFF;

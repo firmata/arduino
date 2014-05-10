@@ -2,7 +2,7 @@
   RCOutputFirmata.h - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-06
+  Date:    2014-05-10
   Author:  git-developer ( https://github.com/git-developer )
    
   This library is free software; you can redistribute it and/or
@@ -56,11 +56,47 @@ private:
   /** 1 sender per pin */
   RCSwitch* senders[TOTAL_PINS];
   
-  /** Initializes a sender for the given pin */
+  /**
+   * Initializes a sender for a pin.
+   *
+   * @param pin Pin to connect to a sender
+   */
   void attach(byte pin);
   
-  /** Removes the sender for the given pin */
+  /**
+   * Removes the sender for a pin.
+   *
+   * @param pin Pin that is connected to a sender
+   */
   void detach(byte pin);
+
+  /**
+   * Sends a tristate code via RCSwitch.
+   *
+   * @param sender RC sender
+   * @param data   Tristate bits
+   * @param length Length of data in bytes
+   * @return Number of processed bytes
+   */
+  byte sendTristate(RCSwitch *sender, byte *data, byte length);
+
+  /**
+   * Sends a long value via RCSwitch.
+   *
+   * @param sender RC sender
+   * @param data data[0..1]: number of bits to send; data[2..5]: long value
+   * @return 
+   */
+  byte sendLong(RCSwitch *sender, byte *data);
+
+  /**
+   * Sends a character string via RCSwitch.
+   *
+   * @param sender RC sender
+   * @param data   character string to send
+   * @return Number of sent characters
+   */
+  byte sendString(RCSwitch *sender, byte *data);
 
   /**
    * Converts a byte[] with tristate bits to a string.

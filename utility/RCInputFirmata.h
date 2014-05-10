@@ -24,6 +24,8 @@
 #define CONFIG_TOLERANCE        0x31
 #define MESSAGE                 0x41
 
+#define NO_INTERRUPT -1
+
 class RCInputFirmata:public FirmataFeature
 {
 
@@ -39,10 +41,20 @@ private:
   /** 1 receiver per pin */
   RCSwitch* receivers[TOTAL_PINS];
   
-  /** Initializes a receiver for the given pin */
+  /**
+   * Initializes a receiver for a pin.
+   *
+   * @param pin Pin to associate to a receiver
+   *
+   * @return true in case of success
+   */
   boolean attach(byte pin);
   
-  /** Removes the receiver for the given pin */
+  /**
+   * Removes the receiver from a pin.
+   *
+   * @param pin Pin that has a receiver associated
+   */
   void detach(byte pin);
 
   /**
@@ -56,6 +68,14 @@ private:
    */  
   void sendMessage(byte subcommand, byte pin, byte length, byte *data);
 
+  /**
+   * Finds the interrupt number for a pin
+   *
+   * @param pin A pin
+   *
+   * @return the interrupt number for the given pin,
+   *         or NO_INTERRUPT if the pin cannot be used for external interrupts
+   */
   byte getInterrupt(byte pin);
 
 };
