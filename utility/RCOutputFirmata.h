@@ -2,15 +2,78 @@
   RCOutputFirmata.h - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-10
+  Date:    2014-05-16
   Author:  git-developer ( https://github.com/git-developer )
    
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+  Description
+  -----------
+   This library is an adapter between the firmata protocol and the RCSwitch
+   library. It allows to send radio messages.
 
-  See file LICENSE.txt for further informations on licensing terms.
+  Usage
+  -----
+   1.) Connect a RC receiver to a digital pin of your Arduino board
+   2.) Put RCSwitch into your arduino library directory
+   3.) Include RCOutputFirmata in ConfigurableFirmata
+   4.) Upload ConfigurableFirmata and connect Arduino to host
+   5.) Configure the pin to use pin mode RC_SEND
+
+   On success, you may send radio messages from the host. Every message that is
+   sent from the host will be echoed back as acknowledgement.
+  
+  Message format
+  --------------
+    byte 0:    subcommand
+    byte 1:    pin
+    bytes 2-n: subcommand specific parameters
+
+  Parameters
+  ----------
+    CONFIG_PROTOCOL:
+     Description:   Set the RCSwitch parameter "protocol"
+     Value space:   Defined by RCSwitch (RCSwitch 2.51: 1-3)
+     Default value: Defined by RCSwitch (RCSwitch 2.51: 1)
+     
+    CONFIG_PULSE_LENGTH:
+     Description:   Set the RCSwitch parameter "pulse length"
+     Value space:   Defined by RCSwitch (RCSwitch 2.51: int)
+     Default value: Defined by RCSwitch (RCSwitch 2.51: 350)
+     
+    CONFIG_REPEAT_TRANSMIT:
+     Description:   Set the RCSwitch parameter "repeat transmit"
+     Value space:   Defined by RCSwitch (RCSwitch 2.51: int)
+     Default value: Defined by RCSwitch (RCSwitch 2.51: 10)
+
+    CODE_TRISTATE:
+     Description:   Send a tristate code
+     Value space:   char[]
+
+    CODE_LONG:
+     Description:   Send a long code
+     Value space:   long
+
+    CODE_CHAR:
+     Description:   Send a character code
+     Value space:   char[]
+
+    CODE_TRISTATE_PACKED:
+     Description:   Send a tristate code
+     Value space:   byte[] - every byte is composed of 4 tristate bits
+                    (defined as TRISTATE_? constants in this file)
+
+  Downloads
+  ---------
+   ConfigurableFirmata: https://github.com/firmata/arduino/tree/configurable
+   RCSwitch:            https://code.google.com/p/rc-switch/
+
+  License
+  -------
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   See file LICENSE.txt for further informations on licensing terms.
 */
 
 #ifndef RCOutputFirmata_h

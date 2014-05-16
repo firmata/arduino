@@ -2,7 +2,7 @@
   RCOutputFirmata.cpp - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-10
+  Date:    2014-05-16
   Author:  git-developer ( https://github.com/git-developer )
 
   This library is free software; you can redistribute it and/or
@@ -86,7 +86,7 @@ boolean RCOutputFirmata::handleSysex(byte command, byte argc, byte *argv)
     default:                     { subcommand = UNKNOWN; }
   }
   sendMessage(subcommand, pin, length, data);
-  return true;
+  return subcommand != UNKNOWN;
 }
 
 void RCOutputFirmata::attach(byte pin)

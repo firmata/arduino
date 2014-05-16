@@ -2,7 +2,7 @@
   RCInputFirmata.cpp - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-06
+  Date:    2014-05-16
   Author:  git-developer ( https://github.com/git-developer )
 
   This library is free software; you can redistribute it and/or
@@ -43,6 +43,7 @@ void RCInputFirmata::reset()
       detach(pin);
     }
   }
+  rawdataEnabled = false;
 }
 
 boolean RCInputFirmata::handleSysex(byte command, byte argc, byte *argv)
@@ -71,17 +72,16 @@ boolean RCInputFirmata::handleSysex(byte command, byte argc, byte *argv)
   }
   
   byte *data = (byte*) argv+2;
-  Encoder7Bit.readBinary(length, data, data);
+  Encoder7Bit.readBinary(length, data, data); // decode in-place
   int value = *(int*) data;
 
-  if (subcommand == CONFIG_TOLERANCE) {
-    receiver->setReceiveTolerance(value);
-  } else {
-    subcommand = UNKNOWN;
+  switch (subcommand) {
+   case CONFIG_TOLERANCE:       { receiver->setReceiveTolerance(value); break; }
+   case CONFIG_ENABLE_RAW_DATA: { rawdataEnabled = (boolean) data[0]; break; }
+   default:                     { subcommand = UNKNOWN; }
   }
-
-  sendMessage(subcommand, pin, length, data);
-  return true;
+  sendMessage(subcommand, pin, length, data, 0, data);
+  return subcommand != UNKNOWN;
 }
 
 void RCInputFirmata::report()
@@ -91,9 +91,15 @@ void RCInputFirmata::report()
       RCSwitch *receiver = receivers[pin];
       if (receiver && receiver->available()) {
         unsigned long value    = receiver->getReceivedValue();
-        unsigned int bitlength = receiver->getReceivedBitlength();
+        unsigned int bitCount = receiver->getReceivedBitlength();
         unsigned int delay     = receiver->getReceivedDelay();
         unsigned int protocol  = receiver->getReceivedProtocol();
+        
+        /* 
+         * Note: The rawdata values can be changed while we read them.
+         * This cannot be avoided because rawdata is written from an interrupt
+         * routine.
+         */
         unsigned int *rawdata  = receiver->getReceivedRawdata();
         receiver->resetAvailable();
 
@@ -103,16 +109,18 @@ void RCInputFirmata::report()
         data[2] = (value >>  8) & 0xFF;
         data[3] = value & 0xFF;
         
-        data[4] = (bitlength >> 8) & 0xFF;
-        data[5] = bitlength & 0xFF;
+        data[4] = (bitCount >> 8) & 0xFF;
+        data[5] = bitCount & 0xFF;
         
         data[6] = (delay >> 8) & 0xFF;
         data[7] = delay & 0xFF;
         
         data[8] = (protocol >> 8) & 0xFF;
         data[9] = protocol & 0xFF;
-  
-        sendMessage(MESSAGE, pin, 10, data);
+        
+        byte rawdataLength = rawdataEnabled ? 2*RCSWITCH_MAX_CHANGES : 0;
+        
+        sendMessage(MESSAGE, pin, 10, data, rawdataLength, (byte*) rawdata);
       }
     }
   }
@@ -142,23 +150,31 @@ void RCInputFirmata::detach(byte pin)
   }
 }
 
-void RCInputFirmata::sendMessage(byte subcommand, byte pin, byte length, byte *data)
+void RCInputFirmata::sendMessage(byte subcommand, byte pin,
+                                 byte length1, byte *data1,
+                                 byte length2, byte *data2)
 {
   Firmata.write(START_SYSEX);
   Firmata.write(RC_DATA);
   Firmata.write(subcommand);
   Firmata.write(pin);
   Encoder7Bit.startBinaryWrite();
-  for (int i = 0; i < length; i++) {
-    Encoder7Bit.writeBinary(data[i]);
+  for (int i = 0; i < length1; i++) {
+    Encoder7Bit.writeBinary(data1[i]);
+  }
+  for (int i = 0; i < length2; i++) {
+    Encoder7Bit.writeBinary(data2[i]);
   }
   Encoder7Bit.endBinaryWrite();
   Firmata.write(END_SYSEX);
 }
 
-byte RCInputFirmata::getInterrupt(byte pin) { //TODO this only fits Arduino Mega; check how this can be made more flexible to fit different boards
+byte RCInputFirmata::getInterrupt(byte pin) {
+// this method fits common Arduino board including Mega.
+// TODO check how this can be made more flexible to fit different boards
+
   byte interrupt = NO_INTERRUPT;
-  switch(pin) {
+  switch (pin) {
     case   2: interrupt = 0; break;
     case   3: interrupt = 1; break;
     case  21: interrupt = 2; break;
