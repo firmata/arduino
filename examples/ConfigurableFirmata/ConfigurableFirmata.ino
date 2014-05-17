@@ -102,7 +102,11 @@ StepperFirmata stepper;
 
 #include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/RCOutputFirmata.h>
-RCOutputFirmata rcOutputFirmata;
+RCOutputFirmata rcOutput;
+
+#include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <utility/RCInputFirmata.h>
+RCInputFirmata rcInput;
 
 #include <utility/FirmataExt.h>
 FirmataExt firmataExt;
@@ -223,7 +227,10 @@ void setup()
   firmataExt.addFeature(stepper);
 #endif
 #ifdef RCOutputFirmata_h
-  firmataExt.addFeature(rcOutputFirmata);
+  firmataExt.addFeature(rcOutput);
+#endif
+#ifdef RCOutputFirmata_h
+  firmataExt.addFeature(rcInput);
 #endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
@@ -307,6 +314,9 @@ runtasks: scheduler.runTasks();
 #ifdef EncoderFirmata_h
     // report encoders positions if reporting enabled.
     encoder.report();
+#endif
+#ifdef RCInputFirmata_h
+    rcInput.report();
 #endif
   }
 #endif
