@@ -91,7 +91,7 @@ void RCInputFirmata::report()
       RCSwitch *receiver = receivers[pin];
       if (receiver && receiver->available()) {
         unsigned long value    = receiver->getReceivedValue();
-        unsigned int bitCount = receiver->getReceivedBitlength();
+        unsigned int bitCount  = receiver->getReceivedBitlength();
         unsigned int delay     = receiver->getReceivedDelay();
         unsigned int protocol  = receiver->getReceivedProtocol();
         
@@ -132,6 +132,7 @@ boolean RCInputFirmata::attach(byte pin)
   if (interrupt == NO_INTERRUPT) {
     return false;
   }
+  pinMode(PIN_TO_DIGITAL(pin), INPUT);
   RCSwitch *receiver = receivers[pin];
   if (!receiver) {
     receiver = new RCSwitch();

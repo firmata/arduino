@@ -123,7 +123,7 @@ EncoderFirmata encoder;
 #include <utility/AnalogWrite.h>
 #endif
 
-#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h
+#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h || defined RCInputFirmata_h
 #include <utility/FirmataReporting.h>
 FirmataReporting reporting;
 #endif
@@ -229,7 +229,7 @@ void setup()
 #ifdef RCOutputFirmata_h
   firmataExt.addFeature(rcOutput);
 #endif
-#ifdef RCOutputFirmata_h
+#ifdef RCInputFirmata_h
   firmataExt.addFeature(rcInput);
 #endif
 #ifdef FirmataReporting_h
