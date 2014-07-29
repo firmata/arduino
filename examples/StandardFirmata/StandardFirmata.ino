@@ -31,7 +31,7 @@
 
 #include <Servo.h>
 #include <Wire.h>
-#include <Firmata.h>
+#include "Firmata.h"
 
 // move the following defines to Firmata.h?
 #define I2C_WRITE B00000000
