@@ -65,7 +65,7 @@ int pinState[TOTAL_PINS];           // any value that has been written
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-int samplingInterval = 19;          // how often to run the main loop (in ms)
+unsigned long samplingInterval = 19; // how often to run the main loop (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -81,6 +81,12 @@ byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+
+// forward declare
+void enableI2CPins();
+void disableI2CPins();
+void reportAnalogCallback(byte analogPin, int value);
+
 
 Servo servos[MAX_SERVOS];
 /*==============================================================================

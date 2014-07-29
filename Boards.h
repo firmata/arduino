@@ -331,14 +331,27 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
-
+#elif defined(INTEL_GALILEO)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              20 // 14 digital + 6 analog
+#define VERSION_BLINK_PIN       13
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 19)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) - 2 < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         ((p) - 2)
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
 #endif
 
 // as long this is not defined for all boards:
-#ifndef IS_PIN_SPI(p)
+#ifndef IS_PIN_SPI
 #define IS_PIN_SPI(p)           0
 #endif
 
@@ -372,8 +385,8 @@ static inline unsigned char readPort(byte port, byte bitmask)
  * writePort() - Write an 8 bit port, only touch pins specified by a bitmask
  *============================================================================*/
 
-static inline unsigned char writePort(byte, byte, byte) __attribute__((always_inline, unused));
-static inline unsigned char writePort(byte port, byte value, byte bitmask)
+static inline void writePort(byte, byte, byte) __attribute__((always_inline, unused));
+static inline void writePort(byte port, byte value, byte bitmask)
 {
 #if defined(ARDUINO_PINOUT_OPTIMIZE)
 	if (port == 0) {
