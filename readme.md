@@ -28,6 +28,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://funnel.cc]
 * clojure
   * [https://github.com/nakkaya/clodiuno]
+  * [https://github.com/peterschwarz/clj-firmata]
 * javascript 
   * [https://github.com/jgautier/firmata]
   * [http://breakoutjs.com]
@@ -42,6 +43,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://code.google.com/p/as3glue/]
 * PHP
   * [https://bitbucket.org/ThomasWeinert/carica-firmata]
+  * [https://github.com/oasynnoum/phpmake_firmata]
 * Haskell
   * [http://hackage.haskell.org/package/hArduino]
 * iOS
