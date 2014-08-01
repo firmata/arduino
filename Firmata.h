@@ -49,6 +49,7 @@
 #define I2C_REQUEST             0x76 // send an I2C read/write request
 #define I2C_REPLY               0x77 // a reply to an I2C read request
 #define I2C_CONFIG              0x78 // config I2C settings such as delay times and power pins
+#define ANALOG_CONFIG           0x7C // configure analog read and write resolution and reference voltage
 #define EXTENDED_ANALOG         0x6F // analog write (PWM, Servo, etc) to any pin
 #define PIN_STATE_QUERY         0x6D // ask for a pin's current mode and value
 #define PIN_STATE_RESPONSE      0x6E // reply with pin's current mode and value
