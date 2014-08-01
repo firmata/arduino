@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -65,7 +65,7 @@ int pinState[TOTAL_PINS];           // any value that has been written
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-int samplingInterval = 19;          // how often to run the main loop (in ms)
+unsigned int samplingInterval = 19;          // how often to run the main loop (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -81,6 +81,15 @@ byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+
+byte analogReadRes = 10; // default - better to define in Boards.h?
+byte analogWriteRes = 8; // default - better to define in Boards.h?
+#ifdef DEFAULT
+// DEFAULT is not always = 0
+byte analogReferenceVoltage = DEFAULT; // defined in Arduio core for AVRs only
+#else
+byte analogReferenceVoltage = 0
+#endif
 
 Servo servos[MAX_SERVOS];
 /*==============================================================================
@@ -111,23 +120,21 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   Wire.requestFrom(address, numBytes);  // all bytes are returned in requestFrom
 
   // check to be sure correct number of bytes were returned by slave
-  if(numBytes == Wire.available()) {
-    i2cRxData[0] = address;
-    i2cRxData[1] = theRegister;
-    for (int i = 0; i < numBytes; i++) {
-      #if ARDUINO >= 100
-      i2cRxData[2 + i] = Wire.read();
-      #else
-      i2cRxData[2 + i] = Wire.receive();
-      #endif
-    }
-  }
-  else {
-    if(numBytes > Wire.available()) {
+  if(numBytes < Wire.available()) {
       Firmata.sendString("I2C Read Error: Too many bytes received");
-    } else {
+  } else if(numBytes > Wire.available()) {
       Firmata.sendString("I2C Read Error: Too few bytes received"); 
-    }
+  }
+
+  i2cRxData[0] = address;
+  i2cRxData[1] = theRegister;
+
+  for (int i = 0; i < numBytes && Wire.available(); i++) {
+    #if ARDUINO >= 100
+    i2cRxData[2 + i] = Wire.read();
+    #else
+    i2cRxData[2 + i] = Wire.receive();
+    #endif
   }
 
   // send slave address, register and received bytes
@@ -337,7 +344,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
     if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
-      Firmata.sendString("10-bit addressing mode is not yet supported");
+      Firmata.sendString("10-bit addressing not supported");
       return;
     }
     else {
@@ -383,7 +390,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       query[queryIndex].bytes = argv[4] + (argv[5] << 7);
       break;
     case I2C_STOP_READING:
-	  byte queryIndexToSkip;      
+      byte queryIndexToSkip;      
       // if read continuous mode is enabled for only 1 i2c device, disable
       // read continuous reporting for that device
       if (queryIndex <= 0) {
@@ -393,7 +400,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // determine which device to stop reading and remove it's data from
         // the array, shifiting other array data to fill the space
         for (byte i = 0; i < queryIndex + 1; i++) {
-          if (query[i].addr = slaveAddress) {
+          if (query[i].addr == slaveAddress) {
             queryIndexToSkip = i;
             break;
           }
@@ -402,7 +409,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         for (byte i = queryIndexToSkip; i<queryIndex + 1; i++) {
           if (i < MAX_QUERIES) {
             query[i].addr = query[i+1].addr;
-            query[i].reg = query[i+1].addr;
+            query[i].reg = query[i+1].reg;
             query[i].bytes = query[i+1].bytes; 
           }
         }
@@ -450,6 +457,82 @@ void sysexCallback(byte command, byte argc, byte *argv)
       //Firmata.sendString("Not enough data");
     }
     break;
+  case ANALOG_CONFIG:
+    if (argc > 1) {
+      switch (argv[0]) {
+      case 0: // set analog reference voltage
+        // currently analogReference is only definved for AVR boards
+        // see: http://arduino.cc/en/Reference/AnalogReference
+        switch (argv[1]) {
+        // note that the following 5 case values do not equal the actual
+        // value of the corresponding constant. The constant value may change
+        // by board type (Mega vs Uno, etc)
+#ifdef DEFAULT
+        case 0: // DEFAULT (5v on 5v boards, 3.3v on 3.3v boards)
+          analogReference(DEFAULT);
+          analogReferenceVoltage = DEFAULT;
+          break;
+#endif
+#ifdef INTERNAL
+        case 1: // INTERNAL
+          analogReference(INTERNAL);
+          analogReferenceVoltage = INTERNAL;
+          break;
+#endif
+#ifdef INTERNAL1V1
+        case 2: // INTERNAL1V1
+          analogReference(INTERNAL1V1);
+          analogReferenceVoltage = INTERNAL1V1;
+          break;
+#endif
+#ifdef INTERNAL2V56
+        case 3: // INTERNAL_2V56
+          analogReference(INTERNAL2V56);
+          analogReferenceVoltage = INTERNAL2V56;
+          break;
+#endif
+#ifdef EXTERNAL
+        case 4: // EXTERNAL (0 to 5V applied to AREF pin)
+          analogReference(EXTERNAL);
+          analogReferenceVoltage = EXTERNAL;
+          break;
+#endif
+        }
+
+        break;
+      case 1: // query analog reference voltage
+          Firmata.write(START_SYSEX);
+          Firmata.write(ANALOG_CONFIG);
+          Firmata.write(1); // analog reference response
+          Firmata.write(analogReferenceVoltage);
+          Firmata.write(END_SYSEX);
+        break;
+#if ARDUINO >= 150
+      // to do: need to exclude AVRs
+      // only available for SAM core boards
+      // not available for all boards, but will safely default to proper
+      // resolution for unsupported boards
+      case 2: // set analog read resolution (defaults to 10 bits for AVR boards)
+        if (argv[1] > 0 && argv[1] < 33) {
+          // see: http://arduino.cc/en/Reference/analogReadResolution
+          // values above the boards capability are truncated
+          // values below the min supported resolution will be zero padded
+          analogReadResolution(argv[1]);
+          analogReadRes = argv[1];
+        }
+        break;
+      case 3: // set analog write (pwm) resolution (defaults to 8 bits for AVR boards)
+        if (argv[1] > 0 && argv[1] < 33) {
+          // see: http://arduino.cc/en/Reference/analogWriteResolution
+          // values above the boards capability are truncated
+          // values below the min supported resolution will be zero padded
+          analogWriteResolution(argv[1]);
+          analogWriteRes = argv[1];
+        }
+        break;
+#endif
+      }
+    }
   case EXTENDED_ANALOG:
     if (argc > 1) {
       int val = argv[1];
@@ -470,11 +553,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       if (IS_PIN_ANALOG(pin)) {
         Firmata.write(ANALOG);
-        Firmata.write(10);
+        Firmata.write(analogReadRes);
       }
       if (IS_PIN_PWM(pin)) {
         Firmata.write(PWM);
-        Firmata.write(8);
+        Firmata.write(analogWriteRes);
       }
       if (IS_PIN_SERVO(pin)) {
         Firmata.write(SERVO);
@@ -496,9 +579,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Firmata.write(pin);
       if (pin < TOTAL_PINS) {
         Firmata.write((byte)pinConfig[pin]);
-	Firmata.write((byte)pinState[pin] & 0x7F);
-	if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-	if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+  Firmata.write((byte)pinState[pin] & 0x7F);
+  if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
+  if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
       }
       Firmata.write(END_SYSEX);
     }
@@ -550,11 +633,11 @@ void systemResetCallback()
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
   if (isI2CEnabled) {
-  	disableI2CPins();
+    disableI2CPins();
   }
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
-    portConfigInputs[i] = 0;	// until activated
+    portConfigInputs[i] = 0;  // until activated
     previousPINs[i] = 0;
   }
   // pins with analog capability default to analog input
