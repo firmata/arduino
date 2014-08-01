@@ -147,6 +147,7 @@ private:
 
 /* private methods ------------------------------ */
     void processSysexMessage(void);
+    void init(void);
     void systemReset(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
     void sendValueAsTwo7bitBytes(int value);
