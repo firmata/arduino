@@ -84,12 +84,7 @@ unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read reque
 
 byte analogReadRes = 10; // default - better to define in Boards.h?
 byte analogWriteRes = 8; // default - better to define in Boards.h?
-#ifdef DEFAULT
-// DEFAULT is not always = 0
 byte analogReferenceVoltage = DEFAULT; // defined in Arduio core for AVRs only
-#else
-byte analogReferenceVoltage = 0
-#endif
 
 Servo servos[MAX_SERVOS];
 /*==============================================================================
@@ -467,12 +462,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // note that the following 5 case values do not equal the actual
         // value of the corresponding constant. The constant value may change
         // by board type (Mega vs Uno, etc)
-#ifdef DEFAULT
         case 0: // DEFAULT (5v on 5v boards, 3.3v on 3.3v boards)
           analogReference(DEFAULT);
           analogReferenceVoltage = DEFAULT;
           break;
-#endif
 #ifdef INTERNAL
         case 1: // INTERNAL
           analogReference(INTERNAL);
@@ -491,12 +484,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
           analogReferenceVoltage = INTERNAL2V56;
           break;
 #endif
-#ifdef EXTERNAL
         case 4: // EXTERNAL (0 to 5V applied to AREF pin)
           analogReference(EXTERNAL);
           analogReferenceVoltage = EXTERNAL;
           break;
-#endif
         }
 
         break;
