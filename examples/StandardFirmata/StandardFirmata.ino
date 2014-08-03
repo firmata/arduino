@@ -31,6 +31,7 @@
 
 #include <Servo.h>
 #include <Wire.h>
+#include <HardwareSerial.h>
 #include <Firmata.h>
 
 // move the following defines to Firmata.h?
