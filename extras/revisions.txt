@@ -1,6 +1,8 @@
 FIRMATA 2.4.0 BETA - not yet released
 
 [core library]
+* Changed sendValueAsTwo7bitBytes, startSysex and endSysex from private to
+* public methods.
 * Added Intel Galileo to Boards.h
 * Renamed FirmataSerial to FirmataStream
 * Updated to latest Arduino library format
