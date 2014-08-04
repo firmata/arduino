@@ -23,7 +23,7 @@
 #define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
-#define MAX_DATA_BYTES 64 // max number of data bytes in incoming messages
+#define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital pin
@@ -82,10 +82,10 @@
 
 extern "C" {
 // callback function types
-    typedef void (*callbackFunction)(byte, int);
-    typedef void (*systemResetCallbackFunction)(void);
-    typedef void (*stringCallbackFunction)(char*);
-    typedef void (*sysexCallbackFunction)(byte command, byte argc, byte*argv);
+  typedef void (*callbackFunction)(byte, int);
+  typedef void (*systemResetCallbackFunction)(void);
+  typedef void (*stringCallbackFunction)(char*);
+  typedef void (*sysexCallbackFunction)(byte command, byte argc, byte*argv);
 }
 
 
@@ -93,67 +93,67 @@ extern "C" {
 class FirmataClass
 {
 public:
-    FirmataClass();
+  FirmataClass();
 /* Arduino constructors */
-    void begin();
-    void begin(long);
-    void begin(Stream &s);
+  void begin();
+  void begin(long);
+  void begin(Stream &s);
 /* querying functions */
-    void printVersion(void);
-    void blinkVersion(void);
-    void printFirmwareVersion(void);
+  void printVersion(void);
+  void blinkVersion(void);
+  void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
-    void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+  void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
 /* serial receive handling */
-    int available(void);
-    void processInput(void);
+  int available(void);
+  void processInput(void);
 /* serial send handling */
-    void sendAnalog(byte pin, int value);
-    void sendDigital(byte pin, int value); // TODO implement this
-    void sendDigitalPort(byte portNumber, int portData);
-    void sendString(const char* string);
-    void sendString(byte command, const char* string);
-    void sendSysex(byte command, byte bytec, byte* bytev);
-    void write(byte c);
+  void sendAnalog(byte pin, int value);
+  void sendDigital(byte pin, int value); // TODO implement this
+  void sendDigitalPort(byte portNumber, int portData);
+  void sendString(const char* string);
+  void sendString(byte command, const char* string);
+  void sendSysex(byte command, byte bytec, byte* bytev);
+  void write(byte c);
 /* attach & detach callback functions to messages */
-    void attach(byte command, callbackFunction newFunction);
-    void attach(byte command, systemResetCallbackFunction newFunction);
-    void attach(byte command, stringCallbackFunction newFunction);
-    void attach(byte command, sysexCallbackFunction newFunction);
-    void detach(byte command);
+  void attach(byte command, callbackFunction newFunction);
+  void attach(byte command, systemResetCallbackFunction newFunction);
+  void attach(byte command, stringCallbackFunction newFunction);
+  void attach(byte command, sysexCallbackFunction newFunction);
+  void detach(byte command);
 
 /* utility methods */
-    void sendValueAsTwo7bitBytes(int value);
-    void startSysex(void);
-    void endSysex(void);
+  void sendValueAsTwo7bitBytes(int value);
+  void startSysex(void);
+  void endSysex(void);
 
 private:
-    Stream *FirmataStream;
+  Stream *FirmataStream;
 /* firmware name and version */
-    byte firmwareVersionCount;
-    byte *firmwareVersionVector;
+  byte firmwareVersionCount;
+  byte *firmwareVersionVector;
 /* input message handling */
-    byte waitForData; // this flag says the next serial input will be data
-    byte executeMultiByteCommand; // execute this after getting multi-byte data
-    byte multiByteChannel; // channel data for multiByteCommands
-    byte storedInputData[MAX_DATA_BYTES]; // multi-byte data
+  byte waitForData; // this flag says the next serial input will be data
+  byte executeMultiByteCommand; // execute this after getting multi-byte data
+  byte multiByteChannel; // channel data for multiByteCommands
+  byte storedInputData[MAX_DATA_BYTES]; // multi-byte data
 /* sysex */
-    boolean parsingSysex;
-    int sysexBytesRead;
+  boolean parsingSysex;
+  int sysexBytesRead;
 /* callback functions */
-    callbackFunction currentAnalogCallback;
-    callbackFunction currentDigitalCallback;
-    callbackFunction currentReportAnalogCallback;
-    callbackFunction currentReportDigitalCallback;
-    callbackFunction currentPinModeCallback;
-    systemResetCallbackFunction currentSystemResetCallback;
-    stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;
+  callbackFunction currentAnalogCallback;
+  callbackFunction currentDigitalCallback;
+  callbackFunction currentReportAnalogCallback;
+  callbackFunction currentReportDigitalCallback;
+  callbackFunction currentPinModeCallback;
+  systemResetCallbackFunction currentSystemResetCallback;
+  stringCallbackFunction currentStringCallback;
+  sysexCallbackFunction currentSysexCallback;
 
 /* private methods ------------------------------ */
-    void processSysexMessage(void);
-    void systemReset(void);
-    void strobeBlinkPin(int count, int onInterval, int offInterval);
+  void processSysexMessage(void);
+  void systemReset(void);
+  void strobeBlinkPin(int count, int onInterval, int offInterval);
 };
 
 extern FirmataClass Firmata;
