@@ -11,6 +11,7 @@ FIRMATA 2.4.0 BETA - not yet released
 * Fixed IS_PIN_SPI ifndef condition in boards.h
 * Added constants to Firmata.h to reserve configurable firmata features
 * Fixed issue where firmwareName was not reported correctly in Windows
+* Ensure incomming String via STRING_DATA command is null-terminated
 * Fixed memory leak when receiving String via STRING_DATA command
   (note this change may break existing code if you were manually deallocating
   the incomming string in your string callback function. See code for details)
