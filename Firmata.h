@@ -122,6 +122,11 @@ public:
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
 
+/* utility methods */
+    void sendValueAsTwo7bitBytes(int value);
+    void startSysex(void);
+    void endSysex(void);
+
 private:
     Stream *FirmataStream;
 /* firmware name and version */
@@ -149,9 +154,6 @@ private:
     void processSysexMessage(void);
     void systemReset(void);
     void strobeBlinkPin(int count, int onInterval, int offInterval);
-    void sendValueAsTwo7bitBytes(int value);
-    void startSysex(void);
-    void endSysex(void);
 };
 
 extern FirmataClass Firmata;
