@@ -3,9 +3,10 @@
  * from software on a host computer. It is intended to work with
  * any host computer software package.
  *
- * To download a host software package, please clink on the following link
- * to open the download page in your default browser.
+ * To download a host software package, please clink on one of the following
+ * links for a list of Firmata client software packages.
  *
+ * http://github.com/firmata/arduino (clients listed in README.md)
  * http://firmata.org/wiki/Download
  */
 
@@ -25,26 +26,25 @@
   formatted using the GNU C formatting and indenting
 */
 
-/* 
- * TODO: use Program Control to load stored profiles from EEPROM
- */
-
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 
 // move the following defines to Firmata.h?
-#define I2C_WRITE B00000000
-#define I2C_READ B00001000
-#define I2C_READ_CONTINUOUSLY B00010000
-#define I2C_STOP_READING B00011000
-#define I2C_READ_WRITE_MODE_MASK B00011000
-#define I2C_10BIT_ADDRESS_MODE_MASK B00100000
+#define I2C_WRITE                     B00000000
+#define I2C_READ                      B00001000
+#define I2C_READ_CONTINUOUSLY         B00010000
+#define I2C_STOP_READING              B00011000
+#define I2C_READ_WRITE_MODE_MASK      B00011000
+#define I2C_10BIT_ADDRESS_MODE_MASK   B00100000
+#define I2C_END_TX_MASK               B01000000
+#define I2C_STOP_TX                   1
+#define I2C_RESTART_TX                0
 
-#define MAX_QUERIES 8
-#define MINIMUM_SAMPLING_INTERVAL 10
+#define MAX_QUERIES                   8
+#define MINIMUM_SAMPLING_INTERVAL     10
 
-#define REGISTER_NOT_SPECIFIED -1
+#define REGISTER_NOT_SPECIFIED        -1
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -65,13 +65,14 @@ int pinState[TOTAL_PINS];           // any value that has been written
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19;          // how often to run the main loop (in ms)
+unsigned int samplingInterval = 19; // how often to run the main loop (in ms)
 
 /* i2c data */
 struct i2c_device_info {
   byte addr;
   byte reg;
   byte bytes;
+  byte stopTX;
 };
 
 /* for i2c read continuous more */
@@ -87,7 +88,7 @@ Servo servos[MAX_SERVOS];
  * FUNCTIONS
  *============================================================================*/
 
-void readAndReportData(byte address, int theRegister, byte numBytes) {
+void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()  
@@ -98,7 +99,7 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
     #else
     Wire.send((byte)theRegister);
     #endif
-    Wire.endTransmission();
+    Wire.endTransmission(stopTX); // default = true
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
       // delay is necessary for some devices such as WiiNunchuck
@@ -326,6 +327,7 @@ void reportDigitalCallback(byte port, int value)
 void sysexCallback(byte command, byte argc, byte *argv)
 {
   byte mode;
+  byte stopTX;
   byte slaveAddress;
   byte slaveRegister;
   byte data;
@@ -340,6 +342,15 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     else {
       slaveAddress = argv[0];
+    }
+
+    // need to invert the logic here since 0 will be default for client
+    // libraries that have not updated to add support for restart tx
+    if (argv[1] & I2C_END_TX_MASK) {
+      stopTX = I2C_RESTART_TX;
+    }
+    else {
+      stopTX = I2C_STOP_TX; // default
     }
 
     switch(mode) {
@@ -361,12 +372,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // a slave register is specified
         slaveRegister = argv[2] + (argv[3] << 7);
         data = argv[4] + (argv[5] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)slaveRegister, data);
+        readAndReportData(slaveAddress, (int)slaveRegister, data, stopTX);
       }
       else {
         // a slave register is NOT specified
         data = argv[2] + (argv[3] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
+        readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data, stopTX);
       }
       break;
     case I2C_READ_CONTINUOUSLY:
@@ -379,6 +390,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       query[queryIndex].addr = slaveAddress;
       query[queryIndex].reg = argv[2] + (argv[3] << 7);
       query[queryIndex].bytes = argv[4] + (argv[5] << 7);
+      query[queryIndex].stopTX = stopTX;
       break;
     case I2C_STOP_READING:
       byte queryIndexToSkip;      
@@ -402,6 +414,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             query[i].addr = query[i+1].addr;
             query[i].reg = query[i+1].reg;
             query[i].bytes = query[i+1].bytes; 
+            query[i].stopTX = query[i+1].stopTX;
           }
         }
         queryIndex--;
@@ -532,11 +545,11 @@ void enableI2CPins()
 
 /* disable the i2c pins so they can be used for other functions */
 void disableI2CPins() {
-    isI2CEnabled = false;
-    // disable read continuous mode for all devices
-    queryIndex = -1;
-    // uncomment the following if or when the end() method is added to Wire library
-    // Wire.end();
+  isI2CEnabled = false;
+  // disable read continuous mode for all devices
+  queryIndex = -1;
+  // uncomment the following if or when the end() method is added to Wire library
+  // Wire.end();
 }
 
 /*==============================================================================
@@ -631,7 +644,7 @@ void loop()
     // report i2c data for all device with read continuous mode enabled
     if (queryIndex > -1) {
       for (byte i = 0; i < queryIndex + 1; i++) {
-        readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
+        readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX);
       }
     }
   }
