@@ -601,12 +601,6 @@ void systemResetCallback()
     disableI2CPins();
   }
 
-  for (byte i=0; i < MAX_SERVOS; i++) {
-    if (servoPinMap[i] < MAX_SERVOS) {
-      //servos[servoPinMap[i]].detach();
-    }
-  }
-
   for (byte i=0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;      // by default, reporting off
     portConfigInputs[i] = 0;  // until activated
