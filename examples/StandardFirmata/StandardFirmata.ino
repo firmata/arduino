@@ -276,7 +276,6 @@ void setPinModeCallback(byte pin, int mode)
     if (IS_PIN_DIGITAL(pin)) {
       pinConfig[pin] = SERVO;
       if (!servos[servoPinMap[pin]].attached()) {
-        // servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin));
         // pass -1 for min and max pulse values to use default values set
         // by Servo library
         attachServo(pin, -1, -1);
