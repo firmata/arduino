@@ -108,8 +108,7 @@ void attachServo(byte pin, int minPulse, int maxPulse)
       servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
     } else {
       servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin));
-    }
-    setPinModeCallback(pin, SERVO);          
+    }        
   } else {
     Firmata.sendString("Max servos attached");
   }
@@ -275,7 +274,7 @@ void setPinModeCallback(byte pin, int mode)
   case SERVO:
     if (IS_PIN_DIGITAL(pin)) {
       pinConfig[pin] = SERVO;
-      if (!servos[servoPinMap[pin]].attached()) {
+      if (servoPinMap[pin] == 255 || !servos[servoPinMap[pin]].attached()) {
         // pass -1 for min and max pulse values to use default values set
         // by Servo library
         attachServo(pin, -1, -1);
@@ -484,6 +483,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           detachServo(pin);
         }
         attachServo(pin, minPulse, maxPulse);
+        setPinModeCallback(pin, SERVO);
       }
     }
     break;
