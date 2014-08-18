@@ -133,6 +133,7 @@ public:
 /* access pin config */
     byte getPinMode(byte pin);
     void setPinMode(byte pin, byte config);
+    void setPinConfig(byte pin, byte config);
 /* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);

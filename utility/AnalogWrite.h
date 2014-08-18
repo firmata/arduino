@@ -27,9 +27,9 @@ void analogWriteCallback(byte pin, int value)
     switch(Firmata.getPinMode(pin)) {
 #ifdef ServoFirmata_h
     case SERVO:
-      if (IS_PIN_SERVO(pin)) {
-        servoAnalogWrite(pin,value);
-        Firmata.setPinState(pin,value);
+      if (IS_PIN_DIGITAL(pin)) {
+        servoAnalogWrite(pin, value);
+        Firmata.setPinState(pin, value);
       }
       break;
 #endif
@@ -37,7 +37,7 @@ void analogWriteCallback(byte pin, int value)
     case PWM:
       if (IS_PIN_PWM(pin)) {
         analogWrite(PIN_TO_PWM(pin), value);
-        Firmata.setPinState(pin,value);
+        Firmata.setPinState(pin, value);
       }
       break;
 #endif

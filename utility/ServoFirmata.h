@@ -33,7 +33,11 @@ public:
   boolean handleSysex(byte command, byte argc, byte* argv);
   void reset();
 private:
-  Servo *servos[MAX_SERVOS];
+  Servo servos[MAX_SERVOS];
+  byte servoPinMap[TOTAL_PINS];
+  byte detachedServos[MAX_SERVOS];
+  byte detachedServoCount;
+  byte servoCount;
   void attach(byte pin, int minPulse, int maxPulse);
   void detach(byte pin);
 };

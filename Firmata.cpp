@@ -433,12 +433,20 @@ byte FirmataClass::getPinMode(byte pin)
 
 void FirmataClass::setPinMode(byte pin, byte config)
 {
-  if (pinConfig[pin]==IGNORE)
+  if (pinConfig[pin] == IGNORE)
+    return;
+  setPinConfig(pin, config);
+  if (currentPinModeCallback)
+    (*currentPinModeCallback)(pin, config);
+}
+
+/* set pin config without calling the pin mode callback */
+void FirmataClass::setPinConfig(byte pin, byte config)
+{
+  if (pinConfig[pin] == IGNORE)
     return;
   pinState[pin] = 0;
   pinConfig[pin] = config;
-  if(currentPinModeCallback)
-    (*currentPinModeCallback)(pin, config);
 }
 
 /* access pin state */
