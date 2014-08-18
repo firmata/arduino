@@ -23,7 +23,6 @@
 
 void analogWriteCallback(byte pin, int value)
 {
-  Firmata.sendString("analog write callback");
   if (pin < TOTAL_PINS) {
     switch(Firmata.getPinMode(pin)) {
 #ifdef ServoFirmata_h

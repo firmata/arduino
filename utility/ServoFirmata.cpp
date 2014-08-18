@@ -81,15 +81,6 @@ boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
       }
     }
   }
-  if (command == EXTENDED_ANALOG) {
-    if (argc > 1) {
-      int val = argv[1];
-      if (argc > 2) val |= (argv[2] << 7);
-      if (argc > 3) val |= (argv[3] << 14);
-      analogWrite(argv[0], val);
-      return true;
-    }
-  }  
   return false;
 }
 
