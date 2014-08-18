@@ -3,7 +3,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
 
 void analogWriteCallback(byte pin, int value)
 {
+  Firmata.sendString("analog write callback");
   if (pin < TOTAL_PINS) {
     switch(Firmata.getPinMode(pin)) {
 #ifdef ServoFirmata_h
