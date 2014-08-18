@@ -20,9 +20,13 @@
 #include <Firmata.h>
 #include <utility/FirmataFeature.h>
 
+void analogWriteCallback(byte pin, int value);
+
 class AnalogOutputFirmata:public FirmataFeature
 {
 public:
+  AnalogOutputFirmata();
+  void analogOutput(byte pin, int value);
   void handleCapability(byte pin);
   boolean handlePinMode(byte pin, int mode);
   boolean handleSysex(byte command, byte argc, byte* argv);

@@ -3,7 +3,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -17,11 +17,41 @@
 #include <Firmata.h>
 #include <AnalogFirmata.h>
 #include <AnalogOutputFirmata.h>
+#include <ServoFirmata.h>
 
-//AnalogOutputFirmata::AnalogOutputFirmata()
-//{
-//  Firmata.attach(REPORT_ANALOG, analogWriteCallback); //TODO: analogWriteCallback is the same for PWM and SERVO
-//}
+AnalogOutputFirmata *AnalogOutputFirmataInstance;
+
+void analogWriteCallback(byte pin, int value)
+{
+  AnalogOutputFirmataInstance->analogOutput(pin, value);
+}
+
+AnalogOutputFirmata::AnalogOutputFirmata()
+{
+  AnalogOutputFirmataInstance = this;
+  /* analogWriteCallback is declared in AnalogWrite.h */
+  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
+}
+
+void AnalogOutputFirmata::analogOutput(byte pin, int value)
+{
+  if (pin < TOTAL_PINS) {
+    switch(Firmata.getPinMode(pin)) {
+    case SERVO:
+      if (IS_PIN_DIGITAL(pin)) {
+        servoAnalogWrite(pin, value);
+        Firmata.setPinState(pin, value);
+      }
+      break;
+    case PWM:
+      if (IS_PIN_PWM(pin)) {
+        analogWrite(PIN_TO_PWM(pin), value);
+        Firmata.setPinState(pin, value);
+      }
+      break;
+    }
+  }  
+}
 
 void AnalogOutputFirmata::reset()
 {
@@ -48,6 +78,15 @@ void AnalogOutputFirmata::handleCapability(byte pin)
 
 boolean AnalogOutputFirmata::handleSysex(byte command, byte argc, byte* argv)
 {
-  return handleAnalogFirmataSysex(command, argc, argv);
+  if (command == EXTENDED_ANALOG) {
+    if (argc > 1) {
+      int val = argv[1];
+      if (argc > 2) val |= (argv[2] << 7);
+      if (argc > 3) val |= (argv[3] << 14);
+      analogOutput(argv[0], val);
+      return true;
+    }
+  } else {
+    return handleAnalogFirmataSysex(command, argc, argv);
+  }
 }
-
