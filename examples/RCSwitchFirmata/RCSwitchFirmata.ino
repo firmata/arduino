@@ -100,11 +100,11 @@ OneWireFirmata oneWire;
 #include <utility/StepperFirmata.h>
 StepperFirmata stepper;
 
-#include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <RCSwitch.h> //wouldn't load from RCOutputFirmata.h in Arduino1.0.3
 #include <utility/RCOutputFirmata.h>
 RCOutputFirmata rcOutput;
 
-#include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <RCSwitch.h> //wouldn't load from RCInputFirmata.h in Arduino1.0.3
 #include <utility/RCInputFirmata.h>
 RCInputFirmata rcInput;
 

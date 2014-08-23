@@ -2,7 +2,7 @@
   RCOutputFirmata.h - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-16
+  Date:    2014-08-23
   Author:  git-developer ( https://github.com/git-developer )
    
   Description
@@ -14,8 +14,8 @@
   -----
    1.) Connect a RC receiver to a digital pin of your Arduino board
    2.) Put RCSwitch into your arduino library directory
-   3.) Include RCOutputFirmata in ConfigurableFirmata
-   4.) Upload ConfigurableFirmata and connect Arduino to host
+   3.) Include RCOutputFirmata in RCSwitchFirmata
+   4.) Upload RCSwitchFirmata and connect Arduino to host
    5.) Configure the pin to use pin mode RC_SEND
 
    On success, you may send radio messages from the host. Every message that is
@@ -63,8 +63,8 @@
 
   Downloads
   ---------
-   ConfigurableFirmata: https://github.com/firmata/arduino/tree/configurable
-   RCSwitch:            https://code.google.com/p/rc-switch/
+   RCSwitchFirmata: https://github.com/firmata/arduino/tree/configurable
+   RCSwitch:        https://code.google.com/p/rc-switch/
 
   License
   -------
@@ -82,7 +82,7 @@
 #include <utility/FirmataFeature.h>
 #include <RCSwitch.h>
 
-#define RESERVED_COMMAND        0x00 // Sysex command: reserved
+#define RESERVED_COMMAND        0x00             // Sysex command: reserved
 #define RC_DATA                 RESERVED_COMMAND // Sysex command: send or receive RC data
 
 #define RC_SEND                 0x0A // pin mode: pin configured for a RC sender

@@ -2,7 +2,7 @@
   RCInputFirmata.h - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-16
+  Date:    2014-08-23
   Author:  git-developer ( https://github.com/git-developer )
 
   Description
@@ -14,8 +14,8 @@
   -----
    1.) Connect a RC receiver to an interrupt-enabled pin of your Arduino board
    2.) Put RCSwitch into your arduino library directory
-   3.) Include RCInputFirmata in ConfigurableFirmata
-   4.) Upload ConfigurableFirmata and connect Arduino to host
+   3.) Include RCInputFirmata in RCSwitchFirmata
+   4.) Upload RCSwitchFirmata and connect Arduino to host
    5.) Configure the pin to use pin mode RC_RECEIVE
 
    On success, Arduino will report received messages to the host.
@@ -68,7 +68,7 @@
 #include <utility/FirmataFeature.h>
 #include <RCSwitch.h>
 
-#define RESERVED_COMMAND        0x00 // Sysex command: reserved
+#define RESERVED_COMMAND        0x00             // Sysex command: reserved
 #define RC_DATA                 RESERVED_COMMAND // Sysex command: send or receive RC data
 
 #define RC_RECEIVE              0x0B // pin mode: pin configured for a RC receiver

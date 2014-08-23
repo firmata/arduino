@@ -2,7 +2,7 @@
   RCOutputFirmata.cpp - Firmata library
 
   Version: 1.0-SNAPSHOT
-  Date:    2014-05-16
+  Date:    2014-08-23
   Author:  git-developer ( https://github.com/git-developer )
 
   This library is free software; you can redistribute it and/or
