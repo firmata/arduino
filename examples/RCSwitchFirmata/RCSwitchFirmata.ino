@@ -100,6 +100,14 @@ OneWireFirmata oneWire;
 #include <utility/StepperFirmata.h>
 StepperFirmata stepper;
 
+#include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <utility/RCOutputFirmata.h>
+RCOutputFirmata rcOutput;
+
+#include <RCSwitch.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
+#include <utility/RCInputFirmata.h>
+RCInputFirmata rcInput;
+
 #include <utility/FirmataExt.h>
 FirmataExt firmataExt;
 
@@ -115,7 +123,7 @@ EncoderFirmata encoder;
 #include <utility/AnalogWrite.h>
 #endif
 
-#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h
+#if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h || defined RCInputFirmata_h
 #include <utility/FirmataReporting.h>
 FirmataReporting reporting;
 #endif
@@ -218,6 +226,12 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef RCOutputFirmata_h
+  firmataExt.addFeature(rcOutput);
+#endif
+#ifdef RCInputFirmata_h
+  firmataExt.addFeature(rcInput);
+#endif
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
@@ -300,6 +314,9 @@ runtasks: scheduler.runTasks();
 #ifdef EncoderFirmata_h
     // report encoders positions if reporting enabled.
     encoder.report();
+#endif
+#ifdef RCInputFirmata_h
+    rcInput.report();
 #endif
   }
 #endif

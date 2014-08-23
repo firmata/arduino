@@ -20,7 +20,7 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   7 // for backwards compatible changes
+#define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
 #define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
@@ -42,7 +42,6 @@
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
 #define ENCODER_DATA            0x61 // reply with encoders current positions
-#define RC_DATA                 0x66 // send or receive RC data
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
@@ -81,10 +80,8 @@
 #define ONEWIRE                 0x07 // pin configured for 1-wire
 #define STEPPER                 0x08 // pin configured for stepper motor
 #define ENCODER                 0x09 // pin configured for encoders
-#define RC_SEND                 0x0A // pin configured for a RC sender
-#define RC_RECEIVE              0x0B // pin configured for a RC receiver
 #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         13
+#define TOTAL_PIN_MODES         11
 
 extern "C" {
 // callback function types

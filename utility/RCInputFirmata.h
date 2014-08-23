@@ -68,6 +68,11 @@
 #include <utility/FirmataFeature.h>
 #include <RCSwitch.h>
 
+#define RESERVED_COMMAND        0x00 // Sysex command: reserved
+#define RC_DATA                 RESERVED_COMMAND // Sysex command: send or receive RC data
+
+#define RC_RECEIVE              0x0B // pin mode: pin configured for a RC receiver
+
 /* Subcommands */
 #define UNKNOWN                 0x00
 #define CONFIG_TOLERANCE        0x31
