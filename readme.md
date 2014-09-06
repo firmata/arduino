@@ -1,4 +1,4 @@
-#Firmata
+#Firmata has been acccepted as an official fork. Please see https://www.github.com/firmata/spark
 
 Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](http://firmata.org/wiki/Protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. See the [firmata wiki](http://firmata.org/wiki/Main_Page) for additional informataion. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
