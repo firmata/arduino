@@ -5,10 +5,14 @@
 
 #include <inttypes.h>
 
+#ifdef SPARK
+#include "application.h"
+#else
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"	// for digitalRead, digitalWrite, etc
+#include "Arduino.h"  // for digitalRead, digitalWrite, etc
 #else
 #include "WProgram.h"
+#endif
 #endif
 
 // Normally Servo.h must be included before Firmata.h (which then includes
@@ -332,6 +336,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+// Spark
+#elif defined(SPARK)
+#define TOTAL_ANALOG_PINS       8
+#define VERSION_BLINK_PIN       7
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 7) || ((p) >= 10 && (p) <= 17))
+#define IS_PIN_ANALOG(p)        ((p) >= 10 && (p) <= 17)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS) //??
+#define IS_PIN_I2C(p)           ((p) == 0 || (p) == 1)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p)-10
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+#define IS_PIN_DISABLED(p)      ((p) == 8 || (p) == 9)
+
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
@@ -402,14 +422,14 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 	}
 #else
 	byte pin=port*8;
-	if ((bitmask & 0x01)) digitalWrite(PIN_TO_DIGITAL(pin+0), (value & 0x01));
-	if ((bitmask & 0x02)) digitalWrite(PIN_TO_DIGITAL(pin+1), (value & 0x02));
-	if ((bitmask & 0x04)) digitalWrite(PIN_TO_DIGITAL(pin+2), (value & 0x04));
-	if ((bitmask & 0x08)) digitalWrite(PIN_TO_DIGITAL(pin+3), (value & 0x08));
-	if ((bitmask & 0x10)) digitalWrite(PIN_TO_DIGITAL(pin+4), (value & 0x10));
-	if ((bitmask & 0x20)) digitalWrite(PIN_TO_DIGITAL(pin+5), (value & 0x20));
-	if ((bitmask & 0x40)) digitalWrite(PIN_TO_DIGITAL(pin+6), (value & 0x40));
-	if ((bitmask & 0x80)) digitalWrite(PIN_TO_DIGITAL(pin+7), (value & 0x80));
+    if ((bitmask & 0x01)) digitalWrite(PIN_TO_DIGITAL(pin+0), (value & 0x01) == 0x01 ? 1 : 0 );
+    if ((bitmask & 0x02)) digitalWrite(PIN_TO_DIGITAL(pin+1), (value & 0x02) == 0x02 ? 1 : 0 );
+    if ((bitmask & 0x04)) digitalWrite(PIN_TO_DIGITAL(pin+2), (value & 0x04) == 0x04 ? 1 : 0 );
+    if ((bitmask & 0x08)) digitalWrite(PIN_TO_DIGITAL(pin+3), (value & 0x08) == 0x08 ? 1 : 0 );
+    if ((bitmask & 0x10)) digitalWrite(PIN_TO_DIGITAL(pin+4), (value & 0x10) == 0x10 ? 1 : 0 );
+    if ((bitmask & 0x20)) digitalWrite(PIN_TO_DIGITAL(pin+5), (value & 0x20) == 0x20 ? 1 : 0 );
+    if ((bitmask & 0x40)) digitalWrite(PIN_TO_DIGITAL(pin+6), (value & 0x40) == 0x40 ? 1 : 0 );
+    if ((bitmask & 0x80)) digitalWrite(PIN_TO_DIGITAL(pin+7), (value & 0x80) == 0x80 ? 1 : 0 );
 #endif
 }
 
