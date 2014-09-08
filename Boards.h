@@ -23,7 +23,7 @@
     Firmata Hardware Abstraction Layer
 
 Firmata is built on top of the hardware abstraction functions of Arduino,
-specifically digitalWrite, digitalRead, analogWrite, analogRead, and 
+specifically digitalWrite, digitalRead, analogWrite, analogRead, and
 pinMode.  While these functions offer simple integer pin numbers, Firmata
 needs more information than is provided by Arduino.  This file provides
 all other hardware specific details.  To make Firmata support a new board,
@@ -163,7 +163,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - FIRST_ANALOG_PIN)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
-#define PIN_TO_SERVO(p)         (p) 
+#define PIN_TO_SERVO(p)         (p)
 
 
 // old Arduinos
@@ -263,7 +263,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p)<=23)?(p)-14:(p)-24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
-#define PIN_TO_SERVO(p)         (p) 
+#define PIN_TO_SERVO(p)         (p)
 
 
 // Teensy++ 1.0 and 2.0
@@ -297,7 +297,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (p) - 18
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
-#define PIN_TO_SERVO(p)         (p)  
+#define PIN_TO_SERVO(p)         (p)
 
 
 // Sanguino
@@ -331,8 +331,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
-// pic32 test board FubarinoSD
-#elif defined(__PIC32__)
+// pic32 board FubarinoSD
+#elif defined(_BOARD_FUBARINO_SD_)
 #define TOTAL_ANALOG_PINS 15
 #define TOTAL_PINS 44 // All pins can be digital
 #define MAX_SERVOS TOTAL_PINS //All pins can be servo with SoftPWMservo
@@ -347,6 +347,23 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p) PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p) (p)
 
+// pic32 board FubarinoMini
+#elif defined(_BOARD_FUBARINO_MINI_)
+#define TOTAL_ANALOG_PINS NUM_ANALOG_PINS
+#define TOTAL_PINS NUM_DIGITAL_PINS // All pins can be digital
+#define MAX_SERVOS TOTAL_PINS //All pins can be servo with SoftPWMservo
+#define VERSION_BLINK_PIN PIN_LED1
+#define IS_PIN_DIGITAL(p) ((p) >= 0 && (p) <= TOTAL_PINS)
+#define IS_PIN_ANALOG(p) ((p) == 0 || (p) == 20 || ((p) >= 3 && (p) <= 13))
+#define IS_PIN_PWM(p) digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p) ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p) ((p) == 25 || (p) == 26)
+#define PIN_TO_DIGITAL(p) (p)
+#define PIN_TO_ANALOG(p) (p)
+#define PIN_TO_PWM(p) PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p) (p)
+
+//TODO: pic32 UNO32 and U32
 
 // anything else
 #else
@@ -438,4 +455,3 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 
 
 #endif /* Firmata_Boards_h */
-
