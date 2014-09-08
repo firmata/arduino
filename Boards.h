@@ -331,6 +331,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// pic32 test board FubarinoSD
+#elif defined(__PIC32__)
+#define TOTAL_ANALOG_PINS 15
+#define TOTAL_PINS 44 // All pins can be digital
+#define MAX_SERVOS TOTAL_PINS //All pins can be servo with SoftPWMservo
+#define VERSION_BLINK_PIN PIN_LED1
+#define IS_PIN_DIGITAL(p) ((p) >= 0 && (p) <= TOTAL_PINS)
+#define IS_PIN_ANALOG(p) ((p) >= 30 && (p) <= 44)
+#define IS_PIN_PWM(p) digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p) ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p) ((p) == 1 || (p) == 2)
+#define PIN_TO_DIGITAL(p) (p)
+#define PIN_TO_ANALOG(p) (p)
+#define PIN_TO_PWM(p) PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p) (p)
+
 
 // anything else
 #else
