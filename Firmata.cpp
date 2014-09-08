@@ -119,7 +119,7 @@ void FirmataClass::printFirmwareVersion(void)
 void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte minor)
 {
   const char *filename;
-  char *extension;
+  const char *extension;
 
   // parse out ".cpp" and "applet/" that comes from using __FILE__
   extension = strstr(name, ".cpp");
