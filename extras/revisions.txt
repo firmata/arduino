@@ -1,8 +1,11 @@
 FIRMATA 2.4.0 BETA - not yet released
 
 [core library]
+* Changed the way servo pins are mapped to enable use of servos on
+  a wider range of pins, including analog pins.
+* Updated FirmataServo example to use new pin mapping technique
 * Changed sendValueAsTwo7bitBytes, startSysex and endSysex from private to
-* public methods.
+  public methods.
 * Added Intel Galileo to Boards.h
 * Renamed FirmataSerial to FirmataStream
 * Updated to latest Arduino library format
