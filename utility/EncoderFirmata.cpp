@@ -21,7 +21,7 @@
 #include <Firmata.h>
 #include "EncoderFirmata.h"
 #include "Encoder.h"
-#include <String.h>
+#include <string.h>
 
 #define isAttached(encoderNum) (encoderNum < MAX_ENCODERS && encoders[encoderNum])
 
