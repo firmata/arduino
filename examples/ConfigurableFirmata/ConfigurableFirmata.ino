@@ -48,7 +48,17 @@
 
 //#include <UIPEthernet.h>
 
-#if defined ethernet_h || defined UIPETHERNET_H
+/*
+ * To execute Network Firmata on Yun uncomment Bridge.h and YunClient.h.
+ * Do not include Ethernet.h or SPI.h in this case.
+ * On Yun there's no need to configure local_ip and mac in the sketch
+ * as this is configured on the linux-side of Yun.
+ */
+
+//#include <Bridge.h>
+//#include <YunClient.h>
+
+#if defined ethernet_h || defined UIPETHERNET_H || defined _YUN_CLIENT_H_
 /*==============================================================================
  * Network configuration for Network Firmata
  *============================================================================*/
@@ -59,9 +69,9 @@
 #define remote_host "server.local"
 //replace with the port that your server is listening on
 #define remote_port 3030
-//replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp
+//replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
 #define local_ip IPAddress(192,168,0,6)
-//replace with ethernet shield mac. It's mandatory every device is assigned a unique mac
+//replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
 const byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
 #endif
 
@@ -126,7 +136,11 @@ FirmataReporting reporting;
 #error "cannot define both remote_ip and remote_host at the same time!"
 #endif
 #include <utility/EthernetClientStream.h>
+#ifdef _YUN_CLIENT_H_
+YunClient client;
+#else
 EthernetClient client;
+#endif
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
   EthernetClientStream stream(client,local_ip,remote_ip,NULL,remote_port);
@@ -179,10 +193,14 @@ void systemResetCallback()
 void setup() 
 {
 #ifdef NETWORK_FIRMATA
+#ifdef _YUN_CLIENT_H_
+  Bridge.begin();
+#else
 #ifdef local_ip
   Ethernet.begin((uint8_t*)mac,local_ip);  //start ethernet
 #else
   Ethernet.begin((uint8_t*)mac); //start ethernet using dhcp
+#endif
 #endif
   delay(1000);
 #endif
@@ -306,7 +324,7 @@ runtasks: scheduler.runTasks();
 #ifdef StepperFirmata_h
   stepper.update();
 #endif
-#if defined NETWORK_FIRMATA && !defined local_ip
+#if defined NETWORK_FIRMATA && !defined local_ip &&!defined _YUN_CLIENT_H_
   if (Ethernet.maintain())
     {
       stream.maintain(Ethernet.localIP());
