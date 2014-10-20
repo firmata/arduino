@@ -70,7 +70,7 @@ unsigned int samplingInterval = 19;          // how often to run the main loop (
 /* i2c data */
 struct i2c_device_info {
   byte addr;
-  byte reg;
+  int reg;
   byte bytes;
 };
 
@@ -375,10 +375,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
 {
   byte mode;
   byte slaveAddress;
-  byte slaveRegister;
   byte data;
-  unsigned int delayTime; 
-  
+  int slaveRegister;
+  unsigned int delayTime;
+
   switch(command) {
   case I2C_REQUEST:
     mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
@@ -409,13 +409,13 @@ void sysexCallback(byte command, byte argc, byte *argv)
         // a slave register is specified
         slaveRegister = argv[2] + (argv[3] << 7);
         data = argv[4] + (argv[5] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)slaveRegister, data);
       }
       else {
         // a slave register is NOT specified
+        slaveRegister = REGISTER_NOT_SPECIFIED;
         data = argv[2] + (argv[3] << 7);  // bytes to read
-        readAndReportData(slaveAddress, (int)REGISTER_NOT_SPECIFIED, data);
       }
+      readAndReportData(slaveAddress, (int)slaveRegister, data);
       break;
     case I2C_READ_CONTINUOUSLY:
       if ((queryIndex + 1) >= MAX_QUERIES) {
@@ -423,10 +423,20 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Firmata.sendString("too many queries");
         break;
       }
+      if (argc == 6) {
+        // a slave register is specified
+        slaveRegister = argv[2] + (argv[3] << 7);
+        data = argv[4] + (argv[5] << 7);  // bytes to read
+      }
+      else {
+        // a slave register is NOT specified
+        slaveRegister = (int)REGISTER_NOT_SPECIFIED;
+        data = argv[2] + (argv[3] << 7);  // bytes to read
+      }
       queryIndex++;
       query[queryIndex].addr = slaveAddress;
-      query[queryIndex].reg = argv[2] + (argv[3] << 7);
-      query[queryIndex].bytes = argv[4] + (argv[5] << 7);
+      query[queryIndex].reg = slaveRegister;
+      query[queryIndex].bytes = data;
       break;
     case I2C_STOP_READING:
       byte queryIndexToSkip;      
