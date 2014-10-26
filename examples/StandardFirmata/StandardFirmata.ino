@@ -349,6 +349,10 @@ void reportAnalogCallback(byte analogPin, int value)
       analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
     } else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
+      // Send pin value immediately. This is helpful when connected via
+      // ethernet, wi-fi or bluetooth so pin states can be known upon
+      // reconnecting.
+      Firmata.sendAnalog(analogPin, analogRead(analogPin));
     }
   }
   // TODO: save status to EEPROM here, if changed
@@ -358,6 +362,10 @@ void reportDigitalCallback(byte port, int value)
 {
   if (port < TOTAL_PORTS) {
     reportPINs[port] = (byte)value;
+    // Send port value immediately. This is helpful when connected via
+    // ethernet, wi-fi or bluetooth so pin states can be known upon
+    // reconnecting.
+    if (value) outputPort(port, readPort(port, portConfigInputs[port]), true);
   }
   // do not disable analog reporting on these 8 pins, to allow some
   // pins used for digital, others analog.  Instead, allow both types

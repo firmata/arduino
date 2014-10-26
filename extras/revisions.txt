@@ -1,9 +1,6 @@
 FIRMATA 2.4.0 BETA - not yet released
 
 [core library]
-* Changed the way servo pins are mapped to enable use of servos on
-  a wider range of pins, including analog pins.
-* Updated FirmataServo example to use new pin mapping technique
 * Changed sendValueAsTwo7bitBytes, startSysex and endSysex from private to
   public methods.
 * Added Intel Galileo to Boards.h
@@ -22,6 +19,11 @@ FIRMATA 2.4.0 BETA - not yet released
 * Increased input data buffer size from 32 to 64 bytes
 
 [StandardFirmata]
+* When a digital port is enabled, its value is now immediately sent to the client
+* When an analog pin is enabled, its value is now immediately sent to the client
+* Changed the way servo pins are mapped to enable use of servos on
+  a wider range of pins, including analog pins.
+* Updated FirmataServo example to use new pin mapping technique
 * Fixed management of unexpected sized I2C replies (Nahuel Greco)
 * Fixed a bug when removing a monitored device with I2C_STOP_Reading (Nahuel Greco)
 * Fixed conditional expression in I2C_STOP_READING case
