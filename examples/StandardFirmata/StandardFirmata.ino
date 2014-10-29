@@ -82,6 +82,10 @@ boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
+byte analogReadRes = 10; // default - better to define in Boards.h?
+byte analogWriteRes = 8; // default - better to define in Boards.h?
+byte analogReferenceVoltage = DEFAULT; // defined in Arduio core for AVRs only
+
 Servo servos[MAX_SERVOS];
 byte servoPinMap[TOTAL_PINS];
 byte detachedServos[MAX_SERVOS];
@@ -505,6 +509,78 @@ void sysexCallback(byte command, byte argc, byte *argv)
       //Firmata.sendString("Not enough data");
     }
     break;
+  case ANALOG_CONFIG:
+    if (argc > 1) {
+      switch (argv[0]) {
+      case 0: // set analog reference voltage
+        // currently analogReference is only definved for AVR boards
+        // see: http://arduino.cc/en/Reference/AnalogReference
+        switch (argv[1]) {
+        // note that the following 5 case values do not equal the actual
+        // value of the corresponding constant. The constant value may change
+        // by board type (Mega vs Uno, etc)
+        case 0: // DEFAULT (5v on 5v boards, 3.3v on 3.3v boards)
+          analogReference(DEFAULT);
+          analogReferenceVoltage = DEFAULT;
+          break;
+#ifdef INTERNAL
+        case 1: // INTERNAL
+          analogReference(INTERNAL);
+          analogReferenceVoltage = INTERNAL;
+          break;
+#endif
+#ifdef INTERNAL1V1
+        case 2: // INTERNAL1V1
+          analogReference(INTERNAL1V1);
+          analogReferenceVoltage = INTERNAL1V1;
+          break;
+#endif
+#ifdef INTERNAL2V56
+        case 3: // INTERNAL_2V56
+          analogReference(INTERNAL2V56);
+          analogReferenceVoltage = INTERNAL2V56;
+          break;
+#endif
+        case 4: // EXTERNAL (0 to 5V applied to AREF pin)
+          analogReference(EXTERNAL);
+          analogReferenceVoltage = EXTERNAL;
+          break;
+        }
+
+        break;
+      case 1: // query analog reference voltage
+          Firmata.write(START_SYSEX);
+          Firmata.write(ANALOG_CONFIG);
+          Firmata.write(1); // analog reference response
+          Firmata.write(analogReferenceVoltage);
+          Firmata.write(END_SYSEX);
+        break;
+#if ARDUINO >= 150
+      // to do: need to exclude AVRs
+      // only available for SAM core boards
+      // not available for all boards, but will safely default to proper
+      // resolution for unsupported boards
+      case 2: // set analog read resolution (defaults to 10 bits for AVR boards)
+        if (argv[1] > 0 && argv[1] < 33) {
+          // see: http://arduino.cc/en/Reference/analogReadResolution
+          // values above the boards capability are truncated
+          // values below the min supported resolution will be zero padded
+          analogReadResolution(argv[1]);
+          analogReadRes = argv[1];
+        }
+        break;
+      case 3: // set analog write (pwm) resolution (defaults to 8 bits for AVR boards)
+        if (argv[1] > 0 && argv[1] < 33) {
+          // see: http://arduino.cc/en/Reference/analogWriteResolution
+          // values above the boards capability are truncated
+          // values below the min supported resolution will be zero padded
+          analogWriteResolution(argv[1]);
+          analogWriteRes = argv[1];
+        }
+        break;
+#endif
+      }
+    }
   case EXTENDED_ANALOG:
     if (argc > 1) {
       int val = argv[1];
@@ -525,11 +601,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       if (IS_PIN_ANALOG(pin)) {
         Firmata.write(ANALOG);
-        Firmata.write(10);
+        Firmata.write(analogReadRes);
       }
       if (IS_PIN_PWM(pin)) {
         Firmata.write(PWM);
-        Firmata.write(8);
+        Firmata.write(analogWriteRes);
       }
       if (IS_PIN_DIGITAL(pin)) {
         Firmata.write(SERVO);
