@@ -24,7 +24,7 @@ test(beginPrintsVersion)
 
   Firmata.begin(stream);
 
-  char expected[] = 
+  char expected[] =
   {
     REPORT_VERSION,
     FIRMATA_MAJOR_VERSION,
@@ -63,7 +63,7 @@ test(processWriteDigital_0)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
   processMessage(message, 3);
 
@@ -74,7 +74,7 @@ test(processWriteDigital_127)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 127, 0 };
   processMessage(message, 3);
 
@@ -85,7 +85,7 @@ test(processWriteDigital_128)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 1 };
   processMessage(message, 3);
 
@@ -96,7 +96,7 @@ test(processWriteLargestDigitalValue)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0x7F, 0x7F };
   processMessage(message, 3);
 
@@ -108,7 +108,7 @@ test(defaultDigitalWritePortIsZero)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
   processMessage(message, 3);
 
@@ -119,7 +119,7 @@ test(specifiedDigitalWritePort)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE + 1, 0, 0 };
   processMessage(message, 3);
 

@@ -9,12 +9,12 @@
  * http://firmata.org/wiki/Download
  */
 
-/* This firmware supports as many servos as possible using the Servo library 
+/* This firmware supports as many servos as possible using the Servo library
  * included in Arduino 0017
  *
  * This example code is in the public domain.
  */
- 
+
 #include <Servo.h>
 #include <Firmata.h>
 
@@ -34,14 +34,14 @@ void systemResetCallback()
   servoCount = 0;
 }
 
-void setup() 
+void setup()
 {
   byte pin;
 
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
-  
+
   Firmata.begin(57600);
   systemResetCallback();
 
@@ -58,8 +58,8 @@ void setup()
   }
 }
 
-void loop() 
+void loop()
 {
-  while(Firmata.available())
+  while (Firmata.available())
     Firmata.processInput();
 }
