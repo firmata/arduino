@@ -19,7 +19,8 @@ FIRMATA 2.4.0 BETA - not yet released
 * Increased input data buffer size from 32 to 64 bytes
 
 [StandardFirmata]
-* Added Yun variant (StandardFirmataYun)
+* Updated I2C_READ_CONTINUOUSLY to work with or without slaveRegister (Rick Waldron)
+* Added Yun variant of StandardFirmata
 * When a digital port is enabled, its value is now immediately sent to the client
 * When an analog pin is enabled, its value is now immediately sent to the client
 * Changed the way servo pins are mapped to enable use of servos on
