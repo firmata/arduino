@@ -334,7 +334,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // pic32 board FubarinoSD
 #elif defined(_BOARD_FUBARINO_SD_)
 #define TOTAL_ANALOG_PINS 15
-#define TOTAL_PINS 44 // All pins can be digital
+#define TOTAL_PINS 45 // All pins can be digital
 #define MAX_SERVOS TOTAL_PINS //All pins can be servo with SoftPWMservo
 #define VERSION_BLINK_PIN PIN_LED1
 #define IS_PIN_DIGITAL(p) ((p) >= 0 && (p) <= TOTAL_PINS)
