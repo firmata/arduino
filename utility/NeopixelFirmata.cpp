@@ -17,6 +17,7 @@ private:
   void initialize(byte pin, byte count, byte order, byte speed);
   void reportBrightness();
   void setPixel(byte position, byte red, byte green, byte blue);
+  void reportDone();
 };
 
 NeopixelFirmataImpl::NeopixelFirmataImpl()
@@ -102,6 +103,7 @@ boolean NeopixelFirmataImpl::handleSysex(byte command, byte argc, byte* argv)
       break;
 
     default:
+      // Firmata.sendString("NeoPixel: Unknown Command");
       return false;
   }
 
@@ -124,6 +126,14 @@ void NeopixelFirmataImpl::initialize(byte pin, byte count, byte order, byte spee
 
   pixels = new Adafruit_NeoPixel(count, pin, order + speed);
   pixels->begin();
+  for(int i=0; i<count; i++) {
+    pixels->setPixelColor(i, 0, 0, 255);
+    pixels->show();
+    delay(50);
+  }
+  pixels->clear();
+  pixels->show();
+  reportDone();
 }
 
 void NeopixelFirmataImpl::reportBrightness()
@@ -134,6 +144,14 @@ void NeopixelFirmataImpl::reportBrightness()
   Firmata.write(NEOPIXEL_CMD_BRIGHTNESS);
   Firmata.write(brightness & 0x7F);
   Firmata.write((brightness >> 7) & 0x7F);
+  Firmata.write(END_SYSEX);
+}
+
+void NeopixelFirmataImpl::reportDone()
+{
+  Firmata.write(START_SYSEX);
+  Firmata.write(NEOPIXEL_DATA);
+  Firmata.write(NEOPIXEL_CMD_DONE);
   Firmata.write(END_SYSEX);
 }
 
