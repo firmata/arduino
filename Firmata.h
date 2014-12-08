@@ -42,7 +42,7 @@
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
 #define ENCODER_DATA            0x61 // reply with encoders current positions
-#define NEOPIXEL_DATA           0x62 // control neo pixels 
+#define LED_STRIP_DATA           0x62 // control neo pixels 
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
 #define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
@@ -81,7 +81,7 @@
 #define ONEWIRE                 0x07 // pin configured for 1-wire
 #define STEPPER                 0x08 // pin configured for stepper motor
 #define ENCODER                 0x09 // pin configured for encoders
-#define NEOPIXEL                0x0A // pine configured for neopixels
+#define LED_STRIP               0x0A // pin configured for led strips
 #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         12
 
