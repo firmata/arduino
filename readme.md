@@ -65,10 +65,11 @@ The version of firmata in the Arduino IDE contains an outdated version of Firmat
 ###Mac OSX:
 
 The Firmata library is contained within the Arduino package.
+
 1. Navigate to the Arduino application
 2. Right click on the application icon and select `Show Package Contents`
 3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
-`Firmata` folder with latest Firmata release (note there is a different download
+`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
 for Arduino 1.0.x vs 1.5.x)
 4. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -77,19 +78,21 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 
 ###Windows:
 
-Update the path and arduino version as necessary
 1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest Firmata release (note there is a different download
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
+
+*Update the path and arduino version as necessary*
 
 ###Linux:
 
-Update the path and arduino version as necessary
 1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest Firmata release (note there is a different download
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
+
+*Update the path and arduino version as necessary*
 
 ###Using the Source code rather than release archive
 
@@ -101,11 +104,12 @@ or higher.
 You will first need to remove the existing Firmata library, then clone firmata/arduino
 into an empty Firmata directory:
 
-Update paths if you're using Windows or Linux
 ```bash
 $ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 ```
+
+*Update paths if you're using Windows or Linux*
 
 To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.5.x), run the
 `release.sh` script.
