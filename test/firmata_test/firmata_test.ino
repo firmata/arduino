@@ -18,28 +18,13 @@ void loop()
   Test::run();
 }
 
-// Note: this test required adding a method (Firmata.unsetFirmwareVersion()) to 
-// Firmata.cpp solely for the purpose of running this test. The method has been 
-// removed from Firmata.cpp, but keeping the test here as a recored 
-// test(setFirmwareVersionDoesNotLeakMemory)
-// {
-//   Firmata.setFirmwareVersion(1, 0);
-//   int initialMemory = freeMemory();
-
-//   Firmata.setFirmwareVersion(1, 0);
-
-//   assertEquals(0, initialMemory - freeMemory());
-  
-//   Firmata.unsetFirmwareVersion();
-// }
-
 test(beginPrintsVersion)
 {
   FakeStream stream;
 
   Firmata.begin(stream);
 
-  char expected[] = 
+  char expected[] =
   {
     REPORT_VERSION,
     FIRMATA_MAJOR_VERSION,
@@ -78,7 +63,7 @@ test(processWriteDigital_0)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
   processMessage(message, 3);
 
@@ -89,7 +74,7 @@ test(processWriteDigital_127)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 127, 0 };
   processMessage(message, 3);
 
@@ -100,7 +85,7 @@ test(processWriteDigital_128)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 1 };
   processMessage(message, 3);
 
@@ -111,7 +96,7 @@ test(processWriteLargestDigitalValue)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0x7F, 0x7F };
   processMessage(message, 3);
 
@@ -123,7 +108,7 @@ test(defaultDigitalWritePortIsZero)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE, 0, 0 };
   processMessage(message, 3);
 
@@ -134,9 +119,19 @@ test(specifiedDigitalWritePort)
 {
   setupDigitalPort();
   Firmata.attach(DIGITAL_MESSAGE, writeToDigitalPort);
-  
+
   byte message[] = { DIGITAL_MESSAGE + 1, 0, 0 };
   processMessage(message, 3);
 
   assertEqual(1, _digitalPort);
+}
+
+test(setFirmwareVersionDoesNotLeakMemory)
+{
+  Firmata.setFirmwareVersion(1, 0);
+  int initialMemory = freeMemory();
+
+  Firmata.setFirmwareVersion(1, 0);
+
+  assertEqual(0, initialMemory - freeMemory());
 }

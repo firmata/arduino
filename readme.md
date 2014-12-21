@@ -51,8 +51,8 @@ Most of the time you will be interacting with arduino with a client library on t
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
-##Updating Firmata in the Arduino IDE (< Arduino 1.5)
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
+##Updating Firmata in the Arduino IDE
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Arduino application.
 
 **Mac OSX**:
 
@@ -61,7 +61,12 @@ $ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 ```
 
-If you are downloading the latest tagged version of Firmata, rename it to "Firmata" and copy to /Applications/Arduino.app/Contents/Resources/Java/libraries/ overwriting the existing Firmata directory. Right-click (or conrol + click) on the Arduino application and choose "Show Package Contents" and navigate to the libraries directory.
+Note that the library path in the Java 7 version Arduino 1.5.7 for OS X has changed to:
+```
+/Applications/Arduino.app/Contents/Java/libraries/Firmata
+```
+
+If you are downloading the latest tagged version of Firmata, rename it to "Firmata" and copy to /Applications/Arduino.app/Contents/Resources/Java/libraries/ (note the special case for the Java 7 version of Arduino 1.5.7 above) overwriting the existing Firmata directory. Right-click (or conrol + click) on the Arduino application and choose "Show Package Contents" and navigate to the libraries directory.
 
 **Windows**:
 
@@ -81,29 +86,6 @@ update the path and arduino version as necessary
 ```bash
 $ rm -r ~/arduino-1.x/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git ~/arduino-1.x/libraries/Firmata
-```
-
-##Updating Firmata in the Arduino IDE (>= Arduino 1.5.2)
-As of Arduino 1.5.2 and there are separate library directories for the sam and
-avr architectures. To update Firmata in Arduino 1.5.2 or higher, follow the 
-instructions above for pre Arduino 1.5 versions but update the path as follows:
-
-**Mac OSX**:
-```
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/avr/libraries/Firmata
-/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/sam/libraries/Firmata
-```
-
-**Windows**:
-```
-/Program\ Files/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-/Program\ Files/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
-```
-
-**Linux**
-```
-~/arduino-1.5.x/hardware/arduino/avr/libraries/Firmata
-~/arduino-1.5.x/hardware/arduino/sam/libraries/Firmata
 ```
 
 <a name="contributing" />
