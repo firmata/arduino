@@ -15,7 +15,7 @@
 //******************************************************************************
 
 #include "Firmata.h"
-#include "HardwareSerial.h"
+#include "Stream.h"
 
 extern "C" {
 #include <string.h>
