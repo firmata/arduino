@@ -39,6 +39,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [https://github.com/4ntoine/Firmata]
   * [https://github.com/shigeodayo/Javarduino]
 * .NET
+  * [https://github.com/SolidSoils/Arduino]
   * [http://www.imagitronics.org/projects/firmatanet/]
 * Flash/AS3
   * [http://funnel.cc]
