@@ -1,6 +1,7 @@
 FIRMATA 2.4.0 - Dec 21, 2014
 
-**Changes from 2.3.6 to 2.4 that may impact existing Firmata client implementations:**
+Changes from 2.3.6 to 2.4 that may impact existing Firmata client implementations:
+
 * When sending a string from the client application to the board (STRING_DATA) a
 static buffer is now used for the incoming string in place of a dynamically allocated
 block of memory (see Firmata.cpp lines 181 - 205). In Firmata 2.3.6 and older,
@@ -8,6 +9,7 @@ the dynamically allocated block was never freed, causing a memory leak. If your
 client library had freed this memory in the string callback method, that code
 will break in Firmata 2.4. If the string data needs to persist beyond the string
 callback, it should be copied within the string callback.
+
 * As of Firmata 2.4, when digital port reporting or analog pin reporting is enabled,
 the value of the port (digital) or pin (analog) is immediately sent back to the client
 application. This will likely not have a negative impact on existing client
