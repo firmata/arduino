@@ -1,7 +1,7 @@
 /*
-  Firmata.cpp - Firmata library v2.6.0 - 2014-03-08
+  Firmata.cpp - Firmata library v2.6.1 - 2014-12-28
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -84,7 +84,8 @@ void FirmataClass::begin(Stream &s)
 }
 
 // output the protocol version message to the serial port
-void FirmataClass::printVersion(void) {
+void FirmataClass::printVersion(void)
+{
   FirmataStream->write(REPORT_VERSION);
   FirmataStream->write(FIRMATA_MAJOR_VERSION);
   FirmataStream->write(FIRMATA_MINOR_VERSION);
@@ -93,7 +94,7 @@ void FirmataClass::printVersion(void) {
 void FirmataClass::blinkVersion(void)
 {
   // flash the pin with the protocol version
-  pinMode(VERSION_BLINK_PIN,OUTPUT);
+  pinMode(VERSION_BLINK_PIN, OUTPUT);
   strobeBlinkPin(FIRMATA_MAJOR_VERSION, 40, 210);
   delay(250);
   strobeBlinkPin(FIRMATA_MINOR_VERSION, 40, 210);
@@ -104,12 +105,14 @@ void FirmataClass::printFirmwareVersion(void)
 {
   byte i;
 
-  if(firmwareVersionCount) { // make sure that the name has been set before reporting
+  if (firmwareVersionCount)  // make sure that the name has been set before reporting
+  {
     startSysex();
     FirmataStream->write(REPORT_FIRMWARE);
     FirmataStream->write(firmwareVersionVector[0]); // major version number
     FirmataStream->write(firmwareVersionVector[1]); // minor version number
-    for(i=2; i<firmwareVersionCount; ++i) {
+    for (i = 2; i < firmwareVersionCount; ++i)
+    {
       sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
     }
     endSysex();
@@ -125,25 +128,30 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   extension = strstr(name, ".cpp");
   firmwareName = strrchr(name, '/');
 
-  if (!firmwareName) {
+  if (!firmwareName)
+  {
     // windows
     firmwareName = strrchr(name, '\\');
   }
-  if (!firmwareName) {
+  if (!firmwareName)
+  {
     // user passed firmware name
     firmwareName = name;
   }
-  else {
+  else
+  {
     firmwareName ++;
   }
 
-  if (!extension) {
+  if (!extension)
+  {
     firmwareVersionCount = strlen(firmwareName) + 2;
   }
-  else {
+  else
+  {
     firmwareVersionCount = extension - firmwareName + 2;
   }
-    
+
   // in case anyone calls setFirmwareNameAndVersion more than once
   free(firmwareVersionVector);
 
@@ -151,9 +159,9 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
   firmwareVersionVector[1] = minor;
-  strncpy((char*)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
+  strncpy((char *)firmwareVersionVector + 2, firmwareName, firmwareVersionCount - 2);
 }
- 
+
 //------------------------------------------------------------------------------
 // Serial Receive Handling
 
@@ -165,16 +173,19 @@ int FirmataClass::available(void)
 
 void FirmataClass::processSysexMessage(void)
 {
-  switch(storedInputData[0]) { //first byte in buffer is command
+  switch (storedInputData[0])  //first byte in buffer is command
+  {
   case REPORT_FIRMWARE:
     printFirmwareVersion();
     break;
   case STRING_DATA:
-    if(currentStringCallback) {
+    if (currentStringCallback)
+    {
       byte bufferLength = (sysexBytesRead - 1) / 2;
       byte i = 1;
       byte j = 0;
-      while(j < bufferLength) {
+      while (j < bufferLength)
+      {
         // The string length will only be at most half the size of the
         // stored input buffer so we can decode the string within the buffer.
         storedInputData[j] = storedInputData[i];
@@ -186,14 +197,15 @@ void FirmataClass::processSysexMessage(void)
       // Make sure string is null terminated. This may be the case for data
       // coming from client libraries in languages that don't null terminate
       // strings.
-      if (storedInputData[j-1] != '\0') {
+      if (storedInputData[j - 1] != '\0')
+      {
         storedInputData[j] = '\0';
       }
-      (*currentStringCallback)((char*)&storedInputData[0]);
+      (*currentStringCallback)((char *)&storedInputData[0]);
     }
     break;
   default:
-    if(currentSysexCallback)
+    if (currentSysexCallback)
       (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
   }
 }
@@ -201,7 +213,8 @@ void FirmataClass::processSysexMessage(void)
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
-  if (inputData!=-1) {
+  if (inputData != -1)
+  {
     parse(inputData);
   }
 }
@@ -209,34 +222,44 @@ void FirmataClass::processInput(void)
 void FirmataClass::parse(byte inputData)
 {
   int command;
-    
+
   // TODO make sure it handles -1 properly
-  
-  if (parsingSysex) {
-    if(inputData == END_SYSEX) {
-      //stop sysex byte      
+
+  if (parsingSysex)
+  {
+    if (inputData == END_SYSEX)
+    {
+      //stop sysex byte
       parsingSysex = false;
       //fire off handler function
       processSysexMessage();
-    } else {
+    }
+    else
+    {
       //normal data byte - add to buffer
       storedInputData[sysexBytesRead] = inputData;
       sysexBytesRead++;
     }
-  } else if( (waitForData > 0) && (inputData < 128) ) {  
+  }
+  else if ( (waitForData > 0) && (inputData < 128) )
+  {
     waitForData--;
     storedInputData[waitForData] = inputData;
-    if( (waitForData==0) && executeMultiByteCommand ) { // got the whole message
-      switch(executeMultiByteCommand) {
+    if ( (waitForData == 0) && executeMultiByteCommand ) // got the whole message
+    {
+      switch (executeMultiByteCommand)
+      {
       case ANALOG_MESSAGE:
-        if(currentAnalogCallback) {
+        if (currentAnalogCallback)
+        {
           (*currentAnalogCallback)(multiByteChannel,
                                    (storedInputData[0] << 7)
                                    + storedInputData[1]);
         }
         break;
       case DIGITAL_MESSAGE:
-        if(currentDigitalCallback) {
+        if (currentDigitalCallback)
+        {
           (*currentDigitalCallback)(multiByteChannel,
                                     (storedInputData[0] << 7)
                                     + storedInputData[1]);
@@ -246,26 +269,32 @@ void FirmataClass::parse(byte inputData)
         setPinMode(storedInputData[1], storedInputData[0]);
         break;
       case REPORT_ANALOG:
-        if(currentReportAnalogCallback)
-          (*currentReportAnalogCallback)(multiByteChannel,storedInputData[0]);
+        if (currentReportAnalogCallback)
+          (*currentReportAnalogCallback)(multiByteChannel, storedInputData[0]);
         break;
       case REPORT_DIGITAL:
-        if(currentReportDigitalCallback)
-          (*currentReportDigitalCallback)(multiByteChannel,storedInputData[0]);
+        if (currentReportDigitalCallback)
+          (*currentReportDigitalCallback)(multiByteChannel, storedInputData[0]);
         break;
       }
       executeMultiByteCommand = 0;
-    }	
-  } else {
+    }
+  }
+  else
+  {
     // remove channel info from command byte if less than 0xF0
-    if(inputData < 0xF0) {
+    if (inputData < 0xF0)
+    {
       command = inputData & 0xF0;
       multiByteChannel = inputData & 0x0F;
-    } else {
+    }
+    else
+    {
       command = inputData;
       // commands in the 0xF* range don't use channel data
     }
-    switch (command) {
+    switch (command)
+    {
     case ANALOG_MESSAGE:
     case DIGITAL_MESSAGE:
     case SET_PIN_MODE:
@@ -293,13 +322,13 @@ void FirmataClass::parse(byte inputData)
 
 boolean FirmataClass::isParsingMessage(void)
 {
-  return (waitForData>0 || parsingSysex);
+  return (waitForData > 0 || parsingSysex);
 }
 //------------------------------------------------------------------------------
 // Serial Send Handling
 
 // send an analog message
-void FirmataClass::sendAnalog(byte pin, int value) 
+void FirmataClass::sendAnalog(byte pin, int value)
 {
   // pin can only be 0-15, so chop higher bits
   FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
@@ -307,7 +336,7 @@ void FirmataClass::sendAnalog(byte pin, int value)
 }
 
 // send a single digital pin in a digital message
-void FirmataClass::sendDigital(byte pin, int value) 
+void FirmataClass::sendDigital(byte pin, int value)
 {
   /* TODO add single pin digital messages to the protocol, this needs to
    * track the last digital data sent so that it can be sure to change just
@@ -339,25 +368,26 @@ void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 }
 
 
-void FirmataClass::sendSysex(byte command, byte bytec, byte* bytev) 
+void FirmataClass::sendSysex(byte command, byte bytec, byte *bytev)
 {
   byte i;
   startSysex();
   FirmataStream->write(command);
-  for(i=0; i<bytec; i++) {
-    sendValueAsTwo7bitBytes(bytev[i]);        
+  for (i = 0; i < bytec; i++)
+  {
+    sendValueAsTwo7bitBytes(bytev[i]);
   }
   endSysex();
 }
 
-void FirmataClass::sendString(byte command, const char* string) 
+void FirmataClass::sendString(byte command, const char *string)
 {
   sendSysex(command, strlen(string), (byte *)string);
 }
 
 
 // send a string as the protocol string type
-void FirmataClass::sendString(const char* string) 
+void FirmataClass::sendString(const char *string)
 {
   sendString(STRING_DATA, string);
 }
@@ -374,7 +404,8 @@ void FirmataClass::write(byte c)
 // generic callbacks
 void FirmataClass::attach(byte command, callbackFunction newFunction)
 {
-  switch(command) {
+  switch (command)
+  {
   case ANALOG_MESSAGE: currentAnalogCallback = newFunction; break;
   case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
   case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
@@ -385,14 +416,16 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
 
 void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
 {
-  switch(command) {
+  switch (command)
+  {
   case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
   }
 }
 
 void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
 {
-  switch(command) {
+  switch (command)
+  {
   case STRING_DATA: currentStringCallback = newFunction; break;
   }
 }
@@ -404,7 +437,8 @@ void FirmataClass::attach(byte command, sysexCallbackFunction newFunction)
 
 void FirmataClass::detach(byte command)
 {
-  switch(command) {
+  switch (command)
+  {
   case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
   case STRING_DATA: currentStringCallback = NULL; break;
   case START_SYSEX: currentSysexCallback = NULL; break;
@@ -420,7 +454,8 @@ void FirmataClass::attachDelayTask(delayTaskCallbackFunction newFunction)
 
 void FirmataClass::delayTask(long delay)
 {
-  if (delayTaskCallback) {
+  if (delayTaskCallback)
+  {
     (*delayTaskCallback)(delay);
   }
 }
@@ -433,11 +468,11 @@ byte FirmataClass::getPinMode(byte pin)
 
 void FirmataClass::setPinMode(byte pin, byte config)
 {
-  if (pinConfig[pin]==IGNORE)
+  if (pinConfig[pin] == IGNORE)
     return;
   pinState[pin] = 0;
   pinConfig[pin] = config;
-  if(currentPinModeCallback)
+  if (currentPinModeCallback)
     (*currentPinModeCallback)(pin, config);
 }
 
@@ -486,14 +521,15 @@ void FirmataClass::systemReset(void)
   executeMultiByteCommand = 0; // execute this after getting multi-byte data
   multiByteChannel = 0; // channel data for multiByteCommands
 
-  for(i=0; i<MAX_DATA_BYTES; i++) {
+  for (i = 0; i < MAX_DATA_BYTES; i++)
+  {
     storedInputData[i] = 0;
   }
 
   parsingSysex = false;
   sysexBytesRead = 0;
 
-  if(currentSystemResetCallback)
+  if (currentSystemResetCallback)
     (*currentSystemResetCallback)();
 }
 
@@ -501,11 +537,12 @@ void FirmataClass::systemReset(void)
 
 // =============================================================================
 // used for flashing the pin for the version number
-void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval) 
+void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
 {
   byte i;
   pinMode(VERSION_BLINK_PIN, OUTPUT);
-  for(i=0; i<count; i++) {
+  for (i = 0; i < count; i++)
+  {
     delay(offInterval);
     digitalWrite(VERSION_BLINK_PIN, HIGH);
     delay(onInterval);
