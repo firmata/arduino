@@ -36,7 +36,7 @@
 /* i2c data */
 struct i2c_device_info {
   byte addr;
-  byte reg;
+  int reg;
   byte bytes;
 };
 
