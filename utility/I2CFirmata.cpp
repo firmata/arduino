@@ -16,7 +16,7 @@
 
 #include <Firmata.h>
 #include <Wire.h>
-#include <I2CFirmata.h>
+#include "I2CFirmata.h"
 
 I2CFirmata::I2CFirmata()
 {

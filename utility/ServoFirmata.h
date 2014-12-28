@@ -19,7 +19,7 @@
 
 #include <Servo.h>
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
+#include "FirmataFeature.h"
 
 void servoAnalogWrite(byte pin, int value);
 

@@ -18,7 +18,7 @@
 #define AnalogOutputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
+#include "FirmataFeature.h"
 
 class AnalogOutputFirmata:public FirmataFeature
 {

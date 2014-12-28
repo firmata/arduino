@@ -18,7 +18,7 @@
 #define DigitalInputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
+#include "FirmataFeature.h"
 
 void reportDigitalInputCallback(byte port, int value);
 

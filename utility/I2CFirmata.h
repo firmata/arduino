@@ -18,8 +18,8 @@
 #define I2CFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <utility/FirmataReporting.h>
+#include "FirmataFeature.h"
+#include "FirmataReporting.h"
 
 // move the following defines to Firmata.h?
 #define I2C_WRITE B00000000

@@ -15,8 +15,8 @@
 */
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <FirmataReporting.h>
+#include "FirmataFeature.h"
+#include "FirmataReporting.h"
 
 void FirmataReporting::setSamplingInterval(int interval)
 {

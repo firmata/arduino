@@ -15,7 +15,7 @@
 
 #include "OneWire.h"
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
+#include "FirmataFeature.h"
 
 //subcommands:
 #define ONEWIRE_SEARCH_REQUEST 0x40
