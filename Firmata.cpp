@@ -1,5 +1,5 @@
 /*
-  Firmata.cpp - Firmata library v2.6.0 - 2014-03-08
+  Firmata.cpp - Firmata library v2.6.1 - 2014-08-17
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
  
   This library is free software; you can redistribute it and/or
@@ -433,12 +433,20 @@ byte FirmataClass::getPinMode(byte pin)
 
 void FirmataClass::setPinMode(byte pin, byte config)
 {
-  if (pinConfig[pin]==IGNORE)
+  if (pinConfig[pin] == IGNORE)
+    return;
+  setPinConfig(pin, config);
+  if (currentPinModeCallback)
+    (*currentPinModeCallback)(pin, config);
+}
+
+/* set pin config without calling the pin mode callback */
+void FirmataClass::setPinConfig(byte pin, byte config)
+{
+  if (pinConfig[pin] == IGNORE)
     return;
   pinState[pin] = 0;
   pinConfig[pin] = config;
-  if(currentPinModeCallback)
-    (*currentPinModeCallback)(pin, config);
 }
 
 /* access pin state */

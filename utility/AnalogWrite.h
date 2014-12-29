@@ -3,7 +3,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -27,9 +27,9 @@ void analogWriteCallback(byte pin, int value)
     switch(Firmata.getPinMode(pin)) {
 #ifdef ServoFirmata_h
     case SERVO:
-      if (IS_PIN_SERVO(pin)) {
-        servoAnalogWrite(pin,value);
-        Firmata.setPinState(pin,value);
+      if (IS_PIN_DIGITAL(pin)) {
+        servoAnalogWrite(pin, value);
+        Firmata.setPinState(pin, value);
       }
       break;
 #endif
@@ -37,7 +37,7 @@ void analogWriteCallback(byte pin, int value)
     case PWM:
       if (IS_PIN_PWM(pin)) {
         analogWrite(PIN_TO_PWM(pin), value);
-        Firmata.setPinState(pin,value);
+        Firmata.setPinState(pin, value);
       }
       break;
 #endif

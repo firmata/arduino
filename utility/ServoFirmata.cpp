@@ -3,7 +3,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2011 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -22,31 +22,37 @@ ServoFirmata *ServoInstance;
 
 void servoAnalogWrite(byte pin, int value)
 {
-  ServoInstance->analogWrite(pin,value);
+  ServoInstance->analogWrite(pin, value);
 }
 
 ServoFirmata::ServoFirmata()
 {
   ServoInstance = this;
+  for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+    servoPinMap[pin] = 255;
+  }  
+  detachedServoCount = 0;
+  servoCount = 0;
 }
 
 boolean ServoFirmata::analogWrite(byte pin, int value)
 {
-  if (IS_PIN_SERVO(pin)) {
-    Servo *servo = servos[PIN_TO_SERVO(pin)];
-    if (servo)
-      servo->write(value);
+  if (IS_PIN_DIGITAL(pin) && servoPinMap[pin] != 255) {
+    servos[servoPinMap[pin]].write(value);
   }
 }
 
 boolean ServoFirmata::handlePinMode(byte pin, int mode)
 {
-  if (IS_PIN_SERVO(pin)) {
-    if (mode==SERVO) {
-      attach(pin,-1,-1);
+  if (IS_PIN_DIGITAL(pin)) {
+    if (mode == SERVO) {
+      Firmata.setPinConfig(pin, mode);
+      attach(pin, -1, -1);
       return true;
     } else {
-      detach(pin);
+      if (servoPinMap[pin] < MAX_SERVOS && servos[servoPinMap[pin]].attached()) {
+        detach(pin);
+      }
     }
   }
   return false;
@@ -54,7 +60,7 @@ boolean ServoFirmata::handlePinMode(byte pin, int mode)
 
 void ServoFirmata::handleCapability(byte pin)
 {
-  if (IS_PIN_SERVO(pin)) {
+  if (IS_PIN_DIGITAL(pin)) {
     Firmata.write(SERVO);
     Firmata.write(14); //14 bit resolution (Servo takes int as argument)
   }
@@ -66,11 +72,11 @@ boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
     if (argc > 4) {
       // these vars are here for clarity, they'll optimized away by the compiler
       byte pin = argv[0];
-      if (IS_PIN_SERVO(pin) && Firmata.getPinMode(pin)!=IGNORE) {
+      if (IS_PIN_DIGITAL(pin) && Firmata.getPinMode(pin)!=IGNORE) {
         int minPulse = argv[1] + (argv[2] << 7);
         int maxPulse = argv[3] + (argv[4] << 7);
-        Firmata.setPinMode(pin, SERVO);
         attach(pin, minPulse, maxPulse);
+        Firmata.setPinMode(pin, SERVO);
         return true;
       }
     }
@@ -80,35 +86,58 @@ boolean ServoFirmata::handleSysex(byte command, byte argc, byte* argv)
 
 void ServoFirmata::attach(byte pin, int minPulse, int maxPulse)
 {
-  Servo *servo = servos[PIN_TO_SERVO(pin)];
-  if (!servo) {
-    servo = new Servo();
-    servos[PIN_TO_SERVO(pin)] = servo;
+  if (servoCount >= MAX_SERVOS) {
+    Firmata.sendString("Max servos attached");
+    return;
   }
-  if (servo->attached())
-    servo->detach();
-  if (minPulse>=0 || maxPulse>=0)
-    servo->attach(PIN_TO_DIGITAL(pin),minPulse,maxPulse);
+ 
+  if (servoPinMap[pin] != 255 && servos[servoPinMap[pin]].attached())
+    servos[servoPinMap[pin]].detach();
+
+  // reuse indexes of detached servos until all have been reallocated
+  if (detachedServoCount > 0) {
+    servoPinMap[pin] = detachedServos[detachedServoCount - 1];
+    if (detachedServoCount > 0) detachedServoCount--;
+  } else {
+    servoPinMap[pin] = servoCount;
+    servoCount++;
+  }
+  if (minPulse >= 0 || maxPulse >= 0)
+    servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
   else
-    servo->attach(PIN_TO_DIGITAL(pin));
+    servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin));
 }
 
 void ServoFirmata::detach(byte pin)
 {
-  Servo *servo = servos[PIN_TO_SERVO(pin)];
-  if (servo) {
-    if (servo->attached())
-      servo->detach();
-    free(servo);
-    servos[PIN_TO_SERVO(pin)]=NULL;
+  if (servoPinMap[pin] == 255)
+    return;
+  
+  if (servos[servoPinMap[pin]].attached()) {
+    servos[servoPinMap[pin]].detach();
+
+    // if we're detaching the last servo, decrement the count
+    // otherwise store the index of the detached servo
+    if (servoPinMap[pin] == servoCount && servoCount > 0) {
+      servoCount--;
+    } else if (servoCount > 0) {
+      // keep track of detached servos because we want to reuse their indexes
+      // before incrementing the count of attached servos
+      detachedServoCount++;
+      detachedServos[detachedServoCount - 1] = servoPinMap[pin];
+    }
   }
+
+  servoPinMap[pin] = 255;
 }
 
 void ServoFirmata::reset()
 {
-  for (byte pin=0;pin<TOTAL_PINS;pin++) {
-    if (IS_PIN_SERVO(pin)) {
+  for (byte pin = 0; pin < TOTAL_PINS; pin++) {
+    if (IS_PIN_DIGITAL(pin)) {
       detach(pin);
     }
   }
+  detachedServoCount = 0;
+  servoCount = 0;
 }

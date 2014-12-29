@@ -13,7 +13,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
   
@@ -100,6 +100,10 @@ AnalogOutputFirmata analogOutput;
 #include <utility/ServoFirmata.h>
 ServoFirmata servo;
 
+#if defined ServoFirmata_h && ! defined AnalogOutputFirmata_h
+#error AnalogOutputFirmata must be included to use ServoFirmata
+#endif
+
 #include <Wire.h> //wouldn't load from I2CFirmata.h in Arduino1.0.3
 #include <utility/I2CFirmata.h>
 I2CFirmata i2c;
@@ -118,12 +122,6 @@ FirmataScheduler scheduler;
 
 #include <utility/EncoderFirmata.h>
 EncoderFirmata encoder;
-
-
-// dependencies. Do not comment out the following lines
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-#include <utility/AnalogWrite.h>
-#endif
 
 #if defined AnalogInputFirmata_h || defined I2CFirmata_h || defined EncoderFirmata_h
 #include <utility/FirmataReporting.h>
@@ -205,11 +203,6 @@ void setup()
   delay(1000);
 #endif
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
-
-#if defined AnalogOutputFirmata_h || defined ServoFirmata_h
-  /* analogWriteCallback is declared in AnalogWrite.h */
-  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
-#endif
 
   #ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h
