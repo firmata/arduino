@@ -405,17 +405,14 @@ static inline unsigned char writePort(byte, byte, byte) __attribute__((always_in
 static inline unsigned char writePort(byte port, byte value, byte bitmask)
 {
 #if defined(ARDUINO_PINOUT_OPTIMIZE)
-  if (port == 0)
-  {
+  if (port == 0) {
     bitmask = bitmask & 0xFC;  // do not touch Tx & Rx pins
     byte valD = value & bitmask;
     byte maskD = ~bitmask;
     cli();
     PORTD = (PORTD & maskD) | valD;
     sei();
-  }
-  else if (port == 1)
-  {
+  } else if (port == 1) {
     byte valB = (value & bitmask) & 0x3F;
     byte valC = (value & bitmask) >> 6;
     byte maskB = ~(bitmask & 0x3F);
@@ -424,9 +421,7 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
     PORTB = (PORTB & maskB) | valB;
     PORTC = (PORTC & maskC) | valC;
     sei();
-  }
-  else if (port == 2)
-  {
+  } else if (port == 2) {
     bitmask = bitmask & 0x0F;
     byte valC = (value & bitmask) << 2;
     byte maskC = ~(bitmask << 2);
