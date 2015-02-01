@@ -1,4 +1,4 @@
-#Firmata
+#ConfigurableFirmata
 
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/firmata/arduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -95,7 +95,7 @@ for Arduino 1.0.x vs 1.5.x).
 
 *Update the path and arduino version as necessary*
 
-###Using the Source code rather than release archive
+###Using the ConfigurableFirmata Source code rather than release archive
 
 Clone this repo directly into the core Arduino libraries directory. If you are using
 Arduino 1.5.x, the repo directory structure will not match the Arduino
@@ -103,11 +103,12 @@ library format, however it should still compile as long as you are using Arduino
 or higher.
 
 You will first need to remove the existing Firmata library, then clone firmata/arduino
-into an empty Firmata directory:
+into an empty Firmata directory and checkout the `configurable` branch:
 
 ```bash
 $ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
+$ git checkout configurable
 ```
 
 *Update paths if you're using Windows or Linux*
