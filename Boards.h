@@ -5,7 +5,7 @@
 
 #include <inttypes.h>
 
-#if defined2(ARDUINO) && ARDUINO >= 100
+#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"  // for digitalRead, digitalWrite, etc
 #else
 #include "WProgram.h"
