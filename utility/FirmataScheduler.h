@@ -14,8 +14,8 @@
 #define FirmataScheduler_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <utility/Encoder7Bit.h>
+#include "FirmataFeature.h"
+#include "Encoder7Bit.h"
 
 //subcommands
 #define CREATE_FIRMATA_TASK     0

@@ -16,7 +16,7 @@
 
 #include <Servo.h>
 #include <Firmata.h>
-#include <ServoFirmata.h>
+#include "ServoFirmata.h"
 
 ServoFirmata *ServoInstance;
 

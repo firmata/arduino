@@ -11,10 +11,10 @@
 */
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <Encoder7Bit.h>
-#include <FirmataScheduler.h>
-#include <FirmataExt.h>
+#include "FirmataFeature.h"
+#include "Encoder7Bit.h"
+#include "FirmataScheduler.h"
+#include "FirmataExt.h"
 
 FirmataScheduler *FirmataSchedulerInstance;
 

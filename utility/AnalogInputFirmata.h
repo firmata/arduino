@@ -18,8 +18,8 @@
 #define AnalogInputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
-#include <utility/FirmataReporting.h>
+#include "FirmataFeature.h"
+#include "FirmataReporting.h"
 
 void reportAnalogInputCallback(byte analogPin, int value);
 

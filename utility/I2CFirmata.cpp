@@ -16,7 +16,7 @@
 
 #include <Firmata.h>
 #include <Wire.h>
-#include <I2CFirmata.h>
+#include "I2CFirmata.h"
 
 I2CFirmata::I2CFirmata()
 {
@@ -113,8 +113,8 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
 {
   byte mode;
   byte slaveAddress;
-  byte slaveRegister;
   byte data;
+  int slaveRegister;
   mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
   if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
     Firmata.sendString("10-bit addressing not supported");
@@ -157,10 +157,20 @@ void I2CFirmata::handleI2CRequest(byte argc, byte *argv)
       Firmata.sendString("too many queries");
       break;
     }
+    if (argc == 6) {
+      // a slave register is specified
+      slaveRegister = argv[2] + (argv[3] << 7);
+      data = argv[4] + (argv[5] << 7);  // bytes to read
+    }
+    else {
+      // a slave register is NOT specified
+      slaveRegister = (int)REGISTER_NOT_SPECIFIED;
+      data = argv[2] + (argv[3] << 7);  // bytes to read
+    }
     queryIndex++;
     query[queryIndex].addr = slaveAddress;
-    query[queryIndex].reg = argv[2] + (argv[3] << 7);
-    query[queryIndex].bytes = argv[4] + (argv[5] << 7);
+    query[queryIndex].reg = slaveRegister;
+    query[queryIndex].bytes = data;
     break;
   case I2C_STOP_READING:
     byte queryIndexToSkip;

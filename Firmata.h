@@ -1,7 +1,7 @@
 /*
-  Firmata.h - Firmata library v2.6.0 - 2014-03-08
+  Firmata.h - Firmata library v2.6.1 - 2014-12-28
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
 #define FIRMATA_MINOR_VERSION   6 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
+#define FIRMATA_BUGFIX_VERSION  1 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
@@ -84,12 +84,12 @@
 #define TOTAL_PIN_MODES         11
 
 extern "C" {
-// callback function types
-    typedef void (*callbackFunction)(byte, int);
-    typedef void (*systemResetCallbackFunction)(void);
-    typedef void (*stringCallbackFunction)(char*);
-    typedef void (*sysexCallbackFunction)(byte command, byte argc, byte*argv);
-    typedef void (*delayTaskCallbackFunction)(long delay);
+  // callback function types
+  typedef void (*callbackFunction)(byte, int);
+  typedef void (*systemResetCallbackFunction)(void);
+  typedef void (*stringCallbackFunction)(char *);
+  typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
+  typedef void (*delayTaskCallbackFunction)(long delay);
 }
 
 
@@ -97,82 +97,82 @@ extern "C" {
 class FirmataClass
 {
 public:
-    FirmataClass();
-/* Arduino constructors */
-    void begin();
-    void begin(long);
-    void begin(Stream &s);
-/* querying functions */
-    void printVersion(void);
-    void blinkVersion(void);
-    void printFirmwareVersion(void);
+  FirmataClass();
+  /* Arduino constructors */
+  void begin();
+  void begin(long);
+  void begin(Stream &s);
+  /* querying functions */
+  void printVersion(void);
+  void blinkVersion(void);
+  void printFirmwareVersion(void);
   //void setFirmwareVersion(byte major, byte minor);  // see macro below
-    void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
-/* serial receive handling */
-    int available(void);
-    void processInput(void);
-    void parse(unsigned char value);
-    boolean isParsingMessage(void);
-/* serial send handling */
-    void sendAnalog(byte pin, int value);
-    void sendDigital(byte pin, int value); // TODO implement this
-    void sendDigitalPort(byte portNumber, int portData);
-    void sendString(const char* string);
-    void sendString(byte command, const char* string);
-    void sendSysex(byte command, byte bytec, byte* bytev);
-    void write(byte c);
-/* attach & detach callback functions to messages */
-    void attach(byte command, callbackFunction newFunction);
-    void attach(byte command, systemResetCallbackFunction newFunction);
-    void attach(byte command, stringCallbackFunction newFunction);
-    void attach(byte command, sysexCallbackFunction newFunction);
-    void detach(byte command);
-/* delegate to Scheduler (if any) */
-    void attachDelayTask(delayTaskCallbackFunction newFunction);
-    void delayTask(long delay);
-/* access pin config */
-    byte getPinMode(byte pin);
-    void setPinMode(byte pin, byte config);
-/* access pin state */
-    int getPinState(byte pin);
-    void setPinState(byte pin, int state);
+  void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+  /* serial receive handling */
+  int available(void);
+  void processInput(void);
+  void parse(unsigned char value);
+  boolean isParsingMessage(void);
+  /* serial send handling */
+  void sendAnalog(byte pin, int value);
+  void sendDigital(byte pin, int value); // TODO implement this
+  void sendDigitalPort(byte portNumber, int portData);
+  void sendString(const char *string);
+  void sendString(byte command, const char *string);
+  void sendSysex(byte command, byte bytec, byte *bytev);
+  void write(byte c);
+  /* attach & detach callback functions to messages */
+  void attach(byte command, callbackFunction newFunction);
+  void attach(byte command, systemResetCallbackFunction newFunction);
+  void attach(byte command, stringCallbackFunction newFunction);
+  void attach(byte command, sysexCallbackFunction newFunction);
+  void detach(byte command);
+  /* delegate to Scheduler (if any) */
+  void attachDelayTask(delayTaskCallbackFunction newFunction);
+  void delayTask(long delay);
+  /* access pin config */
+  byte getPinMode(byte pin);
+  void setPinMode(byte pin, byte config);
+  /* access pin state */
+  int getPinState(byte pin);
+  void setPinState(byte pin, int state);
 
 
 private:
-    Stream *FirmataStream;
-/* firmware name and version */
-    byte firmwareVersionCount;
-    byte *firmwareVersionVector;
-/* input message handling */
-    byte waitForData; // this flag says the next serial input will be data
-    byte executeMultiByteCommand; // execute this after getting multi-byte data
-    byte multiByteChannel; // channel data for multiByteCommands
-    byte storedInputData[MAX_DATA_BYTES]; // multi-byte data
-/* sysex */
-    boolean parsingSysex;
-    int sysexBytesRead;
-/* pins configuration */
-    byte pinConfig[TOTAL_PINS];         // configuration of every pin
-    int pinState[TOTAL_PINS];           // any value that has been written
+  Stream *FirmataStream;
+  /* firmware name and version */
+  byte firmwareVersionCount;
+  byte *firmwareVersionVector;
+  /* input message handling */
+  byte waitForData; // this flag says the next serial input will be data
+  byte executeMultiByteCommand; // execute this after getting multi-byte data
+  byte multiByteChannel; // channel data for multiByteCommands
+  byte storedInputData[MAX_DATA_BYTES]; // multi-byte data
+  /* sysex */
+  boolean parsingSysex;
+  int sysexBytesRead;
+  /* pins configuration */
+  byte pinConfig[TOTAL_PINS];         // configuration of every pin
+  int pinState[TOTAL_PINS];           // any value that has been written
 
-/* callback functions */
-    callbackFunction currentAnalogCallback;
-    callbackFunction currentDigitalCallback;
-    callbackFunction currentReportAnalogCallback;
-    callbackFunction currentReportDigitalCallback;
-    callbackFunction currentPinModeCallback;
-    systemResetCallbackFunction currentSystemResetCallback;
-    stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;
-    delayTaskCallbackFunction delayTaskCallback;
+  /* callback functions */
+  callbackFunction currentAnalogCallback;
+  callbackFunction currentDigitalCallback;
+  callbackFunction currentReportAnalogCallback;
+  callbackFunction currentReportDigitalCallback;
+  callbackFunction currentPinModeCallback;
+  systemResetCallbackFunction currentSystemResetCallback;
+  stringCallbackFunction currentStringCallback;
+  sysexCallbackFunction currentSysexCallback;
+  delayTaskCallbackFunction delayTaskCallback;
 
-/* private methods ------------------------------ */
-    void processSysexMessage(void);
-    void systemReset(void);
-    void strobeBlinkPin(int count, int onInterval, int offInterval);
-    void sendValueAsTwo7bitBytes(int value);
-    void startSysex(void);
-    void endSysex(void);
+  /* private methods ------------------------------ */
+  void processSysexMessage(void);
+  void systemReset(void);
+  void strobeBlinkPin(int count, int onInterval, int offInterval);
+  void sendValueAsTwo7bitBytes(int value);
+  void startSysex(void);
+  void endSysex(void);
 };
 
 extern FirmataClass Firmata;

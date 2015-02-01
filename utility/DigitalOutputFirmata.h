@@ -18,7 +18,7 @@
 #define DigitalOutputFirmata_h
 
 #include <Firmata.h>
-#include <utility/FirmataFeature.h>
+#include "FirmataFeature.h"
 
 void digitalOutputWriteCallback(byte port, int value);
 

@@ -15,7 +15,7 @@
 */
 
 #include <Firmata.h>
-#include <AnalogFirmata.h>
+#include "AnalogFirmata.h"
 
 boolean handleAnalogFirmataSysex(byte command, byte argc, byte* argv)
 {
