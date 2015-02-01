@@ -298,9 +298,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        (p) - 18
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
-<<<<<<< HEAD
-=======
-
 
 // Intel Galileo Board
 #elif defined(ARDUINO_LINUX)
@@ -317,7 +314,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
->>>>>>> 9493e4627d5b1173eb9425017c660f23d4852192
 
 
 // Sanguino
