@@ -58,7 +58,7 @@ Most of the time you will be interacting with arduino with a client library on t
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [release](https://github.com/firmata/arduino/releases) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [release](https://github.com/firmata/arduino/releases/tag/v2.4.0) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
 
 *Note that Arduino 1.5.0 - 1.5.5 are not supported. Please use Arduino 1.5.6 or higher (or Arduino 1.0.5 or 1.0.6).*
 
@@ -69,7 +69,7 @@ The Firmata library is contained within the Arduino package.
 1. Navigate to the Arduino application
 2. Right click on the application icon and select `Show Package Contents`
 3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
-`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.0) (note there is a different download
 for Arduino 1.0.x vs 1.5.x)
 4. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -79,7 +79,7 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 ###Windows:
 
 1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.0) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -88,7 +88,7 @@ for Arduino 1.0.x vs 1.5.x).
 ###Linux:
 
 1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.0) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -126,19 +126,19 @@ If you would like to contribute but don't have a specific bugfix or new feature 
 
 You must thoroughly test your contributed code. In your pull request, describe tests performed to ensure that no existing code is broken and that any changes maintain backwards compatibility with the existing api. Test on multiple Arduino board variants if possible. We hope to enable some form of automated (or at least semi-automated) testing in the future, but for now any tests will need to be executed manually by the contributor and reviewers.
 
-Maintain the existing code style:
+Use [Artistic Style](http://astyle.sourceforge.net/) (astyle) to format your code. Set the following rules for the astyle formatter:
 
-- If you are changing a C++ file, use [Artistic Style (astyle)](http://astyle.sourceforge.net/) to format your code
-  - [Sublime Text astyle plugin](https://github.com/timonwong/SublimeAStyleFormatter) change default indentation from 4 to 2 spaces
-- If you are changing an .ino file, use the auto format feature (Tools -> Auto Format) in the Arduino IDE before submitting a pull request
-- Indentation is 2 spaces
-- Use spaces instead of tabs
-- Use camel case for both private and public properties and methods
-- Document functions (specific doc style is TBD... for now just be sure to document)
-- Insert first block bracket on line following the function definition:
+```
+style = ""
+indent-spaces = 2
+indent-classes = true
+indent-switches = true
+indent-cases = true
+indent-col1-comments = true
+attach-inlines = true
+pad-oper = true
+pad-header = true
+keep-one-line-statements = true
+```
 
-<pre>void someFunction()
-{
-  // do something
-}
-</pre>
+If you happen to use Sublime Text, [this astyle plugin](https://github.com/timonwong/SublimeAStyleFormatter) is helpful. Set the above rules in the user settings file.
