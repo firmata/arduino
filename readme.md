@@ -135,7 +135,6 @@ indent-classes = true
 indent-switches = true
 indent-cases = true
 indent-col1-comments = true
-attach-inlines = true
 pad-oper = true
 pad-header = true
 keep-one-line-statements = true

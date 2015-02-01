@@ -21,7 +21,7 @@ void stringCallback(char *myString)
 }
 
 
-void sysexCallback(byte command, byte argc, byte*argv)
+void sysexCallback(byte command, byte argc, byte *argv)
 {
   Firmata.sendSysex(command, argc, argv);
 }
