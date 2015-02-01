@@ -1,6 +1,8 @@
 #Firmata
 
-Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](http://firmata.org/wiki/Protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. See the [firmata wiki](http://firmata.org/wiki/Main_Page) for additional informataion. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/firmata/arduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
 ##Usage
 
@@ -10,6 +12,7 @@ The second and more common model is to load a general purpose sketch called Stan
 
 ##Firmata Client Libraries
 Most of the time you will be interacting with arduino with a client library on the host computers. Several Firmata client libraries have been implemented in a variety of popular programming languages:
+
 
 * procesing
   * [https://github.com/firmata/processing]
@@ -28,6 +31,7 @@ Most of the time you will be interacting with arduino with a client library on t
   * [http://funnel.cc]
 * clojure
   * [https://github.com/nakkaya/clodiuno]
+  * [https://github.com/peterschwarz/clj-firmata]
 * javascript
   * [https://github.com/jgautier/firmata]
   * [http://breakoutjs.com]
@@ -35,73 +39,106 @@ Most of the time you will be interacting with arduino with a client library on t
 * java
   * [https://github.com/4ntoine/Firmata]
   * [https://github.com/shigeodayo/Javarduino]
+  * [https://github.com/kurbatov/firmata4j]
 * .NET
+  * [https://github.com/SolidSoils/Arduino]
   * [http://www.imagitronics.org/projects/firmatanet/]
 * Flash/AS3
   * [http://funnel.cc]
   * [http://code.google.com/p/as3glue/]
 * PHP
   * [https://bitbucket.org/ThomasWeinert/carica-firmata]
+  * [https://github.com/oasynnoum/phpmake_firmata]
 * Haskell
   * [http://hackage.haskell.org/package/hArduino]
 * iOS
   * [https://github.com/jacobrosenthal/iosfirmata]
+* Dart
+  * [https://github.com/nfrancois/firmata]
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, clone the repo into the location of firmata in the arduino IDE or download the latest [tagged version](https://github.com/firmata/arduino/tags) (stable), rename the folder to "Firmata" and replace the existing Firmata folder in your Ardino application.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [Configurable Firmata release](https://github.com/firmata/arduino/releases) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
 
-**Mac OSX**:
+*Note that Arduino 1.5.0 - 1.5.5 are not supported. Please use Arduino 1.5.6 or higher (or Arduino 1.0.5 or 1.0.6).*
+
+###Mac OSX:
+
+The Firmata library is contained within the Arduino package.
+
+1. Navigate to the Arduino application
+2. Right click on the application icon and select `Show Package Contents`
+3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
+`Firmata` folder with latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+for Arduino 1.0.x vs 1.5.x)
+4. Restart the Arduino application and the latest version of Firmata will be available.
+
+If you are using the Java 7 version of Arduino 1.5.7 or higher, the file path
+will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory).
+
+###Windows:
+
+1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+for Arduino 1.0.x vs 1.5.x).
+2. Restart the Arduino application and the latest version of Firmata will be available.
+
+*Update the path and arduino version as necessary*
+
+###Linux:
+
+1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+for Arduino 1.0.x vs 1.5.x).
+2. Restart the Arduino application and the latest version of Firmata will be available.
+
+*Update the path and arduino version as necessary*
+
+###Using the Source code rather than release archive
+
+Clone this repo directly into the core Arduino libraries directory. If you are using
+Arduino 1.5.x, the repo directory structure will not match the Arduino
+library format, however it should still compile as long as you are using Arduino 1.5.7
+or higher.
+
+You will first need to remove the existing Firmata library, then clone firmata/arduino
+into an empty Firmata directory:
 
 ```bash
 $ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
 ```
 
-If you are downloading the latest tagged version of Firmata, rename it to "Firmata" and copy to /Applications/Arduino.app/Contents/Resources/Java/libraries/ overwriting the existing Firmata directory. Right-click (or conrol + click) on the Arduino application and choose "Show Package Contents" and navigate to the libraries directory.
+*Update paths if you're using Windows or Linux*
 
-**Windows**:
-
-Using the Git Shell application installed with [GitHub for Windows](http://windows.github.com/) (set default shell in options to Git Bash) or other command line based git tool:
-
-update the path and arduino version as necessary
-```bash
-$ rm -r c:/Program\ Files/arduino/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git c:/Program\ Files/arduino/libraries/Firmata
-```
-
-Note: If you use GitHub for Windows, you must clone the firmata/arduino repository using the Git Shell application as described above. You can use the Github for Windows GUI only after you have cloned the repository. Drag the Firmata file into the Github for Windows GUI to track it.
-
-**Linux**:
-
-update the path and arduino version as necessary
-```bash
-$ rm -r ~/arduino/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git ~/arduino/libraries/Firmata
-```
+To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.5.x), run the
+`release.sh` script.
 
 <a name="contributing" />
 ##Contributing
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/firmata/arduino/issues?sort=created&state=open). Due to the limited memory of standard Arduino boards we cannot add every requested feature to StandardFirmata. Requests to add new features to StandardFirmata will be evaluated by the Firmata developers. However it is still possible to add new features to other Firmata implementations (Firmata is a protocol whereas StandardFirmata is just one of many possible implementations).
 
-To contribute, fork this respository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *dev* branch. If you are contributing a feature for configurable firmata, submit the pull request against the *configurable_dev* branch.
+To contribute, fork this repository and create a new topic branch for the bug, feature or other existing issue you are addressing. Submit the pull request against the *master* branch.
 
 If you would like to contribute but don't have a specific bugfix or new feature to contribute, you can take on an existing issue, see issues labeled "pull-request-encouraged". Add a comment to the issue to express your intent to begin work and/or to get any additional information about the issue.
 
-You must thorougly test your contributed code. In your pull request, describe tests performed to ensure that no existing code is broken and that any changes maintain backwards compatibility with the existing api. Test on multiple Arduino board variants if possible. We hope to enable some form of automated (or at least semi-automated) testing in the future, but for now any tests will need to be executed manually by the contributor and reviewsers.
+You must thoroughly test your contributed code. In your pull request, describe tests performed to ensure that no existing code is broken and that any changes maintain backwards compatibility with the existing api. Test on multiple Arduino board variants if possible. We hope to enable some form of automated (or at least semi-automated) testing in the future, but for now any tests will need to be executed manually by the contributor and reviewers.
 
-Maintain the existing code style:
+Use [Artistic Style](http://astyle.sourceforge.net/) (astyle) to format your code. Set the following rules for the astyle formatter:
 
-- Indentation is 2 spaces
-- Use spaces instead of tabs
-- Use camel case for both private and public properties and methods
-- Document functions (specific doc style is TBD... for now just be sure to document)
-- Insert first block bracket on line following the function definition:
+```
+style = ""
+indent-spaces = 2
+indent-classes = true
+indent-switches = true
+indent-cases = true
+indent-col1-comments = true
+attach-inlines = true
+pad-oper = true
+pad-header = true
+keep-one-line-statements = true
+```
 
-<pre>void someFunction()
-{
-  // do something
-}
-</pre>
+If you happen to use Sublime Text, [this astyle plugin](https://github.com/timonwong/SublimeAStyleFormatter) is helpful. Set the above rules in the user settings file.
