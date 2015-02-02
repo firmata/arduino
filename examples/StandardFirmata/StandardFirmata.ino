@@ -346,7 +346,7 @@ void reportAnalogCallback(byte analogPin, int value)
 {
   if (analogPin < TOTAL_ANALOG_PINS) {
     if (value == 0) {
-      analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
+      analogInputsToReport = analogInputsToReport & ~ (1 << analogPin);
     } else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
       // Send pin value immediately. This is helpful when connected via

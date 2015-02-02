@@ -22,7 +22,7 @@ byte pin;
 int analogValue;
 int previousAnalogValues[TOTAL_ANALOG_PINS];
 
-byte portStatus[TOTAL_PORTS];	// each bit: 1=pin is digital input, 0=other/ignore
+byte portStatus[TOTAL_PORTS]; // each bit: 1=pin is digital input, 0=other/ignore
 byte previousPINs[TOTAL_PORTS];
 
 /* timer variables */

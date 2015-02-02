@@ -24,8 +24,7 @@ test(beginPrintsVersion)
 
   Firmata.begin(stream);
 
-  char expected[] =
-  {
+  char expected[] = {
     REPORT_VERSION,
     FIRMATA_MAJOR_VERSION,
     FIRMATA_MINOR_VERSION,
@@ -34,13 +33,12 @@ test(beginPrintsVersion)
   assertEqual(expected, stream.bytesWritten());
 }
 
-void processMessage(const byte* message, size_t length)
+void processMessage(const byte *message, size_t length)
 {
   FakeStream stream;
   Firmata.begin(stream);
 
-  for (size_t i = 0; i < length; i++)
-  {
+  for (size_t i = 0; i < length; i++) {
     stream.nextByte(message[i]);
     Firmata.processInput();
   }
@@ -54,7 +52,8 @@ void writeToDigitalPort(byte port, int value)
   _digitalPortValue = value;
 }
 
-void setupDigitalPort() {
+void setupDigitalPort()
+{
   _digitalPort = 0;
   _digitalPortValue = 0;
 }

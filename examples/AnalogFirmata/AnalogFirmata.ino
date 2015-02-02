@@ -53,7 +53,7 @@ void analogWriteCallback(byte pin, int value)
 void reportAnalogCallback(byte pin, int value)
 {
   if (value == 0) {
-    analogInputsToReport = analogInputsToReport &~ (1 << pin);
+    analogInputsToReport = analogInputsToReport & ~ (1 << pin);
   }
   else { // everything but 0 enables reporting of that pin
     analogInputsToReport = analogInputsToReport | (1 << pin);

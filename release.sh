@@ -15,7 +15,7 @@ cd temp
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Firmata-2.4.0-beta3.zip
+mv ./temp/Firmata.zip Firmata-2.4.0.zip
 
 #package for Arduino 1.5.x
 cp library.properties temp/Firmata
@@ -29,5 +29,5 @@ cd ..
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Arduino-1.5.x-Firmata-2.4.0-beta3.zip
+mv ./temp/Firmata.zip Arduino-1.5.x-Firmata-2.4.0.zip
 rm -r ./temp
