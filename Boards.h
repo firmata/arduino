@@ -299,7 +299,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 
-
 // Intel Galileo Board
 #elif defined(ARDUINO_LINUX)
 #define TOTAL_ANALOG_PINS       6
@@ -348,6 +347,57 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// pic32 board FubarinoSD
+#elif defined(_BOARD_FUBARINO_SD_)
+#define TOTAL_ANALOG_PINS       15
+#define TOTAL_PINS              45 // All pins can be digital
+#define MAX_SERVOS              5  // TODO: Enable all pins as PWM with SoftPWMServo
+#define VERSION_BLINK_PIN       PIN_LED1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 30 && (p) <= 44)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 1 || (p) == 2)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+// pic32 board FubarinoMini
+#elif defined(_BOARD_FUBARINO_MINI_)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_PINS
+#define TOTAL_PINS              NUM_DIGITAL_PINS // All pins can be digital
+#define MAX_SERVOS              5 //TODO: Enable all pins as PWM so all pins can be servo with SoftPWMservo
+#define VERSION_BLINK_PIN       PIN_LED1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) == 0 || (p) == 20 || ((p) >= 3 && (p) <= 13))
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_I2C(p)           ((p) == 25 || (p) == 26)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+//TODO: pic32 UNO32 and U32
+// pic32 board FubarinoMini
+#elif defined(_BOARD_UNO_)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_PINS //12
+#define TOTAL_PINS              NUM_DIGITAL_PINS // 47 All pins can be digital
+#define MAX_SERVOS              5 //All pins can be servo with SoftPWMservo
+#define VERSION_BLINK_PIN       PIN_LED1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) == 0 || (p) == 20 || ((p) >= 3 && (p) <= 13))
+#define IS_PIN_PWM(p)           ((p) == 10 || (p) == 9 || (p) == 5 || (p) == 5 || (p) == 3)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 45 || (p) == 46)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
 
 // anything else
 #else
@@ -441,4 +491,3 @@ static inline unsigned char writePort(byte port, byte value, byte bitmask)
 
 
 #endif /* Firmata_Boards_h */
-
