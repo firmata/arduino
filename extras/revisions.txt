@@ -3,6 +3,9 @@ FIRMATA 2.4.1 - Feb 7, 2015
 [core library]
 * Fixed off-by-one bug in setFirmwareNameAndVersion (Brian Schmalz)
 
+[StandardFirmata]
+* Prevent analog values from being reported during system reset
+
 FIRMATA 2.4.0 - Dec 21, 2014
 
 Changes from 2.3.6 to 2.4 that may impact existing Firmata client implementations:
