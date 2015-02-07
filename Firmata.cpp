@@ -146,7 +146,7 @@ void FirmataClass::setFirmwareNameAndVersion(const char *name, byte major, byte 
   // in case anyone calls setFirmwareNameAndVersion more than once
   free(firmwareVersionVector);
 
-  firmwareVersionVector = (byte *) malloc(firmwareVersionCount);
+  firmwareVersionVector = (byte *) malloc(firmwareVersionCount+1);
   firmwareVersionVector[firmwareVersionCount] = 0;
   firmwareVersionVector[0] = major;
   firmwareVersionVector[1] = minor;
