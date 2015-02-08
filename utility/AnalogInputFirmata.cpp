@@ -44,7 +44,14 @@ void AnalogInputFirmata::reportAnalog(byte analogPin, int value)
       analogInputsToReport = analogInputsToReport &~ (1 << analogPin);
     } else {
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
-      Firmata.sendAnalog(analogPin, analogRead(analogPin));
+      // prevent during system reset or all analog pin values will be reported
+      // which may report noise for unconnected analog pins
+      if (Firmata.isResetting()) {
+        // Send pin value immediately. This is helpful when connected via
+        // ethernet, wi-fi or bluetooth so pin states can be known upon
+        // reconnecting.
+        Firmata.sendAnalog(analogPin, analogRead(analogPin));
+      }
     }
   }
   // TODO: save status to EEPROM here, if changed

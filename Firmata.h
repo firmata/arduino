@@ -113,6 +113,7 @@ class FirmataClass
     void processInput(void);
     void parse(unsigned char value);
     boolean isParsingMessage(void);
+    boolean isResetting(void);
     /* serial send handling */
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
@@ -154,6 +155,8 @@ class FirmataClass
     /* pins configuration */
     byte pinConfig[TOTAL_PINS];         // configuration of every pin
     int pinState[TOTAL_PINS];           // any value that has been written
+
+    boolean resetting;
 
     /* callback functions */
     callbackFunction currentAnalogCallback;

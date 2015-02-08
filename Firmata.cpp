@@ -294,6 +294,11 @@ boolean FirmataClass::isParsingMessage(void)
 {
   return (waitForData > 0 || parsingSysex);
 }
+
+boolean FirmataClass::isResetting(void)
+{
+  return resetting;
+}
 //------------------------------------------------------------------------------
 // Serial Send Handling
 
@@ -479,6 +484,7 @@ void FirmataClass::setPinState(byte pin, int state)
 // resets the system state upon a SYSTEM_RESET message from the host software
 void FirmataClass::systemReset(void)
 {
+  resetting = true;
   byte i;
 
   waitForData = 0; // this flag says the next serial input will be data
@@ -494,6 +500,8 @@ void FirmataClass::systemReset(void)
 
   if (currentSystemResetCallback)
     (*currentSystemResetCallback)();
+
+  resetting = false;
 }
 
 
