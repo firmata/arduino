@@ -31,7 +31,7 @@ boolean DHT11Feature::handlePinMode(byte pin, int mode)
   return false;
 }
 
-boolean DHT11Feature::handleSysex(byte command, byte argc, byte* argv)
+boolean DHT11Feature::handleSysex(byte command, byte argc, byte *argv)
 {
   return false;
 }
@@ -43,30 +43,30 @@ void DHT11Feature::reset()
 
 void DHT11Feature::report()
 {
-  for (byte i=0; i<TOTAL_PINS;i++) {
-    if (DHT11_PIN==Firmata.getPinMode(i)) {
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (DHT11_PIN == Firmata.getPinMode(i)) {
       int result = DHT11.read(i);
-      switch(result) {
-      case DHTLIB_OK:
-        Firmata.write(START_SYSEX);
-        Firmata.write(RESERVED_COMMAND);
-        Firmata.write(DHT11_PIN);
-        Firmata.write(i);
-        Firmata.write(DHT11.temperature & 0x7F);
-        Firmata.write(DHT11.temperature >> 7 & 0x7F);
-        Firmata.write(DHT11.humidity & 0x7F);
-        Firmata.write(DHT11.humidity >> 7 & 0x7F);
-        Firmata.write(END_SYSEX);
-        break;
-      case DHTLIB_ERROR_CHECKSUM:
-        Firmata.sendString("DHT11 error checksum");
-        break;
-      case DHTLIB_ERROR_TIMEOUT:
-        Firmata.sendString("DHT11 error timeout");
-        break;
-      default:
-        Firmata.sendString("DHT11 error unknown");
-        break;
+      switch (result) {
+        case DHTLIB_OK:
+          Firmata.write(START_SYSEX);
+          Firmata.write(RESERVED_COMMAND);
+          Firmata.write(DHT11_PIN);
+          Firmata.write(i);
+          Firmata.write(DHT11.temperature & 0x7F);
+          Firmata.write(DHT11.temperature >> 7 & 0x7F);
+          Firmata.write(DHT11.humidity & 0x7F);
+          Firmata.write(DHT11.humidity >> 7 & 0x7F);
+          Firmata.write(END_SYSEX);
+          break;
+        case DHTLIB_ERROR_CHECKSUM:
+          Firmata.sendString("DHT11 error checksum");
+          break;
+        case DHTLIB_ERROR_TIMEOUT:
+          Firmata.sendString("DHT11 error timeout");
+          break;
+        default:
+          Firmata.sendString("DHT11 error unknown");
+          break;
       }
     }
   }

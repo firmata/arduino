@@ -33,7 +33,7 @@ int dht11::read(int pin)
   uint8_t idx = 0;
 
   // EMPTY BUFFER
-  for (int i=0; i< 5; i++) bits[i] = 0;
+  for (int i = 0; i < 5; i++) bits[i] = 0;
 
   // REQUEST SAMPLE
   pinMode(pin, OUTPUT);
@@ -45,24 +45,24 @@ int dht11::read(int pin)
 
   // ACKNOWLEDGE or TIMEOUT
   unsigned int loopCnt = 10000;
-  while(digitalRead(pin) == LOW)
+  while (digitalRead(pin) == LOW)
     if (loopCnt-- == 0) return DHTLIB_ERROR_TIMEOUT;
 
   loopCnt = 10000;
-  while(digitalRead(pin) == HIGH)
+  while (digitalRead(pin) == HIGH)
     if (loopCnt-- == 0) return DHTLIB_ERROR_TIMEOUT;
 
   // READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
-  for (int i=0; i<40; i++)
+  for (int i = 0; i < 40; i++)
   {
     loopCnt = 10000;
-    while(digitalRead(pin) == LOW)
+    while (digitalRead(pin) == LOW)
       if (loopCnt-- == 0) return DHTLIB_ERROR_TIMEOUT;
 
     unsigned long t = micros();
 
     loopCnt = 10000;
-    while(digitalRead(pin) == HIGH)
+    while (digitalRead(pin) == HIGH)
       if (loopCnt-- == 0) return DHTLIB_ERROR_TIMEOUT;
 
     if ((micros() - t) > 40) bits[idx] |= (1 << cnt);

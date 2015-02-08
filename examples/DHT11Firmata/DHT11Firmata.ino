@@ -31,10 +31,10 @@ systemResetCallback()
     if (IS_PIN_ANALOG(pin)) {
       pinMode(pin, ANALOG);
       digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
-    } 
+    }
     else {
       pinMode(pin, OUTPUT);
-      digitalWrite(pin,0); // sets the output to 0
+      digitalWrite(pin, 0); // sets the output to 0
     }
   }
   firmataExt.reset();
@@ -54,9 +54,9 @@ setup()
   systemResetCallback();  // reset to default config
 }
 
-void loop() 
+void loop()
 {
-  while(Firmata.available()) {
+  while (Firmata.available()) {
     Firmata.processInput();
   }
   if (reporting.elapsed()) {

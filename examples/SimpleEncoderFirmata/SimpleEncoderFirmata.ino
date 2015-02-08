@@ -16,16 +16,16 @@
   Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   See file LICENSE.txt for further informations on licensing terms.
 
   formatted using the GNU C formatting and indenting
- 
+
  */
 
 //* Due to arduino issue, Wire and Servo libraries need to be included. Should be fixed in later versions
@@ -52,7 +52,7 @@ void systemResetCallback()
 /*==============================================================================
  * SETUP()
  *============================================================================*/
-void setup() 
+void setup()
 {
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
   firmataExt.addFeature(reporting);
@@ -66,11 +66,11 @@ void setup()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void loop() 
+void loop()
 {
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
-  while(Firmata.available()) {
+  while (Firmata.available()) {
     Firmata.processInput();
   }
 
