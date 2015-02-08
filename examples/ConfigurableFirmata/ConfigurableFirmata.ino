@@ -16,12 +16,12 @@
   Copyright (C) 2009-2013 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2013 Norbert Truchsess. All rights reserved.
   Copyright (C) 2014 Nicolas Panel. All rights reserved.
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   See file LICENSE.txt for further informations on licensing terms.
 
   formatted using the GNU C formatting and indenting
@@ -30,9 +30,9 @@
 
 #include <Firmata.h>
 
-/* 
- * by default Firmata uses the Serial-port (over USB) of Arduino. 
- * ConfigurableFirmata may also comunicate over ethernet using tcp/ip. 
+/*
+ * by default Firmata uses the Serial-port (over USB) of Arduino.
+ * ConfigurableFirmata may also comunicate over ethernet using tcp/ip.
  * To configure this 'Network Firmata' to use the original WIZ5100-based
  * ethernet-shield or Arduino Ethernet uncomment the includes of 'SPI.h' and 'Ethernet.h':
  */
@@ -72,11 +72,11 @@
 //replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
 #define local_ip IPAddress(192,168,0,6)
 //replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
-const byte mac[] = {0x90,0xA2,0xDA,0x0D,0x07,0x02};
+const byte mac[] = {0x90, 0xA2, 0xDA, 0x0D, 0x07, 0x02};
 #endif
 
 // To configure, save this file to your working directory so you can edit it
-// then comment out the include and declaration for any features that you do 
+// then comment out the include and declaration for any features that you do
 // not need below.
 
 // Also note that the current compile size for an Arduino Uno with all of the
@@ -143,16 +143,16 @@ EthernetClient client;
 #endif
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
-  EthernetClientStream stream(client,local_ip,remote_ip,NULL,remote_port);
+EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
 #else
-  EthernetClientStream stream(client,IPAddress(0,0,0,0),remote_ip,NULL,remote_port);
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, remote_port);
 #endif
 #endif
 #if !defined remote_ip && defined remote_host
 #ifdef local_ip
-  EthernetClientStream stream(client,local_ip,IPAddress(0,0,0,0),remote_host,remote_port);
+EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, remote_port);
 #else
-  EthernetClientStream stream(client,IPAddress(0,0,0,0),IPAddress(0,0,0,0),remote_host,remote_port);
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), remote_host, remote_port);
 #endif
 #endif
 #endif
@@ -167,7 +167,7 @@ void systemResetCallback()
 
   // pins with analog capability default to analog input
   // otherwise, pins default to digital output
-  for (byte i=0; i < TOTAL_PINS; i++) {
+  for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_ANALOG(i)) {
 #ifdef AnalogInputFirmata_h
       // turns off pullup, configures everything
@@ -190,16 +190,16 @@ void systemResetCallback()
  * SETUP()
  *============================================================================*/
 
-void setup() 
+void setup()
 {
 #ifdef NETWORK_FIRMATA
 #ifdef _YUN_CLIENT_H_
   Bridge.begin();
 #else
 #ifdef local_ip
-  Ethernet.begin((uint8_t*)mac,local_ip);  //start ethernet
+  Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
 #else
-  Ethernet.begin((uint8_t*)mac); //start ethernet using dhcp
+  Ethernet.begin((uint8_t *)mac); //start ethernet using dhcp
 #endif
 #endif
   delay(1000);
@@ -211,7 +211,7 @@ void setup()
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
 #endif
 
-  #ifdef FirmataExt_h
+#ifdef FirmataExt_h
 #ifdef DigitalInputFirmata_h
   firmataExt.addFeature(digitalInput);
 #endif
@@ -255,15 +255,15 @@ void setup()
   // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 #ifdef NETWORK_FIRMATA
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
-  for (byte i=0; i < TOTAL_PINS; i++) {
+  for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
-        || 4==i
+        || 4 == i
         // || 10==i //explicitly ignore pin 10 on MEGA as 53 is hardware-SS but Ethernet-shield uses pin 10 for SS
-        ) {
+       ) {
       Firmata.setPinMode(i, IGNORE);
     }
   }
-//  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
+  //  pinMode(PIN_TO_DIGITAL(53), OUTPUT); configure hardware-SS as output on MEGA
   pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
@@ -279,7 +279,7 @@ void setup()
 /*==============================================================================
  * LOOP()
  *============================================================================*/
-void loop() 
+void loop()
 {
 #ifdef DigitalInputFirmata_h
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
@@ -289,7 +289,7 @@ void loop()
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
-  while(Firmata.available()) {
+  while (Firmata.available()) {
     Firmata.processInput();
 #ifdef FirmataScheduler_h
     if (!Firmata.isParsingMessage()) {
@@ -326,8 +326,8 @@ runtasks: scheduler.runTasks();
 #endif
 #if defined NETWORK_FIRMATA && !defined local_ip &&!defined _YUN_CLIENT_H_
   if (Ethernet.maintain())
-    {
-      stream.maintain(Ethernet.localIP());
-    }
+  {
+    stream.maintain(Ethernet.localIP());
+  }
 #endif
 }
