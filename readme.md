@@ -61,7 +61,7 @@ Most of the time you will be interacting with arduino with a client library on t
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [Configurable Firmata release](https://github.com/firmata/arduino/releases) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [Configurable Firmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
 
 *Note that Arduino 1.5.0 - 1.5.5 are not supported. Please use Arduino 1.5.6 or higher (or Arduino 1.0.5 or 1.0.6).*
 
@@ -72,7 +72,7 @@ The Firmata library is contained within the Arduino package.
 1. Navigate to the Arduino application
 2. Right click on the application icon and select `Show Package Contents`
 3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
-`Firmata` folder with latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
 for Arduino 1.0.x vs 1.5.x)
 4. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -82,7 +82,7 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 ###Windows:
 
 1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -91,7 +91,7 @@ for Arduino 1.0.x vs 1.5.x).
 ###Linux:
 
 1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases) (note there is a different download
+`Firmata` folder with the latest [ConfigurableFirmata release](https://github.com/firmata/arduino/releases/tag/v2.6.2) (note there is a different download
 for Arduino 1.0.x vs 1.5.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
@@ -138,7 +138,6 @@ indent-classes = true
 indent-switches = true
 indent-cases = true
 indent-col1-comments = true
-attach-inlines = true
 pad-oper = true
 pad-header = true
 keep-one-line-statements = true
