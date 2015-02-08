@@ -77,8 +77,6 @@ struct i2c_device_info {
 /* for i2c read continuous more */
 i2c_device_info query[MAX_QUERIES];
 
-boolean isResetting = false;
-
 byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
@@ -353,7 +351,7 @@ void reportAnalogCallback(byte analogPin, int value)
       analogInputsToReport = analogInputsToReport | (1 << analogPin);
       // prevent during system reset or all analog pin values will be reported
       // which may report noise for unconnected analog pins
-      if (!isResetting) {
+      if (!Firmata.isResetting()) {
         // Send pin value immediately. This is helpful when connected via
         // ethernet, wi-fi or bluetooth so pin states can be known upon
         // reconnecting.
@@ -616,7 +614,6 @@ void disableI2CPins() {
 
 void systemResetCallback()
 {
-  isResetting = true;
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
   if (isI2CEnabled) {
@@ -657,7 +654,6 @@ void systemResetCallback()
     outputPort(i, readPort(i, portConfigInputs[i]), true);
   }
   */
-  isResetting = false;
 }
 
 void setup()
