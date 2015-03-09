@@ -1,15 +1,13 @@
 /*
- * Firmata is a generic protocol for communicating with microcontrollers
- * from software on a host computer. It is intended to work with
- * any host computer software package.
- *
- * To download a host software package, please clink on the following link
- * to open the download page in your default browser.
- *
- * http://firmata.org/wiki/Download
- */
+  Firmata is a generic protocol for communicating with microcontrollers
+  from software on a host computer. It is intended to work with
+  any host computer software package.
 
-/*
+  To download a host software package, please clink on the following link
+  to open the list of Firmata client libraries your default browser.
+
+  https://github.com/firmata/arduino#firmata-client-libraries
+
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -22,56 +20,134 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  formatted using the GNU C formatting and indenting
+  Last updated by Jeff Hoefs: March 8, 2015
+*/
+
+/*
+  README
+
+  To use StandardFirmataEthernet you will need to have one of the following
+  boards or shields:
+
+  - Arduino Ethernet shield (or clone)
+  - Arduino Ethernet board (or clone)
+  - Arduino Yun
+  - An ENC28J60-based ethernet shield or board
+
+  Follow the instructions in the NETWORK CONFIGURATION section below to
+  configure your particular hardware.
 */
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
-#include <SPI.h>
-#include <Ethernet.h>
-#include "EthernetClientStream.h"
+
+#define DEBUG
+#ifdef DEBUG
+  #define DEBUG_PRINTLN(x)  Serial.println (x)
+  #define DEBUG_PRINT(x)    Serial.print (x)
+#else
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINT(x)
+#endif
+
+#define I2C_WRITE                   B00000000
+#define I2C_READ                    B00001000
+#define I2C_READ_CONTINUOUSLY       B00010000
+#define I2C_STOP_READING            B00011000
+#define I2C_READ_WRITE_MODE_MASK    B00011000
+#define I2C_10BIT_ADDRESS_MODE_MASK B00100000
+#define I2C_MAX_QUERIES             8
+#define I2C_REGISTER_NOT_SPECIFIED  -1
+
+// the minimum interval for sampling analog input
+#define MINIMUM_SAMPLING_INTERVAL   10
+
+
+/*==============================================================================
+ * NETWORK CONFIGURATION
+ *
+ * You must configure your particular hardware. Follow the steps below.
+ *============================================================================*/
+
+// STEP 1 [REQUIRED]
+// Uncomment the appropriate set of includes for your hardware (OPTION A, B or C)
 
 /*
- * network configuration
+ * OPTION A: Configure for Arduino Ethernet board or shield
+ *
+ * To configure StandardFirmataEthernet to use the original WIZ5100-based
+ * ethernet shield or Arduino Ethernet uncomment the includes of 'SPI.h' and 'Ethernet.h':
  */
+
+// #include <SPI.h>
+// #include <Ethernet.h>
+
+/*
+ * OPTION B: Configure for Arduin Yun
+ *
+ * To execute StandardFirmataEthernet on Yun uncomment Bridge.h and YunClient.h.
+ * Do not include Ethernet.h or SPI.h above in this case.
+ * On Yun there's no need to configure local_ip and mac in the sketch
+ * as this is configured on the linux-side of Yun.
+ */
+
+// #include <Bridge.h>
+// #include <YunClient.h>
+
+/*
+ * OPTION C: Configure for ENC28J60-based Ethernt boards or shields
+ *
+ * To configure StandardFirmataEthernet to use an ENC28J60 based board include
+ * 'UIPEthernet.h' (no SPI.h or Ethernet.h required).
+ * The UIPEthernet-library can be downloaded from: https://github.com/ntruchsess/arduino_uip
+ */
+
+// #include <UIPEthernet.h>
+
+// STEP 2 [REQUIRED for all boards and shields]
 // replace with IP of the server you want to connect to, comment out if using 'remote_host'
 #define remote_ip IPAddress(10, 0, 0, 3)
-
 // *** REMOTE HOST IS NOT YET WORKING ***
 // replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 // #define remote_host "server.local"
 
-// replace with the port that your server is listening on
+// STEP 3 [REQUIRED unless using Arduin Yun]
+// Replace with the port that your server is listening on
 #define remote_port 3030
-// replace with the Arduino's IP address. Comment out if Ethernet-startup should use dhcp.
+
+// STEP 4 [REQUIRED unless using Arduino Yun OR if not using DHCP]
+// Replace with your board or ethernet shield's IP address
+// Comment out if you want to use DHCP
 #define local_ip IPAddress(10, 0, 0, 15)
+
+// STEP 5 [REQUIRED unless using Arduino Yun]
 // replace with ethernet shield mac. It's mandatory every devices is assigned a unique mac address
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
+
+#if !defined ethernet_h && !defined _YUN_CLIENT_H_ && !defined UIPEthernet_H
+#error "you must uncomment the includes for your board configuration. See OPTIONS A, B and C in the NETWORK CONFIGURATION SECTION"
+#endif
 
 #if defined remote_ip && defined remote_host
 #error "cannot define both remote_ip and remote_host at the same time!"
 #endif
 
-// move the following defines to Firmata.h?
-#define I2C_WRITE B00000000
-#define I2C_READ B00001000
-#define I2C_READ_CONTINUOUSLY B00010000
-#define I2C_STOP_READING B00011000
-#define I2C_READ_WRITE_MODE_MASK B00011000
-#define I2C_10BIT_ADDRESS_MODE_MASK B00100000
-
-#define MAX_QUERIES 8
-#define MINIMUM_SAMPLING_INTERVAL 10
-
-#define REGISTER_NOT_SPECIFIED -1
 
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
 
 /* network */
+
+#include "EthernetClientStream.h"
+
+#ifdef _YUN_CLIENT_H_
+YunClient client;
+#else
 EthernetClient client;
+#endif
+
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
 EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
@@ -79,6 +155,7 @@ EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
 EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, remote_port);
 #endif
 #endif
+
 #if !defined remote_ip && defined remote_host
 #ifdef local_ip
 EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, remote_port);
@@ -88,7 +165,7 @@ EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0)
 #endif
 
 /* analog inputs */
-int analogInputsToReport = 0; // bitwise array to store pin reporting
+int analogInputsToReport = 0;      // bitwise array to store pin reporting
 
 /* digital input ports */
 byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
@@ -102,7 +179,7 @@ int pinState[TOTAL_PINS];           // any value that has been written
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19;          // how often to run the main loop (in ms)
+unsigned int samplingInterval = 19; // how often to sample analog inputs (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -111,15 +188,14 @@ struct i2c_device_info {
   byte bytes;
 };
 
-/* for i2c read continuous more */
-i2c_device_info query[MAX_QUERIES];
-
-boolean isResetting = false;
+/* for i2c read continuous mode */
+i2c_device_info query[I2C_MAX_QUERIES];
 
 byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
-unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+// default delay time between i2c read request and Wire.requestFrom()
+unsigned int i2cReadDelayTime = 0;
 
 Servo servos[MAX_SERVOS];
 byte servoPinMap[TOTAL_PINS];
@@ -127,6 +203,26 @@ byte detachedServos[MAX_SERVOS];
 byte detachedServoCount = 0;
 byte servoCount = 0;
 
+boolean isResetting = false;
+
+/* utility functions */
+void wireWrite(byte data)
+{
+#if ARDUINO >= 100
+  Wire.write((byte)data);
+#else
+  Wire.send(data);
+#endif
+}
+
+byte wireRead(void)
+{
+#if ARDUINO >= 100
+  return Wire.read();
+#else
+  return Wire.receive();
+#endif
+}
 
 /*==============================================================================
  * FUNCTIONS
@@ -174,13 +270,9 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
-  if (theRegister != REGISTER_NOT_SPECIFIED) {
+  if (theRegister != I2C_REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-#if ARDUINO >= 100
-    Wire.write((byte)theRegister);
-#else
-    Wire.send((byte)theRegister);
-#endif
+    wireWrite((byte)theRegister);
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
@@ -195,20 +287,16 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
 
   // check to be sure correct number of bytes were returned by slave
   if (numBytes < Wire.available()) {
-    Firmata.sendString("I2C Read Error: Too many bytes received");
+    Firmata.sendString("I2C: Too many bytes received");
   } else if (numBytes > Wire.available()) {
-    Firmata.sendString("I2C Read Error: Too few bytes received");
+    Firmata.sendString("I2C: Too few bytes received");
   }
 
   i2cRxData[0] = address;
   i2cRxData[1] = theRegister;
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
-#if ARDUINO >= 100
-    i2cRxData[2 + i] = Wire.read();
-#else
-    i2cRxData[2 + i] = Wire.receive();
-#endif
+    i2cRxData[2 + i] = wireRead();
   }
 
   // send slave address, register and received bytes
@@ -228,7 +316,7 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
 
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
- * to the Serial output queue using Serial.print() */
+ * to the Stream output queue using Stream.write() */
 void checkDigitalInputs(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
@@ -286,7 +374,7 @@ void setPinModeCallback(byte pin, int mode)
     case ANALOG:
       if (IS_PIN_ANALOG(pin)) {
         if (IS_PIN_DIGITAL(pin)) {
-          pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
+          pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
           digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
         }
         pinConfig[pin] = ANALOG;
@@ -294,7 +382,7 @@ void setPinModeCallback(byte pin, int mode)
       break;
     case INPUT:
       if (IS_PIN_DIGITAL(pin)) {
-        pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
+        pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
         pinConfig[pin] = INPUT;
       }
@@ -449,11 +537,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Wire.beginTransmission(slaveAddress);
           for (byte i = 2; i < argc; i += 2) {
             data = argv[i] + (argv[i + 1] << 7);
-#if ARDUINO >= 100
-            Wire.write(data);
-#else
-            Wire.send(data);
-#endif
+            wireWrite(data);
           }
           Wire.endTransmission();
           delayMicroseconds(70);
@@ -466,15 +550,15 @@ void sysexCallback(byte command, byte argc, byte *argv)
           }
           else {
             // a slave register is NOT specified
-            slaveRegister = REGISTER_NOT_SPECIFIED;
+            slaveRegister = I2C_REGISTER_NOT_SPECIFIED;
             data = argv[2] + (argv[3] << 7);  // bytes to read
           }
           readAndReportData(slaveAddress, (int)slaveRegister, data);
           break;
         case I2C_READ_CONTINUOUSLY:
-          if ((queryIndex + 1) >= MAX_QUERIES) {
+          if ((queryIndex + 1) >= I2C_MAX_QUERIES) {
             // too many queries, just ignore
-            Firmata.sendString("too many queries");
+            Firmata.sendString("too many I2C queries");
             break;
           }
           if (argc == 6) {
@@ -484,7 +568,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           }
           else {
             // a slave register is NOT specified
-            slaveRegister = (int)REGISTER_NOT_SPECIFIED;
+            slaveRegister = (int)I2C_REGISTER_NOT_SPECIFIED;
             data = argv[2] + (argv[3] << 7);  // bytes to read
           }
           queryIndex++;
@@ -510,7 +594,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             }
 
             for (byte i = queryIndexToSkip; i < queryIndex + 1; i++) {
-              if (i < MAX_QUERIES) {
+              if (i < I2C_MAX_QUERIES) {
                 query[i].addr = query[i + 1].addr;
                 query[i].reg = query[i + 1].reg;
                 query[i].bytes = query[i + 1].bytes;
@@ -593,7 +677,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_I2C(pin)) {
           Firmata.write(I2C);
-          Firmata.write(1);  // to do: determine appropriate value
+          Firmata.write(1);  // TODO: could assign a number to map to SCL or SDA
         }
         Firmata.write(127);
       }
@@ -639,7 +723,6 @@ void enableI2CPins()
 
   isI2CEnabled = true;
 
-  // is there enough time before the first I2C request to call this here?
   Wire.begin();
 }
 
@@ -657,14 +740,16 @@ void disableI2CPins() {
 void systemResetCallback()
 {
   isResetting = true;
+
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
+
   if (isI2CEnabled) {
     disableI2CPins();
   }
 
   for (byte i = 0; i < TOTAL_PORTS; i++) {
-    reportPINs[i] = false;      // by default, reporting off
+    reportPINs[i] = false;    // by default, reporting off
     portConfigInputs[i] = 0;  // until activated
     previousPINs[i] = 0;
   }
@@ -702,16 +787,25 @@ void systemResetCallback()
 
 void setup()
 {
+#ifdef DEBUG
   Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Need only for ATmega32u4-based boards (Leonardo)
+  }
+#endif
 
+#ifdef _YUN_CLIENT_H_
+  Bridge.begin();
+#else
 #ifdef local_ip
   Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
 #else
-  Ethernet.begin((uint8_t *)mac); //start ethernet using dhcp
+  Ethernet.begin((uint8_t *)mac);           //start ethernet using dhcp
+#endif
 #endif
 
-  delay(1000); // this delay may impact some Firmata clients
-  Serial.println("connecting...");
+  delay(1000); // TODO: determine if this delay is necessary and if so how short it can be
+  DEBUG_PRINTLN("connecting...");
 
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
@@ -723,25 +817,32 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // Network Firmata communicates with Ethernet-shields over SPI. Therefor all
-  // SPI-pins must be set to IGNORE. Otherwise Firmata would break SPI-communication.
-  // add Pin 10 and configure pin 53 as output if using a MEGA with Ethernetshield.
+  // StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefor all
+  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
+  // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
+  // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 
+#if !defined UIPEthernet_H
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
-        || 4 == i // SD-Card on Ethernet-shiedl uses pin 4 for SS
-        || 10 == i //  Ethernet-shield uses pin 10 for SS
+        || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
+        || 10 == i // Ethernet-shield uses pin 10 for SS
        ) {
       pinConfig[i] = IGNORE;
     }
   }
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  setPinModeCallback(53, IGNORE); // on MEGA as 53 is hardware-SS
-  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware-SS as output on MEGA
-#endif
-  pinMode(PIN_TO_DIGITAL(4), OUTPUT); // switch off SD-card bypassing Firmata
+
+  // Arduino Ethernet, Arduino EthernetShield and Arduino Yun all have SD SS wired to D4
+  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  setPinModeCallback(53, IGNORE);      // on MEGA as 53 is hardware SS
+  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+#endif
+
+#endif
 
   // start up Network Firmata:
   Firmata.begin(stream);
@@ -756,17 +857,15 @@ void loop()
   byte pin, analogPin;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
-   * FTDI buffer using Serial.print()  */
+   * Stream buffer using Stream.write()  */
   checkDigitalInputs();
 
-  /* SERIALREAD - processing incoming messagse as soon as possible, while still
+  /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available())
     Firmata.processInput();
 
-  /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
-   * 60 bytes. use a timer to sending an event character every 4 ms to
-   * trigger the buffer to dump. */
+  // TODO - ensure that Stream buffer doesn't go over 60 bytes
 
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
@@ -788,7 +887,7 @@ void loop()
     }
   }
 
-#if !defined local_ip
+#if !defined local_ip && !defined _YUN_CLIENT_H_
   if (Ethernet.maintain())
   {
     stream.maintain(Ethernet.localIP());

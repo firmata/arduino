@@ -22,6 +22,15 @@
 
 #define MILLIS_RECONNECT 5000
 
+#define DEBUG
+#ifdef DEBUG
+  #define DEBUG_PRINTLN(x)  Serial.println (x)
+  #define DEBUG_PRINT(x)    Serial.print (x)
+#else
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINT(x)
+#endif
+
 EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port)
 : ip(ip),
   host(host),
@@ -96,9 +105,9 @@ EthernetClientStream::maintain()
       connected = host ? client.connect(host,port) : client.connect(ip,port);
       if (!connected) {
         time_connect = millis();
-        Serial.println("connection failed");
+        DEBUG_PRINTLN("connection failed");
       } else {
-        Serial.println("connected");
+        DEBUG_PRINTLN("connected");
       }
     }
   return connected;
