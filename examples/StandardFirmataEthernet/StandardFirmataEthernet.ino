@@ -101,6 +101,10 @@
  * To configure StandardFirmataEthernet to use an ENC28J60 based board include
  * 'UIPEthernet.h' (no SPI.h or Ethernet.h required).
  * The UIPEthernet-library can be downloaded from: https://github.com/ntruchsess/arduino_uip
+ *
+ * NOTE there is not enough memory to use UIPEthenet with an Arduino Uno or Leonardo
+ * (or other ATmega328 or ATmega32u4 based board). Use an Arduino Mega or other board
+ * that has at least 4 KB of SRAM.
  */
 
 // #include <UIPEthernet.h>
@@ -125,7 +129,7 @@
 // replace with ethernet shield mac. It's mandatory every devices is assigned a unique mac address
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
 
-#if !defined ethernet_h && !defined _YUN_CLIENT_H_ && !defined UIPEthernet_H
+#if !defined ethernet_h && !defined _YUN_CLIENT_H_ && !defined UIPETHERNET_H
 #error "you must uncomment the includes for your board configuration. See OPTIONS A, B and C in the NETWORK CONFIGURATION SECTION"
 #endif
 
