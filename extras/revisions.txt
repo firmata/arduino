@@ -1,3 +1,8 @@
+FIRMATA 2.4.2 - Mar 16, 2015
+
+[core library]
+* Add support for Teesy 3.1 (Olivier Louvignes)
+
 FIRMATA 2.4.1 - Feb 7, 2015
 
 [core library]
