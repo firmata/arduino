@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: March 8, 2015
+  Last updated by Jeff Hoefs: April 10, 2015
 */
 
 /*
@@ -32,7 +32,6 @@
   - Arduino Ethernet shield (or clone)
   - Arduino Ethernet board (or clone)
   - Arduino Yun
-  - An ENC28J60-based ethernet shield or board
 
   Follow the instructions in the NETWORK CONFIGURATION section below to
   configure your particular hardware.
@@ -42,7 +41,7 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
   #define DEBUG_PRINTLN(x)  Serial.println (x)
   #define DEBUG_PRINT(x)    Serial.print (x)
@@ -71,7 +70,8 @@
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
-// Uncomment the appropriate set of includes for your hardware (OPTION A, B or C)
+// Uncomment / comment the appropriate set of includes for your hardware (OPTION A or B)
+// Option A is enabled by default.
 
 /*
  * OPTION A: Configure for Arduino Ethernet board or shield
@@ -80,8 +80,8 @@
  * ethernet shield or Arduino Ethernet uncomment the includes of 'SPI.h' and 'Ethernet.h':
  */
 
-// #include <SPI.h>
-// #include <Ethernet.h>
+#include <SPI.h>
+#include <Ethernet.h>
 
 /*
  * OPTION B: Configure for Arduin Yun
@@ -95,19 +95,6 @@
 // #include <Bridge.h>
 // #include <YunClient.h>
 
-/*
- * OPTION C: Configure for ENC28J60-based Ethernt boards or shields
- *
- * To configure StandardFirmataEthernet to use an ENC28J60 based board include
- * 'UIPEthernet.h' (no SPI.h or Ethernet.h required).
- * The UIPEthernet-library can be downloaded from: https://github.com/ntruchsess/arduino_uip
- *
- * NOTE there is not enough memory to use UIPEthenet with an Arduino Uno or Leonardo
- * (or other ATmega328 or ATmega32u4 based board). Use an Arduino Mega or other board
- * that has at least 4 KB of SRAM.
- */
-
-// #include <UIPEthernet.h>
 
 // STEP 2 [REQUIRED for all boards and shields]
 // replace with IP of the server you want to connect to, comment out if using 'remote_host'
@@ -126,11 +113,11 @@
 #define local_ip IPAddress(10, 0, 0, 15)
 
 // STEP 5 [REQUIRED unless using Arduino Yun]
-// replace with ethernet shield mac. It's mandatory every devices is assigned a unique mac address
+// replace with ethernet shield mac. Must be unique for your network
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
 
-#if !defined ethernet_h && !defined _YUN_CLIENT_H_ && !defined UIPETHERNET_H
-#error "you must uncomment the includes for your board configuration. See OPTIONS A, B and C in the NETWORK CONFIGURATION SECTION"
+#if !defined ethernet_h && !defined _YUN_CLIENT_H_
+#error "you must uncomment the includes for your board configuration. See OPTIONS A and B in the NETWORK CONFIGURATION SECTION"
 #endif
 
 #if defined remote_ip && defined remote_host
@@ -824,9 +811,7 @@ void setup()
   // StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefor all
   // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
   // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
-  // No need to ignore pin 10 on MEGA with ENC28J60, as here pin 53 should be connected to SS:
 
-#if !defined UIPEthernet_H
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
@@ -844,8 +829,6 @@ void setup()
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   setPinModeCallback(53, IGNORE);      // on MEGA as 53 is hardware SS
   pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif
-
 #endif
 
   // start up Network Firmata:
