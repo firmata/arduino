@@ -22,7 +22,7 @@
 
 #define MILLIS_RECONNECT 5000
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
   #define DEBUG_PRINTLN(x)  Serial.println (x)
   #define DEBUG_PRINT(x)    Serial.print (x)
