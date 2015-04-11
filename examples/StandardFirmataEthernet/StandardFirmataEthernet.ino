@@ -817,6 +817,9 @@ void setup()
     if (IS_PIN_SPI(i)
         || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
         || 10 == i // Ethernet-shield uses pin 10 for SS
+#if defined(__AVR_ATmega32U4__)
+        || 28 == i // On Leonardo, pin 28 is A10 which maps to D10
+#endif
        ) {
       pinConfig[i] = IGNORE;
     }
