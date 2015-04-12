@@ -6,6 +6,7 @@
 mkdir -p temp/Firmata
 cp -r examples temp/Firmata
 cp -r extras temp/Firmata
+cp -r utility temp/Firmata
 cp Boards.h temp/Firmata
 cp Firmata.cpp temp/Firmata
 cp Firmata.h temp/Firmata
@@ -15,7 +16,7 @@ cd temp
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Firmata-2.4.2.zip
+mv ./temp/Firmata.zip Firmata-2.4.3.zip
 
 #package for Arduino 1.6.x
 cp library.properties temp/Firmata
@@ -25,9 +26,10 @@ mkdir src
 mv Boards.h ./src/
 mv Firmata.cpp ./src/
 mv Firmata.h ./src/
+mv utility ./src/
 cd ..
 find . -name "*.DS_Store" -type f -delete
 zip -r Firmata.zip ./Firmata/
 cd ..
-mv ./temp/Firmata.zip Arduino-1.6.x-Firmata-2.4.2.zip
+mv ./temp/Firmata.zip Arduino-1.6.x-Firmata-2.4.3.zip
 rm -r ./temp
