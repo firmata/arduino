@@ -58,7 +58,7 @@ Most of the time you will be interacting with arduino with a client library on t
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE
-The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [release](https://github.com/firmata/arduino/releases/tag/v2.4.2) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
+The version of firmata in the Arduino IDE contains an outdated version of Firmata. To update Firmata, download the latest [release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (for Arduino 1.0.x or Arduino 1.5.6 or higher) and replace the existing Firmata folder in your Arduino application. See the instructions below for your platform.
 
 *Note that Arduino 1.5.0 - 1.5.5 are not supported. Please use Arduino 1.5.6 or higher (or Arduino 1.0.5 or 1.0.6).*
 
@@ -69,8 +69,8 @@ The Firmata library is contained within the Arduino package.
 1. Navigate to the Arduino application
 2. Right click on the application icon and select `Show Package Contents`
 3. Navigate to: `/Contents/Resources/Java/libraries/` and replace the existing
-`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.2) (note there is a different download
-for Arduino 1.0.x vs 1.5.x)
+`Firmata` folder with latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
+for Arduino 1.0.x vs 1.6.x)
 4. Restart the Arduino application and the latest version of Firmata will be available.
 
 If you are using the Java 7 version of Arduino 1.5.7 or higher, the file path
@@ -79,8 +79,8 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 ###Windows:
 
 1. Navigate to `c:/Program\ Files/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.2) (note there is a different download
-for Arduino 1.0.x vs 1.5.x).
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
+for Arduino 1.0.x vs 1.6.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
 *Update the path and arduino version as necessary*
@@ -88,8 +88,8 @@ for Arduino 1.0.x vs 1.5.x).
 ###Linux:
 
 1. Navigate to `~/arduino-1.x/libraries/` and replace the existing
-`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.2) (note there is a different download
-for Arduino 1.0.x vs 1.5.x).
+`Firmata` folder with the latest [Firmata release](https://github.com/firmata/arduino/releases/tag/v2.4.3) (note there is a different download
+for Arduino 1.0.x vs 1.6.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
 *Update the path and arduino version as necessary*
@@ -97,7 +97,7 @@ for Arduino 1.0.x vs 1.5.x).
 ###Using the Source code rather than release archive
 
 Clone this repo directly into the core Arduino libraries directory. If you are using
-Arduino 1.5.x, the repo directory structure will not match the Arduino
+Arduino 1.5.x or 1.6.x, the repo directory structure will not match the Arduino
 library format, however it should still compile as long as you are using Arduino 1.5.7
 or higher.
 
@@ -111,7 +111,7 @@ $ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Content
 
 *Update paths if you're using Windows or Linux*
 
-To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.5.x), run the
+To generate properly formatted versions of Firmata (for Arduino 1.0.x and Arduino 1.6.x), run the
 `release.sh` script.
 
 

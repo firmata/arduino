@@ -1,3 +1,13 @@
+FIRMATA 2.4.3 - Apr 11, 2015
+
+[core library]
+* Added debug macros (utility/firmataDebug.h)
+* Added Norbert Truchsess' EthernetClientStream lib from the configurable branch
+
+[examples]
+* Added StandardFirmataEthernet to enable Firmata over Ethernet
+* Minor updates to StandardFirmata and StandardFirmataYun
+
 FIRMATA 2.4.2 - Mar 16, 2015
 
 [core library]
