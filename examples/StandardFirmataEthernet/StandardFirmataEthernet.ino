@@ -650,11 +650,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_ANALOG(pin)) {
           Firmata.write(ANALOG);
-          Firmata.write(10);
+          Firmata.write(10); // 10 = 10-bit resolution
         }
         if (IS_PIN_PWM(pin)) {
           Firmata.write(PWM);
-          Firmata.write(8);
+          Firmata.write(8); // 8 = 8-bit resolution
         }
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write(SERVO);
