@@ -20,16 +20,10 @@
 #include "EthernetClientStream.h"
 #include <Arduino.h>
 
-#define MILLIS_RECONNECT 5000
-
 //#define DEBUG
-#ifdef DEBUG
-  #define DEBUG_PRINTLN(x)  Serial.println (x)
-  #define DEBUG_PRINT(x)    Serial.print (x)
-#else
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINT(x)
-#endif
+#include "debug.h"
+
+#define MILLIS_RECONNECT 5000
 
 EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IPAddress ip, const char* host, uint16_t port)
 : ip(ip),

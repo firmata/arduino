@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 10, 2015
+  Last updated by Jeff Hoefs: April 11, 2015
 */
 
 /*
@@ -42,13 +42,7 @@
 #include <Firmata.h>
 
 //#define DEBUG
-#ifdef DEBUG
-  #define DEBUG_PRINTLN(x)  Serial.println (x)
-  #define DEBUG_PRINT(x)    Serial.print (x)
-#else
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINT(x)
-#endif
+#include "debug.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -778,12 +772,7 @@ void systemResetCallback()
 
 void setup()
 {
-#ifdef DEBUG
-  Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Need only for ATmega32u4-based boards (Leonardo)
-  }
-#endif
+  DEBUG_BEGIN(9600);
 
 #ifdef _YUN_CLIENT_H_
   Bridge.begin();
