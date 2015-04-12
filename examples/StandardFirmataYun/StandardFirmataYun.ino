@@ -1,15 +1,13 @@
 /*
- * Firmata is a generic protocol for communicating with microcontrollers
- * from software on a host computer. It is intended to work with
- * any host computer software package.
- *
- * To download a host software package, please clink on the following link
- * to open the download page in your default browser.
- *
- * http://firmata.org/wiki/Download
- */
+  Firmata is a generic protocol for communicating with microcontrollers
+  from software on a host computer. It is intended to work with
+  any host computer software package.
 
-/*
+  To download a host software package, please clink on the following link
+  to open the download page in your default browser.
+
+  https://github.com/firmata/arduino#firmata-client-libraries
+
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
@@ -23,29 +21,36 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  formatted using the GNU C formatting and indenting
+  Last updated by Jeff Hoefs: April 11, 2015
  */
 
 /*
- * TODO: use Program Control to load stored profiles from EEPROM
- */
+  README
+
+  The Arduino Yun has both an Arduino (Atmega32u4) environment and a
+  Linux (Linino) environment.
+
+  StandardFirmataYun enables Firmata running on the Arduino environment
+  to communicate with a Firmata client application running on the Linux
+  environment.
+*/
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 
-// move the following defines to Firmata.h?
-#define I2C_WRITE B00000000
-#define I2C_READ B00001000
-#define I2C_READ_CONTINUOUSLY B00010000
-#define I2C_STOP_READING B00011000
-#define I2C_READ_WRITE_MODE_MASK B00011000
+#define I2C_WRITE                   B00000000
+#define I2C_READ                    B00001000
+#define I2C_READ_CONTINUOUSLY       B00010000
+#define I2C_STOP_READING            B00011000
+#define I2C_READ_WRITE_MODE_MASK    B00011000
 #define I2C_10BIT_ADDRESS_MODE_MASK B00100000
+#define MAX_QUERIES                 8
+#define REGISTER_NOT_SPECIFIED      -1
 
-#define MAX_QUERIES 8
+// the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL 10
 
-#define REGISTER_NOT_SPECIFIED -1
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -66,7 +71,7 @@ int pinState[TOTAL_PINS];           // any value that has been written
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19;          // how often to run the main loop (in ms)
+unsigned int samplingInterval = 19; // how often to run the main loop (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -78,12 +83,11 @@ struct i2c_device_info {
 /* for i2c read continuous more */
 i2c_device_info query[MAX_QUERIES];
 
-boolean isResetting = false;
-
 byte i2cRxData[32];
 boolean isI2CEnabled = false;
 signed char queryIndex = -1;
-unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
+// default delay time between i2c read request and Wire.requestFrom()
+unsigned int i2cReadDelayTime = 0;
 
 Servo servos[MAX_SERVOS];
 byte servoPinMap[TOTAL_PINS];
@@ -91,6 +95,26 @@ byte detachedServos[MAX_SERVOS];
 byte detachedServoCount = 0;
 byte servoCount = 0;
 
+boolean isResetting = false;
+
+/* utility functions */
+void wireWrite(byte data)
+{
+#if ARDUINO >= 100
+  Wire.write((byte)data);
+#else
+  Wire.send(data);
+#endif
+}
+
+byte wireRead(void)
+{
+#if ARDUINO >= 100
+  return Wire.read();
+#else
+  return Wire.receive();
+#endif
+}
 
 /*==============================================================================
  * FUNCTIONS
@@ -103,19 +127,16 @@ void attachServo(byte pin, int minPulse, int maxPulse)
     if (detachedServoCount > 0) {
       servoPinMap[pin] = detachedServos[detachedServoCount - 1];
       if (detachedServoCount > 0) detachedServoCount--;
-    }
-    else {
+    } else {
       servoPinMap[pin] = servoCount;
       servoCount++;
     }
     if (minPulse > 0 && maxPulse > 0) {
       servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin), minPulse, maxPulse);
-    }
-    else {
+    } else {
       servos[servoPinMap[pin]].attach(PIN_TO_DIGITAL(pin));
     }
-  }
-  else {
+  } else {
     Firmata.sendString("Max servos attached");
   }
 }
@@ -127,8 +148,7 @@ void detachServo(byte pin)
   // otherwise store the index of the detached servo
   if (servoPinMap[pin] == servoCount && servoCount > 0) {
     servoCount--;
-  }
-  else if (servoCount > 0) {
+  } else if (servoCount > 0) {
     // keep track of detached servos because we want to reuse their indexes
     // before incrementing the count of attached servos
     detachedServoCount++;
@@ -144,19 +164,14 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
   if (theRegister != REGISTER_NOT_SPECIFIED) {
     Wire.beginTransmission(address);
-#if ARDUINO >= 100
-    Wire.write((byte)theRegister);
-#else
-    Wire.send((byte)theRegister);
-#endif
+    wireWrite((byte)theRegister);
     Wire.endTransmission();
     // do not set a value of 0
     if (i2cReadDelayTime > 0) {
       // delay is necessary for some devices such as WiiNunchuck
       delayMicroseconds(i2cReadDelayTime);
     }
-  }
-  else {
+  } else {
     theRegister = 0;  // fill the register with a dummy value
   }
 
@@ -164,21 +179,16 @@ void readAndReportData(byte address, int theRegister, byte numBytes) {
 
   // check to be sure correct number of bytes were returned by slave
   if (numBytes < Wire.available()) {
-    Firmata.sendString("I2C Read Error: Too many bytes received");
-  }
-  else if (numBytes > Wire.available()) {
-    Firmata.sendString("I2C Read Error: Too few bytes received");
+    Firmata.sendString("I2C: Too many bytes received");
+  } else if (numBytes > Wire.available()) {
+    Firmata.sendString("I2C: Too few bytes received");
   }
 
   i2cRxData[0] = address;
   i2cRxData[1] = theRegister;
 
   for (int i = 0; i < numBytes && Wire.available(); i++) {
-#if ARDUINO >= 100
-    i2cRxData[2 + i] = Wire.read();
-#else
-    i2cRxData[2 + i] = Wire.receive();
-#endif
+    i2cRxData[2 + i] = wireRead();
   }
 
   // send slave address, register and received bytes
@@ -228,6 +238,9 @@ void checkDigitalInputs(void)
  */
 void setPinModeCallback(byte pin, int mode)
 {
+  if (pinConfig[pin] == IGNORE)
+    return;
+
   if (pinConfig[pin] == I2C && isI2CEnabled && mode != I2C) {
     // disable i2c so pins can be used for other functions
     // the following if statements should reconfigure the pins properly
@@ -244,8 +257,7 @@ void setPinModeCallback(byte pin, int mode)
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == INPUT) {
       portConfigInputs[pin / 8] |= (1 << (pin & 7));
-    }
-    else {
+    } else {
       portConfigInputs[pin / 8] &= ~(1 << (pin & 7));
     }
   }
@@ -254,7 +266,7 @@ void setPinModeCallback(byte pin, int mode)
     case ANALOG:
       if (IS_PIN_ANALOG(pin)) {
         if (IS_PIN_DIGITAL(pin)) {
-          pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
+          pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
           digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
         }
         pinConfig[pin] = ANALOG;
@@ -262,7 +274,7 @@ void setPinModeCallback(byte pin, int mode)
       break;
     case INPUT:
       if (IS_PIN_DIGITAL(pin)) {
-        pinMode(PIN_TO_DIGITAL(pin), INPUT); // disable output driver
+        pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
         pinConfig[pin] = INPUT;
       }
@@ -417,11 +429,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Wire.beginTransmission(slaveAddress);
           for (byte i = 2; i < argc; i += 2) {
             data = argv[i] + (argv[i + 1] << 7);
-#if ARDUINO >= 100
-            Wire.write(data);
-#else
-            Wire.send(data);
-#endif
+            wireWrite(data);
           }
           Wire.endTransmission();
           delayMicroseconds(70);
@@ -466,8 +474,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           // read continuous reporting for that device
           if (queryIndex <= 0) {
             queryIndex = -1;
-          }
-          else {
+          } else {
             // if read continuous mode is enabled for multiple devices,
             // determine which device to stop reading and remove it's data from
             // the array, shifiting other array data to fill the space
@@ -526,8 +533,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         if (samplingInterval < MINIMUM_SAMPLING_INTERVAL) {
           samplingInterval = MINIMUM_SAMPLING_INTERVAL;
         }
-      }
-      else {
+      } else {
         //Firmata.sendString("Not enough data");
       }
       break;
@@ -551,11 +557,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_ANALOG(pin)) {
           Firmata.write(ANALOG);
-          Firmata.write(10);
+          Firmata.write(10); // 10 = 10-bit resolution
         }
         if (IS_PIN_PWM(pin)) {
           Firmata.write(PWM);
-          Firmata.write(8);
+          Firmata.write(8); // 8 = 8-bit resolution
         }
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write(SERVO);
@@ -563,7 +569,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_I2C(pin)) {
           Firmata.write(I2C);
-          Firmata.write(1);  // to do: determine appropriate value
+          Firmata.write(1);  // TODO: could assign a number to map to SCL or SDA
         }
         Firmata.write(127);
       }
@@ -609,7 +615,6 @@ void enableI2CPins()
 
   isI2CEnabled = true;
 
-  // is there enough time before the first I2C request to call this here?
   Wire.begin();
 }
 
@@ -627,14 +632,16 @@ void disableI2CPins() {
 void systemResetCallback()
 {
   isResetting = true;
+
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
+
   if (isI2CEnabled) {
     disableI2CPins();
   }
 
   for (byte i = 0; i < TOTAL_PORTS; i++) {
-    reportPINs[i] = false;      // by default, reporting off
+    reportPINs[i] = false;    // by default, reporting off
     portConfigInputs[i] = 0;  // until activated
     previousPINs[i] = 0;
   }
@@ -645,8 +652,7 @@ void systemResetCallback()
     if (IS_PIN_ANALOG(i)) {
       // turns off pullup, configures everything
       setPinModeCallback(i, ANALOG);
-    }
-    else {
+    } else {
       // sets the output to 0, configures portConfigInputs
       setPinModeCallback(i, OUTPUT);
     }
@@ -663,11 +669,11 @@ void systemResetCallback()
    * since once in the loop(), this firmware will only send on change */
   /*
   TODO: this can never execute, since no pins default to digital input
-   but it will be needed when/if we support EEPROM stored config
-   for (byte i=0; i < TOTAL_PORTS; i++) {
-   outputPort(i, readPort(i, portConfigInputs[i]), true);
-   }
-   */
+        but it will be needed when/if we support EEPROM stored config
+  for (byte i=0; i < TOTAL_PORTS; i++) {
+    outputPort(i, readPort(i, portConfigInputs[i]), true);
+  }
+  */
   isResetting = false;
 }
 
@@ -710,14 +716,12 @@ void loop()
    * FTDI buffer using Serial.print()  */
   checkDigitalInputs();
 
-  /* SERIALREAD - processing incoming messagse as soon as possible, while still
+  /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available())
     Firmata.processInput();
 
-  /* SEND FTDI WRITE BUFFER - make sure that the FTDI buffer doesn't go over
-   * 60 bytes. use a timer to sending an event character every 4 ms to
-   * trigger the buffer to dump. */
+  // TODO - ensure that Stream buffer doesn't go over 60 bytes
 
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
@@ -739,4 +743,3 @@ void loop()
     }
   }
 }
-
