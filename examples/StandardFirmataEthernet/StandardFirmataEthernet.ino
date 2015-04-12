@@ -35,6 +35,14 @@
 
   Follow the instructions in the NETWORK CONFIGURATION section below to
   configure your particular hardware.
+
+  NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
+  the following boards. Firmata will ignore any requests to use these pins:
+
+  - Arduino Uno or other ATMega328 boards: (D4, D10, D11, D12, D13)
+  - Arduino Mega: (D4, D10, D50, D51, D52, D53)
+  - Arduino Leonardo: (D4, D10)
+  - Arduino Due: (D4, D10)
 */
 
 #include <Servo.h>
@@ -784,7 +792,6 @@ void setup()
 #endif
 #endif
 
-  delay(1000); // TODO: determine if this delay is necessary and if so how short it can be
   DEBUG_PRINTLN("connecting...");
 
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
@@ -807,7 +814,8 @@ void setup()
         || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
         || 10 == i // Ethernet-shield uses pin 10 for SS
 #if defined(__AVR_ATmega32U4__)
-        || 28 == i // On Leonardo, pin 28 is A10 which maps to D10
+        || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
+        || 28 == i
 #endif
        ) {
       pinConfig[i] = IGNORE;
@@ -819,7 +827,6 @@ void setup()
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  setPinModeCallback(53, IGNORE);      // on MEGA as 53 is hardware SS
   pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
 #endif
 
