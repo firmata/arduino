@@ -49,8 +49,8 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-//#define DEBUG
-#include "debug.h"
+//#define SERIAL_DEBUG
+#include "utility/firmataDebug.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -133,7 +133,7 @@ const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
 
 /* network */
 
-#include "EthernetClientStream.h"
+#include "utility/EthernetClientStream.h"
 
 #ifdef _YUN_CLIENT_H_
 YunClient client;

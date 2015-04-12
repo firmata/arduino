@@ -20,8 +20,8 @@
 #include "EthernetClientStream.h"
 #include <Arduino.h>
 
-//#define DEBUG
-#include "debug.h"
+//#define SERIAL_DEBUG
+#include "firmataDebug.h"
 
 #define MILLIS_RECONNECT 5000
 
