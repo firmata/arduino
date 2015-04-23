@@ -110,6 +110,9 @@ OneWireFirmata oneWire;
 #include <utility/StepperFirmata.h>
 StepperFirmata stepper;
 
+#include <utility/ShiftFirmata.h>
+ShiftFirmata shift;
+
 #include <utility/FirmataExt.h>
 FirmataExt firmataExt;
 
@@ -236,6 +239,9 @@ void setup()
 #ifdef StepperFirmata_h
   firmataExt.addFeature(stepper);
 #endif
+#ifdef ShiftFirmata_h
+  firmataExt.addFeature(shift);
+#endif  
 #ifdef FirmataReporting_h
   firmataExt.addFeature(reporting);
 #endif
