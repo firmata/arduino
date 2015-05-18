@@ -1,3 +1,11 @@
+FIRMATA 2.5.0.beta1 - May 17, 2015
+
+[core library]
+* Added SET_DIGITAL_PIN_VALUE (0xF5) to enable setting an individual digital pin value
+
+[StandardFirmata (all variations)]
+* Implement SET_DIGITAL_PIN_VALUE
+
 FIRMATA 2.4.3 - Apr 11, 2015
 
 [core library]
