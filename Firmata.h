@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.4.3 - 2015-4-11
+  Firmata.h - Firmata library v2.5.0.beta1 - 2015-5-17
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -20,18 +20,20 @@
  * software can test whether it will be compatible with the currently
  * installed firmware. */
 #define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   4 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  3 // for bugfix releases
+#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
+#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin
+#define DIGITAL_MESSAGE         0x90 // send data for a digital port (collection of 8 pins)
 #define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
 #define REPORT_ANALOG           0xC0 // enable analog input by pin #
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair
 //
 #define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
+//
+#define SET_DIGITAL_PIN_VALUE   0xF5 // set value of an individual digital pin
 //
 #define REPORT_VERSION          0xF9 // report protocol version
 #define SYSTEM_RESET            0xFF // reset from MIDI
@@ -69,8 +71,8 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in wiring.h
-//#define OUTPUT                0x01 // defined in wiring.h
+//#define INPUT                 0x00 // defined in Arduino.h
+//#define OUTPUT                0x01 // defined in Arduino.h
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
@@ -148,6 +150,7 @@ class FirmataClass
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
     callbackFunction currentPinModeCallback;
+    callbackFunction currentPinValueCallback;
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
