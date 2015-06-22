@@ -25,7 +25,37 @@
 
 #include <Servo.h>
 #include <Wire.h>
+// SoftwareSerial is only supported for AVR-based boards
+#if defined(ARDUINO_ARCH_AVR)
+#include <SoftwareSerial.h>
+#endif
+#include <ArduinoUnit.h>
 #include <Firmata.h>
+
+#define HW_SERIAL0                  0x00
+#define HW_SERIAL1                  0x01
+#define HW_SERIAL2                  0x02
+#define HW_SERIAL3                  0x03
+
+#define SW_SERIAL0                  0x08
+#define SW_SERIAL1                  0x09
+#define SW_SERIAL2                  0x0A
+#define SW_SERIAL3                  0x0B
+
+#define SERIAL_MESSAGE              0x60
+#define SERIAL_CONFIG               0x10
+#define SERIAL_WRITE                0x20
+#define SERIAL_READ                 0x30
+#define SERIAL_REPLY                0x40
+#define SERIAL_CLOSE                0x50
+#define SERIAL_FLUSH                0x60
+#define SERIAL_LISTEN               0x70
+#define SERIAL_READ_CONTINUOUSLY    0x00
+#define SERIAL_STOP_READING         0x01
+#define SERIAL_MODE_MASK            0xF0
+#define SERIAL_PORT_ID_MASK         0x0F
+#define MAX_SERIAL_PORTS            8
+
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -61,6 +91,15 @@ unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
 unsigned int samplingInterval = 19; // how often to run the main loop (in ms)
 
+/* serial message */
+Stream *swSerial0 = NULL;
+Stream *swSerial1 = NULL;
+Stream *swSerial2 = NULL;
+Stream *swSerial3 = NULL;
+
+byte reportSerial[MAX_SERIAL_PORTS];
+signed char serialIndex = -1;
+
 /* i2c data */
 struct i2c_device_info {
   byte addr;
@@ -85,6 +124,10 @@ byte servoCount = 0;
 
 boolean isResetting = false;
 
+int memCheckCounter = 0;
+char buffer[20];
+char debugBuffer[50];
+
 /* utility functions */
 void wireWrite(byte data)
 {
@@ -107,6 +150,90 @@ byte wireRead(void)
 /*==============================================================================
  * FUNCTIONS
  *============================================================================*/
+
+// get a pointer to the serial port associated with the specified port id
+Stream* getPortFromId(byte portId)
+{
+  switch (portId) {
+    case HW_SERIAL0:
+      // block use of Serial (typically pins 0 and 1) until ability to reclaim Serial is implemented
+      //return &Serial;
+      return NULL;
+#if defined(UBRR1H) || defined(USBCON)
+    case HW_SERIAL1:
+      return &Serial1;
+#endif
+#if defined(UBRR2H) || defined(SERIAL_PORT_HARDWARE2)
+    case HW_SERIAL2:
+      return &Serial2;
+#endif
+#if defined(UBRR3H) || defined(SERIAL_PORT_HARDWARE3)
+    case HW_SERIAL3:
+      return &Serial3;
+#endif
+#if defined(ARDUINO_ARCH_AVR)
+    case SW_SERIAL0:
+      if (swSerial0 != NULL) {
+        // instances of SoftwareSerial are already pointers so simply return the instance
+        return swSerial0;
+      }
+      break;
+    case SW_SERIAL1:
+      if (swSerial1 != NULL) {
+        return swSerial1;
+      }
+      break;
+    case SW_SERIAL2:
+      if (swSerial2 != NULL) {
+        return swSerial2;
+      }
+      break;
+    case SW_SERIAL3:
+      if (swSerial3 != NULL) {
+        return swSerial3;
+      }
+      break;
+#endif
+  }
+  return NULL;
+}
+
+// Check serial ports that have READ_CONTINUOUS mode set and relay any data
+// for each port to the device attached to that port.
+void checkSerial()
+{
+  byte portId, serialData;
+  Stream* serialPort;
+
+  if (serialIndex > -1) {
+
+    // loop through all reporting (READ_CONTINUOUS) serial ports
+    for (byte i = 0; i < serialIndex + 1; i++) {
+      portId = reportSerial[i];
+      serialPort = getPortFromId(portId);
+      if (serialPort == NULL) {
+        continue;
+      }
+      // only the SoftwareSerial port that is "listening" can read data
+      if (portId > 7 && !((SoftwareSerial*)serialPort)->isListening()) {
+        continue;
+      }
+      if (serialPort->available() > 0) {
+        Firmata.write(START_SYSEX);
+        Firmata.write(SERIAL_MESSAGE);
+        Firmata.write(SERIAL_REPLY | portId);
+        // relay serial data to the serial device
+        while (serialPort->available() > 0) {
+          serialData = serialPort->read();
+          Firmata.write(serialData & 0x7F);
+          Firmata.write((serialData >> 7) & 0x7F);
+        }
+        Firmata.write(END_SYSEX);
+      }
+
+    }
+  }
+}
 
 void attachServo(byte pin, int minPulse, int maxPulse)
 {
@@ -586,6 +713,137 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       Firmata.write(END_SYSEX);
       break;
+
+    case SERIAL_MESSAGE:
+      Stream * serialPort;
+      mode = argv[0] & SERIAL_MODE_MASK;
+      byte portId = argv[0] & SERIAL_PORT_ID_MASK;
+
+      switch (mode) {
+        case SERIAL_CONFIG:
+          {
+            long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
+            int bytesToRead = (int)argv[4] | ((int)argv[5] << 7); // not yet used
+            byte txPin, rxPin;
+
+            if (portId > 7 && argc > 6) {
+              rxPin = argv[6];
+              txPin = argv[7];
+            }
+
+            if (portId < 8) {
+              serialPort = getPortFromId(portId);
+              if (serialPort != NULL) {
+                ((HardwareSerial*)serialPort)->begin(baud);
+              }
+            } else {
+#if defined(ARDUINO_ARCH_AVR)
+              switch (portId) {
+                case SW_SERIAL0:
+                  if (swSerial0 == NULL) {
+                    swSerial0 = new SoftwareSerial(rxPin, txPin);
+                  }
+                  break;
+                case SW_SERIAL1:
+                  if (swSerial1 == NULL) {
+                    swSerial1 = new SoftwareSerial(rxPin, txPin);
+                  }
+                  break;
+                case SW_SERIAL2:
+                  if (swSerial2 == NULL) {
+                    swSerial2 = new SoftwareSerial(rxPin, txPin);
+                  }
+                  break;
+                case SW_SERIAL3:
+                  if (swSerial3 == NULL) {
+                    swSerial3 = new SoftwareSerial(rxPin, txPin);
+                  }
+                  break;
+              }
+              serialPort = getPortFromId(portId);
+              if (serialPort != NULL) {
+                ((SoftwareSerial*)serialPort)->begin(baud);
+              }
+#endif
+            }
+            break; // SERIAL_CONFIG
+          }
+        case SERIAL_WRITE:
+          {
+            byte data;
+            serialPort = getPortFromId(portId);
+            if (serialPort == NULL) {
+              break;
+            }
+            for (byte i = 1; i < argc; i += 2) {
+              data = argv[i] + (argv[i + 1] << 7);
+              serialPort->write(data);
+            }
+            break;
+          }
+        case SERIAL_READ:
+          if (argv[1] == SERIAL_READ_CONTINUOUSLY) {
+            if (serialIndex + 1 >= MAX_SERIAL_PORTS) {
+              break;
+            }
+            serialIndex++;
+            reportSerial[serialIndex] = portId;
+          } else if (argv[1] == SERIAL_STOP_READING) {
+            byte serialIndexToSkip;
+            if (serialIndex <= 0) {
+              serialIndex = -1;
+            } else {
+              for (byte i = 0; i < serialIndex + 1; i++) {
+                if (reportSerial[i] == portId) {
+                  serialIndexToSkip = i;
+                  break;
+                }
+              }
+              // shift elements over to fill space left by removed element
+              for (byte i = serialIndexToSkip; i < serialIndex + 1; i++) {
+                if (i < MAX_SERIAL_PORTS) {
+                  reportSerial[i] = reportSerial[i + 1];
+                }
+              }
+              serialIndex--;
+            }
+          }
+          break;
+        case SERIAL_CLOSE:
+          serialPort = getPortFromId(portId);
+          if (serialPort != NULL) {
+            if (portId < 8) {
+              ((HardwareSerial*)serialPort)->end();
+            } else {
+#if defined(ARDUINO_ARCH_AVR)
+              ((SoftwareSerial*)serialPort)->end();
+              if (serialPort != NULL) {
+                free(serialPort);
+                serialPort = NULL;
+              }
+#endif
+            }
+          }
+          break;
+        case SERIAL_FLUSH:
+          serialPort = getPortFromId(portId);
+          if (serialPort != NULL) {
+            getPortFromId(portId)->flush();
+          }
+          break;
+#if defined(ARDUINO_ARCH_AVR)
+        case SERIAL_LISTEN:
+          // can only call listen() on software serial ports
+          if (portId > 7) {
+            serialPort = getPortFromId(portId);
+            if (serialPort != NULL) {
+              ((SoftwareSerial*)serialPort)->listen();
+            }
+          }
+          break;
+#endif
+      }
+      break;
   }
 }
 
@@ -619,6 +877,7 @@ void disableI2CPins() {
 
 void systemResetCallback()
 {
+  Stream *serialPort;
   isResetting = true;
 
   // initialize a defalt state
@@ -627,6 +886,18 @@ void systemResetCallback()
   if (isI2CEnabled) {
     disableI2CPins();
   }
+
+#if defined(ARDUINO_ARCH_AVR)
+  // free memory allocated for SoftwareSerial ports
+  for (byte i = SW_SERIAL0; i < SW_SERIAL3 + 1; i++) {
+    serialPort = getPortFromId(i);
+    if (serialPort != NULL) {
+      free(serialPort);
+      serialPort = NULL;
+    }
+  }
+  serialIndex = -1;
+#endif
 
   for (byte i = 0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;    // by default, reporting off
@@ -726,5 +997,19 @@ void loop()
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
       }
     }
+
+    //    // check for memory leaks
+    //    // send memory reading approximately ever 10 seconds
+    //    // 526 * 19 (default sampling interval) = 9994 ms
+    //    // increase 526 for long running processes
+    //    if (memCheckCounter++ == 526) {
+    //      sprintf(buffer, "%u", freeMemory());
+    //      Firmata.sendString(buffer);
+    //      memCheckCounter = 0;
+    //    }
+
   }
+
+  // TODO - figure out best location to call this function.
+  checkSerial();
 }
