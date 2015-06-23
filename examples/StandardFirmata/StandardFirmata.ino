@@ -896,8 +896,8 @@ void systemResetCallback()
       serialPort = NULL;
     }
   }
-  serialIndex = -1;
 #endif
+  serialIndex = -1;
 
   for (byte i = 0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;    // by default, reporting off
