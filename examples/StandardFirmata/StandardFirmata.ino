@@ -29,7 +29,11 @@
  * TODO: use Program Control to load stored profiles from EEPROM
  */
 
-#include <Servo.h>
+#if defined (MPIDE)
+  #include <SoftPWMServo.h>  // Gives us PWM and Servo on every pin
+#else
+  #include <Servo.h>
+#endif
 #include <Wire.h>
 #include <Firmata.h>
 
@@ -82,7 +86,11 @@ boolean isI2CEnabled = false;
 signed char queryIndex = -1;
 unsigned int i2cReadDelayTime = 0;  // default delay time between i2c read request and Wire.requestFrom()
 
-Servo servos[MAX_SERVOS];
+#if defined(MPIDE)
+  SoftServo servos[MAX_SERVOS];
+#else
+  Servo servos[MAX_SERVOS];
+#endif
 byte servoPinMap[TOTAL_PINS];
 byte detachedServos[MAX_SERVOS];
 byte detachedServoCount = 0;
@@ -267,7 +275,11 @@ void setPinModeCallback(byte pin, int mode)
     case PWM:
       if (IS_PIN_PWM(pin)) {
         pinMode(PIN_TO_PWM(pin), OUTPUT);
+#if defined(MPIDE)
+	    SoftPWMServoPWMWrite(PIN_TO_PWM(pin), 0);
+#else
         analogWrite(PIN_TO_PWM(pin), 0);
+#endif
         pinConfig[pin] = PWM;
       }
       break;
@@ -305,7 +317,12 @@ void analogWriteCallback(byte pin, int value)
         break;
       case PWM:
         if (IS_PIN_PWM(pin))
+#if defined(MPIDE)
+          SoftPWMServoPWMWrite(PIN_TO_PWM(pin), value);
+#else
           analogWrite(PIN_TO_PWM(pin), value);
+#endif
+
         pinState[pin] = value;
         break;
     }
