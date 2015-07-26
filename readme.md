@@ -107,8 +107,8 @@ You will first need to remove the existing Firmata library, then clone firmata/a
 into an empty Firmata directory:
 
 ```bash
-$ rm -r /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
-$ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Resources/Java/libraries/Firmata
+$ rm -r /Applications/Arduino.app/Contents/Java/libraries/Firmata/
+$ git clone git@github.com:firmata/arduino.git /Applications/Arduino.app/Contents/Java/libraries/Firmata/
 ```
 
 *Update paths if you're using Windows or Linux*
