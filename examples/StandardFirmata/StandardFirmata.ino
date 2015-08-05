@@ -214,10 +214,12 @@ void checkSerial()
       if (serialPort == NULL) {
         continue;
       }
+#if defined(ARDUINO_ARCH_AVR)
       // only the SoftwareSerial port that is "listening" can read data
       if (portId > 7 && !((SoftwareSerial*)serialPort)->isListening()) {
         continue;
       }
+#endif
       if (serialPort->available() > 0) {
         Firmata.write(START_SYSEX);
         Firmata.write(SERIAL_MESSAGE);
