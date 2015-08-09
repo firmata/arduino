@@ -4,14 +4,14 @@
   any host computer software package.
 
   To download a host software package, please clink on the following link
-  to open the download page in your default browser.
+  to open the list of Firmata client libraries your default browser.
 
   https://github.com/firmata/arduino#firmata-client-libraries
 
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2014 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2014 Alan Yorinks. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 11, 2015
+  Last updated by Jeff Hoefs: August 9th, 2015
  */
 
 /*

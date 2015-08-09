@@ -8,6 +8,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated August 9th, 2015
 */
 
 #ifndef Firmata_Boards_h
@@ -139,7 +141,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #endif
 
 // Arduino Duemilanove, Diecimila, and NG
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
 #if defined(NUM_ANALOG_INPUTS) && NUM_ANALOG_INPUTS == 6
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              20 // 14 digital + 6 analog

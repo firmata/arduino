@@ -1,3 +1,13 @@
+FIRMATA 2.4.4 - Aug 9, 2015
+
+[core library]
+* Added support for chipKIT boards (Brian Schmalz, Rick Anderson and Keith Vogel)
+* Added support for ATmega328 boards (previously only ATmega328p was supported)
+
+[StandardFirmata]
+* Added StandardFirmataChipKIT for ChipKIT boards (Brian Schmalz, Rick Anderson and Keith Vogel)
+* Ensure Serial is ready on Leonardo and other ATMega32u4-based boards
+
 FIRMATA 2.4.3 - Apr 11, 2015
 
 [core library]
