@@ -677,7 +677,16 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
+  // to use a port other than Serial, such as Serial1 on an Arduino Leonardo or Mega,
+  // Call begin(baud) on the alternate serial port and pass it to Firmata to begin like this:
+  // Serial1.begin(57600);
+  // Firmata.begin(Serial1);
+  // then comment out or remove lines 701 - 704 below
+
   Firmata.begin(57600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Only needed for ATmega32u4-based boards (Leonardo, etc).
+  }
   systemResetCallback();  // reset to default config
 }
 
