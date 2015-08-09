@@ -2,7 +2,7 @@
 
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/firmata/arduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
+Firmata is a protocol for communicating with microcontrollers from software on a host computer. The [protocol](https://github.com/firmata/protocol) can be implemented in firmware on any microcontroller architecture as well as software on any host computer software package. The Arduino repository described here is a Firmata library for Arduino and Arduino-compatible devices. If you would like to contribute to Firmata, please see the [Contributing](#contributing) section below.
 
 ##Usage
 
@@ -11,7 +11,7 @@ There are two main models of usage of Firmata. In one model, the author of the A
 The second and more common model is to load a general purpose sketch called StandardFirmata on the Arduino board and then use the host computer exclusively to interact with the Arduino board. StandardFirmata is located in the Arduino IDE in File -> Examples -> Firmata.
 
 ##Firmata Client Libraries
-Most of the time you will be interacting with arduino with a client library on the host computers. Several Firmata client libraries have been implemented in a variety of popular programming languages:
+Most of the time you will be interacting with Arduino with a client library on the host computers. Several Firmata client libraries have been implemented in a variety of popular programming languages:
 
 * procesing
   * [https://github.com/firmata/processing]
@@ -57,7 +57,7 @@ Most of the time you will be interacting with arduino with a client library on t
 * Max/MSP
   * [http://www.maxuino.org/]
 
-Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all arduino and arduino-compatible boards. Refer to the respective projects for details.
+Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all Arduino and Arduino-compatible boards. Refer to the respective projects for details.
 
 ##Updating Firmata in the Arduino IDE - Arduino 1.6.4 and higher
 
@@ -65,8 +65,10 @@ If you want to update to the latest stable version:
 
 1. Open the Arduino IDE and navigate to: `Sketch > Include Library > Manage Libraries`
 2. Filter by "Firmata" and click on the "Firmata by Firmata Developers" item in the list of results.
-3. Click the Select version dropdown and select the most recent version (not you can also install previous versions)
-4. Click Install.
+3. Click the `Select version` dropdown and select the most recent version (note you can also install previous versions)
+4. Click `Install`.
+
+###Cloning Firmata
 
 If you are contributing to Firmata or otherwise need a version newer than the latest tagged release, you can clone Firmata directly to your Arduino/libraries/ directory (where 3rd party libraries are installed). This only works for Arduino 1.6.4 and higher, for older versions you need to clone into the Arduino application directory (see section below titled "Using the Source code rather than release archive"). Be sure to change the name to Firmata as follows:
 
@@ -104,7 +106,7 @@ will differ slightly: `Contents/Java/libraries/Firmata` (no Resources directory)
 for Arduino 1.0.x vs 1.6.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
-*Update the path and arduino version as necessary*
+*Update the path and Arduino version as necessary*
 
 ###Linux:
 
@@ -113,12 +115,16 @@ for Arduino 1.0.x vs 1.6.x).
 for Arduino 1.0.x vs 1.6.x).
 2. Restart the Arduino application and the latest version of Firmata will be available.
 
-*Update the path and arduino version as necessary*
+*Update the path and Arduino version as necessary*
 
 ###Using the Source code rather than release archive (only for versions older than Arduino 1.6.3)
 
-Clone this repo directly into the core Arduino libraries directory. If you are using
-Arduino 1.5.x or 1.6.x, the repo directory structure will not match the Arduino
+*It is recommended you update to Arduino 1.6.4 or higher if possible, that way you can clone directly into the external Arduino/libraries/ directory which persists between Arduino application updates. Otherwise you will need to move your clone each time you update to a newer version of the Arduino IDE.*
+
+If you're stuck with an older version of the IDE, then follow these keep reading otherwise jump up to the "Cloning Firmata section above".
+
+Clone this repo directly into the core Arduino application libraries directory. If you are using
+Arduino 1.5.x or <= 1.6.3, the repo directory structure will not match the Arduino
 library format, however it should still compile as long as you are using Arduino 1.5.7
 or higher.
 
