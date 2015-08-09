@@ -26,7 +26,7 @@
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
-#define DIGITAL_MESSAGE         0x90 // send data for a digital pin
+#define DIGITAL_MESSAGE         0x90 // send data for a digital port (collection of 8 pins)
 #define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
 #define REPORT_ANALOG           0xC0 // enable analog input by pin #
 #define REPORT_DIGITAL          0xD0 // enable digital input by port pair
@@ -69,8 +69,8 @@
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
 
 // pin modes
-//#define INPUT                 0x00 // defined in wiring.h
-//#define OUTPUT                0x01 // defined in wiring.h
+//#define INPUT                 0x00 // defined in Arduino.h
+//#define OUTPUT                0x01 // defined in Arduino.h
 #define ANALOG                  0x02 // analog pin in analogInput mode
 #define PWM                     0x03 // digital pin in PWM output mode
 #define SERVO                   0x04 // digital pin in Servo output mode
