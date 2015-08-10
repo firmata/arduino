@@ -27,6 +27,9 @@
 #include <Wire.h>
 #include <Firmata.h>
 
+#define TONE_TONE     0x00
+#define TONE_NO_TONE  0x01
+
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
 #define I2C_READ_CONTINUOUSLY       B00010000
@@ -229,6 +232,9 @@ void setPinModeCallback(byte pin, int mode)
   if (pinConfig[pin] == IGNORE)
     return;
 
+  if (pinConfig[pin] == TONE && mode != TONE) {
+    noTone(pin);
+  }
   if (pinConfig[pin] == I2C && isI2CEnabled && mode != I2C) {
     // disable i2c so pins can be used for other functions
     // the following if statements should reconfigure the pins properly
@@ -296,6 +302,13 @@ void setPinModeCallback(byte pin, int mode)
         // mark the pin as i2c
         // the user must call I2C_CONFIG to enable I2C for a device
         pinConfig[pin] = I2C;
+      }
+      break;
+    case TONE:
+      if (IS_PIN_DIGITAL(pin)) {
+        digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
+        pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
+        pinConfig[pin] = TONE;        
       }
       break;
     default:
@@ -402,6 +415,23 @@ void sysexCallback(byte command, byte argc, byte *argv)
   unsigned int delayTime;
 
   switch (command) {
+    case TONE_DATA:
+      if (argc > 1) {
+        byte toneCommand = argv[0];
+        byte pin = argv[1];
+  
+        if (toneCommand == TONE_TONE && argc > 5) {
+          unsigned int frequency = argv[2] + (argv[3] << 7);
+          // duration is currently limited to 16,383 ms
+          unsigned int duration = argv[4] + (argv[5] << 7);
+          setPinModeCallback(pin, TONE);
+          tone(pin, frequency, duration);
+        }
+        if (toneCommand == TONE_NO_TONE) {
+          noTone(pin);
+        }
+      }
+      break;
     case I2C_REQUEST:
       mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
       if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
@@ -554,6 +584,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write(SERVO);
           Firmata.write(14);
+        }
+        if (IS_PIN_DIGITAL(pin)) {
+          Firmata.write(TONE);
+          Firmata.write(14); // 14 bit frequency value
         }
         if (IS_PIN_I2C(pin)) {
           Firmata.write(I2C);
