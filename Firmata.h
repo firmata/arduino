@@ -33,6 +33,8 @@
 //
 #define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
 //
+#define SET_DIGITAL_PIN_VALUE   0xF5 // set value of an individual digital pin
+//
 #define REPORT_VERSION          0xF9 // report protocol version
 #define SYSTEM_RESET            0xFF // reset from MIDI
 //
@@ -150,6 +152,7 @@ class FirmataClass
     callbackFunction currentReportAnalogCallback;
     callbackFunction currentReportDigitalCallback;
     callbackFunction currentPinModeCallback;
+    callbackFunction currentPinValueCallback;
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
