@@ -98,6 +98,7 @@ Stream *swSerial2 = NULL;
 Stream *swSerial3 = NULL;
 
 byte reportSerial[MAX_SERIAL_PORTS];
+int serialBytesToRead[12];
 signed char serialIndex = -1;
 
 /* i2c data */
@@ -203,6 +204,8 @@ Stream* getPortFromId(byte portId)
 void checkSerial()
 {
   byte portId, serialData;
+  int bytesToRead = 0;
+  int numBytesToRead = 0;
   Stream* serialPort;
 
   if (serialIndex > -1) {
@@ -210,6 +213,7 @@ void checkSerial()
     // loop through all reporting (READ_CONTINUOUS) serial ports
     for (byte i = 0; i < serialIndex + 1; i++) {
       portId = reportSerial[i];
+      bytesToRead = serialBytesToRead[portId];
       serialPort = getPortFromId(portId);
       if (serialPort == NULL) {
         continue;
@@ -224,11 +228,19 @@ void checkSerial()
         Firmata.write(START_SYSEX);
         Firmata.write(SERIAL_MESSAGE);
         Firmata.write(SERIAL_REPLY | portId);
+
+        if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
+          numBytesToRead = serialPort->available();
+        } else {
+          numBytesToRead = bytesToRead;
+        }
+
         // relay serial data to the serial device
-        while (serialPort->available() > 0) {
+        while (numBytesToRead > 0) {
           serialData = serialPort->read();
           Firmata.write(serialData & 0x7F);
           Firmata.write((serialData >> 7) & 0x7F);
+          numBytesToRead--;
         }
         Firmata.write(END_SYSEX);
       }
@@ -725,8 +737,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
         case SERIAL_CONFIG:
           {
             long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
-            int bytesToRead = (int)argv[4] | ((int)argv[5] << 7); // not yet used
             byte txPin, rxPin;
+
+            serialBytesToRead[portId] = (int)argv[4] | ((int)argv[5] << 7);
 
             if (portId > 7 && argc > 6) {
               rxPin = argv[6];
