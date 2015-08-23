@@ -42,7 +42,14 @@
 #define SW_SERIAL2                  0x0A
 #define SW_SERIAL3                  0x0B
 
-#define SERIAL_MESSAGE              0x60
+// map configuration query response resolution value to serial pin type
+#define CONFIG_RX1                  0x02
+#define CONFIG_TX1                  0x03
+#define CONFIG_RX2                  0x04
+#define CONFIG_TX2                  0x05
+#define CONFIG_RX3                  0x06
+#define CONFIG_TX3                  0x07
+
 #define SERIAL_CONFIG               0x10
 #define SERIAL_WRITE                0x20
 #define SERIAL_READ                 0x30
@@ -67,7 +74,7 @@
 #define I2C_REGISTER_NOT_SPECIFIED  -1
 
 // the minimum interval for sampling analog input
-#define MINIMUM_SAMPLING_INTERVAL 10
+#define MINIMUM_SAMPLING_INTERVAL   10
 
 
 /*==============================================================================
@@ -160,19 +167,19 @@ Stream* getPortFromId(byte portId)
       // block use of Serial (typically pins 0 and 1) until ability to reclaim Serial is implemented
       //return &Serial;
       return NULL;
-#if defined(UBRR1H) || defined(USBCON)
+#if defined(PIN_SERIAL1_RX)
     case HW_SERIAL1:
       return &Serial1;
 #endif
-#if defined(UBRR2H) || defined(SERIAL_PORT_HARDWARE2)
+#if defined(PIN_SERIAL2_RX)
     case HW_SERIAL2:
       return &Serial2;
 #endif
-#if defined(UBRR3H) || defined(SERIAL_PORT_HARDWARE3)
+#if defined(PIN_SERIAL3_RX)
     case HW_SERIAL3:
       return &Serial3;
 #endif
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
     case SW_SERIAL0:
       if (swSerial0 != NULL) {
         // instances of SoftwareSerial are already pointers so simply return the instance
@@ -218,7 +225,7 @@ void checkSerial()
       if (serialPort == NULL) {
         continue;
       }
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
       // only the SoftwareSerial port that is "listening" can read data
       if (portId > 7 && !((SoftwareSerial*)serialPort)->isListening()) {
         continue;
@@ -247,6 +254,57 @@ void checkSerial()
 
     }
   }
+}
+
+/*
+ * Return the serial serial pin type (RX1, TX1, RX2, TX2, etc) for the specified pin
+ */
+byte getSerialPinType(byte pin) {
+#if defined(PIN_SERIAL1_RX)
+  if (pin == PIN_SERIAL1_RX) return CONFIG_RX1;
+  if (pin == PIN_SERIAL1_TX) return CONFIG_TX1;
+#endif
+#if defined(PIN_SERIAL2_RX)
+  if (pin == PIN_SERIAL2_RX) return CONFIG_RX2;
+  if (pin == PIN_SERIAL2_TX) return CONFIG_TX2;
+#endif
+#if defined(PIN_SERIAL3_RX)
+  if (pin == PIN_SERIAL3_RX) return CONFIG_RX3;
+  if (pin == PIN_SERIAL3_TX) return CONFIG_TX3;
+#endif
+  return 0;
+}
+
+byte configHWSerialPins(byte portId) {
+  byte rxPin, txPin;
+  switch (portId) {
+#if defined(PIN_SERIAL1_RX)
+    case HW_SERIAL1:
+      rxPin = PIN_SERIAL1_RX;
+      txPin = PIN_SERIAL1_TX;
+    break;
+#endif
+#if defined(PIN_SERIAL2_RX)
+    case HW_SERIAL2:
+      rxPin = PIN_SERIAL2_RX;
+      txPin = PIN_SERIAL2_TX;
+    break;
+#endif
+#if defined(PIN_SERIAL3_RX)
+    case HW_SERIAL3:
+      rxPin = PIN_SERIAL3_RX;
+      txPin = PIN_SERIAL3_TX;
+    break;
+#endif
+    default:
+      return 0;
+  }
+  setPinModeCallback(rxPin, MODE_SERIAL);
+  setPinModeCallback(txPin, MODE_SERIAL);
+
+  // Fixes an issue where some serial devices would not work properly with Arduino Due
+  // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
+  pinMode(rxPin, INPUT);
 }
 
 void attachServo(byte pin, int minPulse, int maxPulse)
@@ -438,6 +496,10 @@ void setPinModeCallback(byte pin, int mode)
         // the user must call I2C_CONFIG to enable I2C for a device
         pinConfig[pin] = I2C;
       }
+      break;
+    case MODE_SERIAL:
+      // used for both HW and SW serial
+      pinConfig[pin] = MODE_SERIAL;
       break;
     default:
       Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
@@ -700,6 +762,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write(I2C);
           Firmata.write(1);  // TODO: could assign a number to map to SCL or SDA
         }
+        if (IS_PIN_SERIAL(pin)) {
+          Firmata.write(MODE_SERIAL);
+          Firmata.write(getSerialPinType(pin));
+        }
         Firmata.write(127);
       }
       Firmata.write(END_SYSEX);
@@ -749,10 +815,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
             if (portId < 8) {
               serialPort = getPortFromId(portId);
               if (serialPort != NULL) {
+                configHWSerialPins(portId);
                 ((HardwareSerial*)serialPort)->begin(baud);
               }
             } else {
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
               switch (portId) {
                 case SW_SERIAL0:
                   if (swSerial0 == NULL) {
@@ -777,6 +844,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
               }
               serialPort = getPortFromId(portId);
               if (serialPort != NULL) {
+                setPinModeCallback(rxPin, MODE_SERIAL);
+                setPinModeCallback(txPin, MODE_SERIAL);
                 ((SoftwareSerial*)serialPort)->begin(baud);
               }
 #endif
@@ -830,7 +899,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             if (portId < 8) {
               ((HardwareSerial*)serialPort)->end();
             } else {
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
               ((SoftwareSerial*)serialPort)->end();
               if (serialPort != NULL) {
                 free(serialPort);
@@ -846,7 +915,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             getPortFromId(portId)->flush();
           }
           break;
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
         case SERIAL_LISTEN:
           // can only call listen() on software serial ports
           if (portId > 7) {
@@ -902,7 +971,7 @@ void systemResetCallback()
     disableI2CPins();
   }
 
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(SoftwareSerial_h)
   // free memory allocated for SoftwareSerial ports
   for (byte i = SW_SERIAL0; i < SW_SERIAL3 + 1; i++) {
     serialPort = getPortFromId(i);
@@ -967,7 +1036,7 @@ void setup()
   // Call begin(baud) on the alternate serial port and pass it to Firmata to begin like this:
   // Serial1.begin(57600);
   // Firmata.begin(Serial1);
-  // then comment out or remove lines 701 - 704 below
+  // However do not do this if you are using SERIAL_MESSAGE
 
   Firmata.begin(57600);
   while (!Serial) {
