@@ -25,44 +25,14 @@
 
 #include <Servo.h>
 #include <Wire.h>
+#include <ArduinoUnit.h>
+#include <Firmata.h>
+
 // SoftwareSerial is only supported for AVR-based boards
 #if defined(ARDUINO_ARCH_AVR)
 #include <SoftwareSerial.h>
 #endif
-#include <ArduinoUnit.h>
-#include <Firmata.h>
-
-#define HW_SERIAL0                  0x00
-#define HW_SERIAL1                  0x01
-#define HW_SERIAL2                  0x02
-#define HW_SERIAL3                  0x03
-
-#define SW_SERIAL0                  0x08
-#define SW_SERIAL1                  0x09
-#define SW_SERIAL2                  0x0A
-#define SW_SERIAL3                  0x0B
-
-// map configuration query response resolution value to serial pin type
-#define CONFIG_RX1                  0x02
-#define CONFIG_TX1                  0x03
-#define CONFIG_RX2                  0x04
-#define CONFIG_TX2                  0x05
-#define CONFIG_RX3                  0x06
-#define CONFIG_TX3                  0x07
-
-#define SERIAL_CONFIG               0x10
-#define SERIAL_WRITE                0x20
-#define SERIAL_READ                 0x30
-#define SERIAL_REPLY                0x40
-#define SERIAL_CLOSE                0x50
-#define SERIAL_FLUSH                0x60
-#define SERIAL_LISTEN               0x70
-#define SERIAL_READ_CONTINUOUSLY    0x00
-#define SERIAL_STOP_READING         0x01
-#define SERIAL_MODE_MASK            0xF0
-#define SERIAL_PORT_ID_MASK         0x0F
-#define MAX_SERIAL_PORTS            8
-
+#include "utility/serialUtils.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -134,7 +104,6 @@ boolean isResetting = false;
 
 int memCheckCounter = 0;
 char buffer[20];
-char debugBuffer[50];
 
 /* utility functions */
 void wireWrite(byte data)
@@ -254,57 +223,6 @@ void checkSerial()
 
     }
   }
-}
-
-/*
- * Return the serial serial pin type (RX1, TX1, RX2, TX2, etc) for the specified pin
- */
-byte getSerialPinType(byte pin) {
-#if defined(PIN_SERIAL1_RX)
-  if (pin == PIN_SERIAL1_RX) return CONFIG_RX1;
-  if (pin == PIN_SERIAL1_TX) return CONFIG_TX1;
-#endif
-#if defined(PIN_SERIAL2_RX)
-  if (pin == PIN_SERIAL2_RX) return CONFIG_RX2;
-  if (pin == PIN_SERIAL2_TX) return CONFIG_TX2;
-#endif
-#if defined(PIN_SERIAL3_RX)
-  if (pin == PIN_SERIAL3_RX) return CONFIG_RX3;
-  if (pin == PIN_SERIAL3_TX) return CONFIG_TX3;
-#endif
-  return 0;
-}
-
-byte configHWSerialPins(byte portId) {
-  byte rxPin, txPin;
-  switch (portId) {
-#if defined(PIN_SERIAL1_RX)
-    case HW_SERIAL1:
-      rxPin = PIN_SERIAL1_RX;
-      txPin = PIN_SERIAL1_TX;
-    break;
-#endif
-#if defined(PIN_SERIAL2_RX)
-    case HW_SERIAL2:
-      rxPin = PIN_SERIAL2_RX;
-      txPin = PIN_SERIAL2_TX;
-    break;
-#endif
-#if defined(PIN_SERIAL3_RX)
-    case HW_SERIAL3:
-      rxPin = PIN_SERIAL3_RX;
-      txPin = PIN_SERIAL3_TX;
-    break;
-#endif
-    default:
-      return 0;
-  }
-  setPinModeCallback(rxPin, MODE_SERIAL);
-  setPinModeCallback(txPin, MODE_SERIAL);
-
-  // Fixes an issue where some serial devices would not work properly with Arduino Due
-  // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
-  pinMode(rxPin, INPUT);
 }
 
 void attachServo(byte pin, int minPulse, int maxPulse)
@@ -804,6 +722,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           {
             long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
             byte txPin, rxPin;
+            serial_pins pins;
 
             serialBytesToRead[portId] = (int)argv[4] | ((int)argv[5] << 7);
 
@@ -815,7 +734,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
             if (portId < 8) {
               serialPort = getPortFromId(portId);
               if (serialPort != NULL) {
-                configHWSerialPins(portId);
+                pins = getSerialPinNumbers(portId);
+                if (pins.rx != 0 && pins.tx != 0) {
+                  setPinModeCallback(pins.rx, MODE_SERIAL);
+                  setPinModeCallback(pins.tx, MODE_SERIAL);
+                  // Fixes an issue where some serial devices would not work properly with Arduino Due
+                  // because all Arduino pins are set to OUTPUT by default in StandardFirmata.
+                  pinMode(pins.rx, INPUT);
+                }
                 ((HardwareSerial*)serialPort)->begin(baud);
               }
             } else {
@@ -863,7 +789,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
               data = argv[i] + (argv[i + 1] << 7);
               serialPort->write(data);
             }
-            break;
+            break; // SERIAL_WRITE
           }
         case SERIAL_READ:
           if (argv[1] == SERIAL_READ_CONTINUOUSLY) {
@@ -892,7 +818,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
               serialIndex--;
             }
           }
-          break;
+          break; // SERIAL_READ
         case SERIAL_CLOSE:
           serialPort = getPortFromId(portId);
           if (serialPort != NULL) {
@@ -908,13 +834,13 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #endif
             }
           }
-          break;
+          break; // SERIAL_CLOSE
         case SERIAL_FLUSH:
           serialPort = getPortFromId(portId);
           if (serialPort != NULL) {
             getPortFromId(portId)->flush();
           }
-          break;
+          break; // SERIAL_FLUSH
 #if defined(SoftwareSerial_h)
         case SERIAL_LISTEN:
           // can only call listen() on software serial ports
@@ -924,7 +850,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
               ((SoftwareSerial*)serialPort)->listen();
             }
           }
-          break;
+          break; // SERIAL_LISTEN
 #endif
       }
       break;
