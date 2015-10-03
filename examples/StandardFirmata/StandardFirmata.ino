@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: August 9th, 2015
+  Last updated by Jeff Hoefs: October 3rd, 2015
 */
 
 #include <Servo.h>
@@ -75,8 +75,8 @@ Stream *swSerial2 = NULL;
 Stream *swSerial3 = NULL;
 
 byte reportSerial[MAX_SERIAL_PORTS];
-int serialBytesToRead[12];
-signed char serialIndex = -1;
+int serialBytesToRead[SERIAL_READ_ARR_LEN];
+signed char serialIndex;
 
 /* i2c data */
 struct i2c_device_info {
@@ -102,8 +102,6 @@ byte servoCount = 0;
 
 boolean isResetting = false;
 
-int memCheckCounter = 0;
-char buffer[20];
 
 /* utility functions */
 void wireWrite(byte data)
@@ -724,11 +722,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
             byte txPin, rxPin;
             serial_pins pins;
 
-            serialBytesToRead[portId] = (int)argv[4] | ((int)argv[5] << 7);
-
-            if (portId > 7 && argc > 6) {
-              rxPin = argv[6];
-              txPin = argv[7];
+            if (portId > 7 && argc > 4) {
+              rxPin = argv[4];
+              txPin = argv[5];
             }
 
             if (portId < 8) {
@@ -795,6 +791,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
           if (argv[1] == SERIAL_READ_CONTINUOUSLY) {
             if (serialIndex + 1 >= MAX_SERIAL_PORTS) {
               break;
+            }
+
+            if (argc > 2) {
+              // maximum number of bytes to read from buffer per iteration of loop()
+              serialBytesToRead[portId] = (int)argv[2] | ((int)argv[3] << 7);
+            } else {
+              // read all available bytes per iteration of loop()
+              serialBytesToRead[portId] = 0;
             }
             serialIndex++;
             reportSerial[serialIndex] = portId;
@@ -907,7 +911,11 @@ void systemResetCallback()
     }
   }
 #endif
+
   serialIndex = -1;
+  for (byte i = 0; i < SERIAL_READ_ARR_LEN; i++) {
+    serialBytesToRead[i] = 0;
+  }
 
   for (byte i = 0; i < TOTAL_PORTS; i++) {
     reportPINs[i] = false;    // by default, reporting off
@@ -1007,19 +1015,7 @@ void loop()
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes);
       }
     }
-
-    //    // check for memory leaks
-    //    // send memory reading approximately ever 10 seconds
-    //    // 526 * 19 (default sampling interval) = 9994 ms
-    //    // increase 526 for long running processes
-    //    if (memCheckCounter++ == 526) {
-    //      sprintf(buffer, "%u", freeMemory());
-    //      Firmata.sendString(buffer);
-    //      memCheckCounter = 0;
-    //    }
-
   }
 
-  // TODO - figure out best location to call this function.
   checkSerial();
 }

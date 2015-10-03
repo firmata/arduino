@@ -20,14 +20,17 @@
 #define HW_SERIAL1                  0x01
 #define HW_SERIAL2                  0x02
 #define HW_SERIAL3                  0x03
+// extensible up to 0x07
 
 #define SW_SERIAL0                  0x08
 #define SW_SERIAL1                  0x09
 #define SW_SERIAL2                  0x0A
 #define SW_SERIAL3                  0x0B
+// extensible up to 0x0F
 
 #define SERIAL_PORT_ID_MASK         0x0F
 #define MAX_SERIAL_PORTS            8
+#define SERIAL_READ_ARR_LEN         12
 
 // map configuration query response resolution value to serial pin type
 #define RES_RX1                     0x02
