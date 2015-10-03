@@ -25,11 +25,12 @@
 
 #include <Servo.h>
 #include <Wire.h>
-#include <ArduinoUnit.h>
 #include <Firmata.h>
 
 // SoftwareSerial is only supported for AVR-based boards
-#if defined(ARDUINO_ARCH_AVR)
+// The second condition checks if the IDE is in the 1.0.x series, if so, include SoftwareSerial
+// since it should be available to all boards in that IDE.
+#if defined(ARDUINO_ARCH_AVR) || (ARDUINO >= 100 && ARDUINO < 10500)
 #include <SoftwareSerial.h>
 #endif
 #include "utility/serialUtils.h"
