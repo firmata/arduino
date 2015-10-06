@@ -28,17 +28,18 @@
 
   StandardFirmataEthernetPlus adds additional features that may exceed the Flash and
   RAM sizes of Arduino boards such as ATMega328p (Uno) and ATMega32u4
-  (Leonardo, Micro, Yun, etc). It is best to use StandardFirmataPlus with higher
-  memory boards such as the Arduino Mega, Arduino Due, Teensy 3.0/3.1/3.2, etc.
+  (Leonardo, Micro, Yun, etc). It is best to use StandardFirmataPlus with a board that
+  has > 32k Flash and > 3k RAM such as: Arduino Mega, Arduino Due, Teensy 3.0/3.1/3.2, etc.
 
   This sketch consumes too much Flash and RAM to run reliably on an
-  Arduino Ethernet board, Arduino Leonardo, Yun, Uno or other ATMega328p or
-  ATMega32u4-based boards. You will need a board with > 32k Flash and 3k RAM.
-  Use StandardFirmataEthernet.ino instead for those boards and other boards that do not
-  meet the Flash and RAM requirements.
+  Arduino Leonardo, Yun, ATMega32u4-based board. Use StandardFirmataEthernet.ino instead
+  for those boards and other boards that do not meet the Flash and RAM requirements.
 
-  USE: To use StandardFirmataEthernetPlus you will need to have an Arduino Ethernet shield
-  (or clone).
+  To use StandardFirmataEthernet you will need to have one of the following
+  boards or shields:
+
+  - Arduino Ethernet shield (or clone)
+  - Arduino Ethernet board (or clone)
 
   Follow the instructions in the NETWORK CONFIGURATION section below to
   configure your particular hardware.
@@ -48,6 +49,10 @@
 
   - Arduino Mega: (D4, D10, D50, D51, D52, D53)
   - Arduino Due: (D4, D10)
+  - Arduino Uno or other ATMega328p boards: (D4, D10, D11, D12, D13)
+
+  If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
+  - D4, D10, D11, D12, D13
 */
 
 #include <Servo.h>
