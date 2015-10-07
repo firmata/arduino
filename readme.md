@@ -21,6 +21,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/lupeke/python-firmata]
   * [https://github.com/tino/pyFirmata]
   * [https://github.com/MrYsLab/PyMata]
+  * [https://github.com/MrYsLab/pymata-aio]
 * perl
   * [https://github.com/ntruchsess/perl-firmata]
   * [https://github.com/rcaputo/rx-firmata]
