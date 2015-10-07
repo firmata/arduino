@@ -43,6 +43,9 @@
   - Arduino Mega: (D4, D10, D50, D51, D52, D53)
   - Arduino Leonardo: (D4, D10)
   - Arduino Due: (D4, D10)
+
+  If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
+  - D4, D10, D11, D12, D13
 */
 
 #include <Servo.h>

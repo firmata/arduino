@@ -37,7 +37,7 @@
 #define I2C_REGISTER_NOT_SPECIFIED  -1
 
 // the minimum interval for sampling analog input
-#define MINIMUM_SAMPLING_INTERVAL 10
+#define MINIMUM_SAMPLING_INTERVAL   10
 
 
 /*==============================================================================
