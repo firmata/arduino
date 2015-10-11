@@ -242,6 +242,29 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+// Arduino Zero
+// Note this will work with an Arduino Zero Pro, but not with an Arduino M0 Pro
+// Arduino M0 Pro does not properly map pins to the board labeled pin numbers
+#elif defined(_VARIANT_ARDUINO_ZERO_)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              25 // 14 digital + 6 analog + 2 i2c + 3 spi
+#define TOTAL_PORTS             3 // set when TOTAL_PINS > num digitial I/O pins
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define DAC_RESOLUTION          10
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 19)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           (digitalPinHasPWM(p) || (p) == 14) // use DAC0 as a PWM pin
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // SDA = 20, SCL = 21
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define IS_PIN_DAC(p)           ((p) == 14)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+
 // Teensy 1.0
 #elif defined(__AVR_AT90USB162__)
 #define TOTAL_ANALOG_PINS       0
@@ -573,6 +596,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 #ifndef IS_PIN_SERIAL
 #define IS_PIN_SERIAL(p)        0
+#endif
+
+#ifndef IS_PIN_DAC
+#define IS_PIN_DAC(p)           0
+#define DAC_RESOLUTION          8
 #endif
 
 /*==============================================================================
