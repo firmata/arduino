@@ -316,6 +316,20 @@ void setPinModeCallback(byte pin, int mode)
   // TODO: save status to EEPROM here, if changed
 }
 
+/*
+ * Sets the value of an individual pin.
+ * Useful if you want to set a pin value but are not tracking the digital port state.
+ */
+void setPinValueCallback(byte pin, int value)
+{
+  if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
+    if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
+      pinState[pin] = value;
+      digitalWrite(PIN_TO_DIGITAL(pin), value);
+    }
+  }
+}
+
 void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
@@ -698,6 +712,7 @@ void setup()
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach(SET_DIGITAL_PIN_VALUE, setPinValueCallback);
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 

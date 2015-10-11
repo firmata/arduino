@@ -238,6 +238,10 @@ void FirmataClass::processInput(void)
           if (currentPinModeCallback)
             (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
           break;
+        case SET_DIGITAL_PIN_VALUE:
+          if (currentPinValueCallback)
+            (*currentPinValueCallback)(storedInputData[1], storedInputData[0]);
+          break;
         case REPORT_ANALOG:
           if (currentReportAnalogCallback)
             (*currentReportAnalogCallback)(multiByteChannel, storedInputData[0]);
@@ -262,6 +266,7 @@ void FirmataClass::processInput(void)
       case ANALOG_MESSAGE:
       case DIGITAL_MESSAGE:
       case SET_PIN_MODE:
+      case SET_DIGITAL_PIN_VALUE:
         waitForData = 2; // two data bytes needed
         executeMultiByteCommand = command;
         break;
@@ -367,6 +372,7 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
     case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
     case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;
     case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
+    case SET_DIGITAL_PIN_VALUE: currentPinValueCallback = newFunction; break;
   }
 }
 
