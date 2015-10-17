@@ -567,7 +567,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define VERSION_BLINK_PIN       23
 #define PIN_SERIAL1_RX          13
 #define PIN_SERIAL1_TX          14
-#define IS_PIN_DIGITAL(p)       (((p) >= 2) && ((p) <= 8)) || (((p) >= 24) && ((p) <= 31))
+#define IS_PIN_DIGITAL(p)       (((p) >= 2) && ((p) <= 16)) || (((p) >= 24) && ((p) <= 31))
 #define IS_PIN_ANALOG(p)        ((p) >= 24 && (p) <= 31)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
