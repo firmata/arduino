@@ -565,17 +565,15 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              NUM_DIGITAL_PINS // 32
 #define VERSION_BLINK_PIN       23
-#define PIN_SERIAL1_RX          0
-#define PIN_SERIAL1_TX          1
-#define PIN_SERIAL2_RX          13
-#define PIN_SERIAL2_TX          14
+#define PIN_SERIAL1_RX          13
+#define PIN_SERIAL1_TX          14
 #define IS_PIN_DIGITAL(p)       (((p) >= 2) && ((p) <= 8)) || (((p) >= 24) && ((p) <= 31))
 #define IS_PIN_ANALOG(p)        ((p) >= 24 && (p) <= 31)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
 #define IS_PIN_I2C(p)           ((p) == SCL || (p) == SDA)
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
-#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1 || (p) == 13 || (p) == 14)
+#define IS_PIN_SERIAL(p)        ((p) == 13 || (p) == 14)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
