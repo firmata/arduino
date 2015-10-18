@@ -561,6 +561,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 // Pinoccio Scout
+// Note: digital pins 9-16 are usable but not labeled on the board numerically.
+// SS=9, MOSI=10, MISO=11, SCK=12, RX1=13, TX1=14, SCL=15, SDA=16
 #elif defined(ARDUINO_PINOCCIO)
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              NUM_DIGITAL_PINS // 32
