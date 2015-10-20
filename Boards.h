@@ -248,17 +248,17 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(_VARIANT_ARDUINO_ZERO_)
 #define TOTAL_ANALOG_PINS       6
 #define TOTAL_PINS              25 // 14 digital + 6 analog + 2 i2c + 3 spi
-#define TOTAL_PORTS             3 // set when TOTAL_PINS > num digitial I/O pins
+#define TOTAL_PORTS             3  // set when TOTAL_PINS > num digitial I/O pins
 #define VERSION_BLINK_PIN       LED_BUILTIN
-#define DAC_RESOLUTION          10
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 19)
 #define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
-#define IS_PIN_PWM(p)           (digitalPinHasPWM(p) || (p) == 14) // use DAC0 as a PWM pin
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // SDA = 20, SCL = 21
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
 #define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
-#define IS_PIN_DAC(p)           ((p) == 14)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
@@ -598,10 +598,6 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERIAL(p)        0
 #endif
 
-#ifndef IS_PIN_DAC
-#define IS_PIN_DAC(p)           0
-#define DAC_RESOLUTION          8
-#endif
 
 /*==============================================================================
  * readPort() - Read an 8 bit port
