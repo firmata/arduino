@@ -266,7 +266,10 @@ void setPinModeCallback(byte pin, int mode)
       if (IS_PIN_ANALOG(pin)) {
         if (IS_PIN_DIGITAL(pin)) {
           pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
+#if ARDUINO <= 100
+          // deprecated since Arduino 1.0.1 - TODO: drop support in Firmata 2.5
           digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
+#endif
         }
         pinConfig[pin] = ANALOG;
       }
@@ -274,7 +277,10 @@ void setPinModeCallback(byte pin, int mode)
     case INPUT:
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT);    // disable output driver
+#if ARDUINO <= 100
+        // deprecated since Arduino 1.0.1 - TODO: drop support in Firmata 2.5
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
+#endif
         pinConfig[pin] = INPUT;
       }
       break;
