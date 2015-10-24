@@ -21,7 +21,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: August 9th, 2015
+  Last updated by Jeff Hoefs: October 24th, 2015
  */
 
 /*
@@ -666,7 +666,7 @@ void systemResetCallback()
     if (IS_PIN_ANALOG(i)) {
       // turns off pullup, configures everything
       setPinModeCallback(i, ANALOG);
-    } else {
+    } else if (IS_PIN_DIGITAL(i)) {
       // sets the output to 0, configures portConfigInputs
       setPinModeCallback(i, OUTPUT);
     }
