@@ -356,7 +356,7 @@ void analogWriteCallback(byte pin, int value)
 
 void digitalWriteCallback(byte port, int value)
 {
-  byte pin, lastPin, mask = 1, pinWriteMask = 0;
+  byte pin, lastPin, pinValue, mask = 1, pinWriteMask = 0;
 
   if (port < TOTAL_PORTS) {
     // create a mask of the pins on this port that are writable.
@@ -368,8 +368,12 @@ void digitalWriteCallback(byte port, int value)
         // only write to OUTPUT and INPUT (enables pullup)
         // do not touch pins in PWM, ANALOG, SERVO or other modes
         if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
-          pinWriteMask |= mask;
-          pinState[pin] = ((byte)value & mask) ? 1 : 0;
+          pinValue = ((byte)value & mask) ? 1 : 0;
+          // temporary fix until INPUT_PULLUP is added
+          if (pinConfig[pin] == OUTPUT || (pinConfig[pin] == INPUT && pinValue == 1)) {
+            pinWriteMask |= mask;
+          }
+          pinState[pin] = pinValue;
         }
       }
       mask = mask << 1;
