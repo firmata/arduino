@@ -427,13 +427,15 @@ void setPinModeCallback(byte pin, int mode)
 }
 
 /*
- * Sets the value of an individual pin.
- * Useful if you want to set a pin value but are not tracking the digital port state.
+ * Sets the value of an individual pin. Useful if you want to set a pin value but
+ * are not tracking the digital port state.
+ * Can only be used on pins configured as OUTPUT.
+ * Cannot be used to enable pull-ups on Digital INPUT pins.
  */
 void setPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
-    if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
+    if (pinConfig[pin] == OUTPUT) {
       pinState[pin] = value;
       digitalWrite(PIN_TO_DIGITAL(pin), value);
     }
@@ -469,13 +471,19 @@ void digitalWriteCallback(byte port, int value)
     for (pin = port * 8; pin < lastPin; pin++) {
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
-        // only write to OUTPUT and INPUT (enables pullup)
         // do not touch pins in PWM, ANALOG, SERVO or other modes
         if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
           pinValue = ((byte)value & mask) ? 1 : 0;
-          // temporary fix until INPUT_PULLUP is added
-          if (pinConfig[pin] == OUTPUT || (pinConfig[pin] == INPUT && pinValue == 1)) {
+          if (pinConfig[pin] == OUTPUT) {
             pinWriteMask |= mask;
+          } else if (pinConfig[pin] == INPUT && pinValue == 1 && pinState[pin] != 1) {
+            // only handle INPUT here for backwards compatibility
+#if ARDUINO > 100
+            pinMode(pin, INPUT_PULLUP);
+#else
+            // only write to the INPUT pin to enable pullups if Arduino v1.0.0 or earlier
+            pinWriteMask |= mask;
+#endif
           }
           pinState[pin] = pinValue;
         }
