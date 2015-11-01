@@ -82,8 +82,9 @@
 #define STEPPER                 0x08 // pin configured for stepper motor
 #define ENCODER                 0x09 // pin configured for rotary encoders
 #define MODE_SERIAL             0x0A // pin configured for serial communication
+#define MODE_INPUT_PULLUP       0x0B // enable internal pull-up resistor for pin
 #define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
-#define TOTAL_PIN_MODES         12
+#define TOTAL_PIN_MODES         13
 
 extern "C" {
   // callback function types

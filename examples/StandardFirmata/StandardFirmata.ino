@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: October 24th, 2015
+  Last updated by Jeff Hoefs: October 31st, 2015
 */
 
 #include <Servo.h>
@@ -243,7 +243,7 @@ void setPinModeCallback(byte pin, int mode)
     reportAnalogCallback(PIN_TO_ANALOG(pin), mode == ANALOG ? 1 : 0); // turn on/off reporting
   }
   if (IS_PIN_DIGITAL(pin)) {
-    if (mode == INPUT) {
+    if (mode == INPUT || mode == MODE_INPUT_PULLUP) {
       portConfigInputs[pin / 8] |= (1 << (pin & 7));
     } else {
       portConfigInputs[pin / 8] &= ~(1 << (pin & 7));
@@ -271,6 +271,13 @@ void setPinModeCallback(byte pin, int mode)
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
 #endif
         pinConfig[pin] = INPUT;
+      }
+      break;
+    case MODE_INPUT_PULLUP:
+      if (IS_PIN_DIGITAL(pin)) {
+        pinMode(PIN_TO_DIGITAL(pin), INPUT_PULLUP);
+        pinConfig[pin] = MODE_INPUT_PULLUP;
+        pinState[pin] = 1;
       }
       break;
     case OUTPUT:
@@ -571,6 +578,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
       for (byte pin = 0; pin < TOTAL_PINS; pin++) {
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write((byte)INPUT);
+          Firmata.write(1);
+          Firmata.write((byte)MODE_INPUT_PULLUP);
           Firmata.write(1);
           Firmata.write((byte)OUTPUT);
           Firmata.write(1);
