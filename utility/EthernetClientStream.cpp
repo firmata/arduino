@@ -68,12 +68,16 @@ EthernetClientStream::write(uint8_t c)
 void
 EthernetClientStream::maintain(IPAddress localip)
 {
+// temporary hack to Firmata to compile for Intel Galileo
+// the issue is documented here: https://github.com/firmata/arduino/issues/218
+#if !defined(ARDUINO_LINUX)
   if (this->localip!=localip)
     {
       this->localip = localip;
       if (connected)
         stop();
     }
+#endif
 }
 
 void
