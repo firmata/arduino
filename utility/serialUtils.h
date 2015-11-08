@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last update August 23rd, 2015
+  Last updated by Jeff Hoefs: October 3rd, 2015
 */
 
 #ifndef SERIAL_UTILS_H
@@ -88,27 +88,27 @@ inline serial_pins getSerialPinNumbers(uint8_t portId) {
   serial_pins pins;
   switch (portId) {
 #if defined(PIN_SERIAL_RX)
-    // case HW_SERIAL0:
-    //   // TODO when use of HW_SERIAL0 is enabled
-    //   break;
+      // case HW_SERIAL0:
+      //   // TODO when use of HW_SERIAL0 is enabled
+      //   break;
 #endif
 #if defined(PIN_SERIAL1_RX)
     case HW_SERIAL1:
       pins.rx = PIN_SERIAL1_RX;
       pins.tx = PIN_SERIAL1_TX;
-    break;
+      break;
 #endif
 #if defined(PIN_SERIAL2_RX)
     case HW_SERIAL2:
       pins.rx = PIN_SERIAL2_RX;
       pins.tx = PIN_SERIAL2_TX;
-    break;
+      break;
 #endif
 #if defined(PIN_SERIAL3_RX)
     case HW_SERIAL3:
       pins.rx = PIN_SERIAL3_RX;
       pins.tx = PIN_SERIAL3_TX;
-    break;
+      break;
 #endif
     default:
       pins.rx = 0;

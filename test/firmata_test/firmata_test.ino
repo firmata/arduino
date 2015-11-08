@@ -2,7 +2,7 @@
  * To run this test suite, you must first install the ArduinoUnit library
  * to your Arduino/libraries/ directory.
  * You can get ArduinoUnit here: https://github.com/mmurdoch/arduinounit
- * Download version 2.0 or greater.
+ * Download version 2.0 or greater or install it via the Arduino library manager.
  */
 
 #include <ArduinoUnit.h>

@@ -1,3 +1,27 @@
+FIRMATA 2.5.0 0 Nov 7, 2015
+
+[core library]
+* Added Serial feature for interfacing with serial devices via hardware
+  or software serial. See github.com/firmata/protocol/serial.md for details
+* Added ability to set the value of a pin by sending a single value instead
+  of a port value. See 'set digital pin value' in github.com/firmata/protocol/protocol.md
+  for details
+* Added support for Arduino Zero board
+* Added support for Teensy LC board (copied from Teensy Firmata lib)
+* Added support for Pinoccio Scout board (Pawel Szymczykowski)
+* Lowered minimun sampling interval from 10 to 1 millisecond
+* Added new pin mode (PIN_MODE_PULLUP) for setting the INPUT_PULLUP pin mode
+* Changed pin mode defines to safer names (old names still included but
+  deprecated) - see Firmata.h
+
+[StandardFirmata & variants]
+* Created new StandardFirmataPlus that implements the Serial feature
+  Note: The new Serial features is only implemented in the "Plus" versions of
+  StandardFirmata.
+* Created new StandardFirmataEthernetPlus that implements the Serial feature
+* Fixed issue where StandardFirmata was not compiling for Intel Galileo boards
+* Moved StandardFirmataYun to its own repo (github.com/firmata/StandardFirmataYun)
+
 FIRMATA 2.4.4 - Aug 9, 2015
 
 [core library]
