@@ -122,7 +122,7 @@ void setPinModeCallback(byte pin, int mode) {
 
 void analogWriteCallback(byte pin, int value)
 {
-  setPinModeCallback(pin, PWM);
+  setPinModeCallback(pin, PIN_MODE_PWM);
   analogWrite(pin, value);
 }
 
