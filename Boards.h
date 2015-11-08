@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated August 9th, 2015
+  Last updated November 5th, 2015
 */
 
 #ifndef Firmata_Boards_h
