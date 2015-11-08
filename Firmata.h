@@ -73,18 +73,27 @@
 // pin modes
 //#define INPUT                 0x00 // defined in Arduino.h
 //#define OUTPUT                0x01 // defined in Arduino.h
-#define ANALOG                  0x02 // analog pin in analogInput mode
-#define PWM                     0x03 // digital pin in PWM output mode
-#define SERVO                   0x04 // digital pin in Servo output mode
-#define SHIFT                   0x05 // shiftIn/shiftOut mode
-#define I2C                     0x06 // pin included in I2C setup
-#define ONEWIRE                 0x07 // pin configured for 1-wire
-#define STEPPER                 0x08 // pin configured for stepper motor
-#define ENCODER                 0x09 // pin configured for rotary encoders
-#define MODE_SERIAL             0x0A // pin configured for serial communication
-#define MODE_INPUT_PULLUP       0x0B // enable internal pull-up resistor for pin
-#define IGNORE                  0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
+#define PIN_MODE_ANALOG         0x02 // analog pin in analogInput mode
+#define PIN_MODE_PWM            0x03 // digital pin in PWM output mode
+#define PIN_MODE_SERVO          0x04 // digital pin in Servo output mode
+#define PIN_MODE_SHIFT          0x05 // shiftIn/shiftOut mode
+#define PIN_MODE_I2C            0x06 // pin included in I2C setup
+#define PIN_MODE_ONEWIRE        0x07 // pin configured for 1-wire
+#define PIN_MODE_STEPPER        0x08 // pin configured for stepper motor
+#define PIN_MODE_ENCODER        0x09 // pin configured for rotary encoders
+#define PIN_MODE_SERIAL         0x0A // pin configured for serial communication
+#define PIN_MODE_PULLUP         0x0B // enable internal pull-up resistor for pin
+#define PIN_MODE_IGNORE         0x7F // pin configured to be ignored by digitalWrite and capabilityResponse
 #define TOTAL_PIN_MODES         13
+// DEPRECATED as of Firmata v2.5
+#define ANALOG                  0x02 // same as FIRMATA_MODE_ANALOG
+#define PWM                     0x03 // same as FIRMATA_MODE_PWM
+#define SERVO                   0x04 // same as FIRMATA_MODE_SERVO
+#define SHIFT                   0x05 // same as FIRMATA_MODE_SHIFT
+#define I2C                     0x06 // same as FIRMATA_MODE_I2C
+#define ONEWIRE                 0x07 // same as FIRMATA_MODE_ONEWIRE
+#define STEPPER                 0x08 // same as FIRMATA_MODE_STEPPER
+#define ENCODER                 0x09 // same as FIRMATA_MODE_ENCODER
 
 extern "C" {
   // callback function types
@@ -93,7 +102,6 @@ extern "C" {
   typedef void (*stringCallbackFunction)(char *);
   typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
 }
-
 
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
