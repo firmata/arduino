@@ -36,7 +36,6 @@
 #define I2C_END_TX_MASK             B01000000
 #define I2C_STOP_TX                 1
 #define I2C_RESTART_TX              0
-
 #define I2C_MAX_QUERIES             8
 #define I2C_REGISTER_NOT_SPECIFIED  -1
 
@@ -465,6 +464,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       else {
         stopTX = I2C_STOP_TX; // default
       }
+
       switch (mode) {
         case I2C_WRITE:
           Wire.beginTransmission(slaveAddress);
