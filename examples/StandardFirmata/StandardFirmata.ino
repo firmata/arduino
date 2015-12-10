@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: November 7th, 2015
+  Last updated by Jeff Hoefs: December 9th, 2015
 */
 
 #include <Servo.h>
@@ -151,7 +151,7 @@ void detachServo(byte pin)
   servoPinMap[pin] = 255;
 }
 
-void readAndReportData(byte address, int theRegister, byte numBytes) {
+void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX) {
   // allow I2C requests that don't require a register read
   // for example, some devices using an interrupt pin to signify new data available
   // do not always require the register read so upon interrupt you call Wire.requestFrom()
