@@ -868,14 +868,14 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefor all
+  // StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefore all
   // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
   // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
 
   // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
-        || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
+        || 4 == i  // SD-Card on Ethernet-shield uses pin 4 for SS
         || 10 == i // Ethernet-shield uses pin 10 for SS
 #if defined(__AVR_ATmega32U4__)
         || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
