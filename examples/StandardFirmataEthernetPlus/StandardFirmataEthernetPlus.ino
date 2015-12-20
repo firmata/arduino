@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: December 9th, 2015
+  Last updated by Jeff Hoefs: December 19th, 2015
 */
 
 /*
@@ -59,10 +59,10 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-// SoftwareSerial is only supported for AVR-based boards
-// The second condition checks if the IDE is in the 1.0.x series, if so, include SoftwareSerial
+// SoftwareSerial is currently only supported for AVR-based boards and the Arduino 101
+// The third condition checks if the IDE is in the 1.0.x series, if so, include SoftwareSerial
 // since it should be available to all boards in that IDE.
-#if defined(ARDUINO_ARCH_AVR) || (ARDUINO >= 100 && ARDUINO < 10500)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ARC32) || (ARDUINO >= 100 && ARDUINO < 10500)
 #include <SoftwareSerial.h>
 #endif
 #include "utility/serialUtils.h"
@@ -859,12 +859,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
         case SERIAL_CONFIG:
           {
             long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
-            byte txPin, rxPin;
+            byte swTxPin, swRxPin;
             serial_pins pins;
 
             if (portId > 7 && argc > 4) {
-              rxPin = argv[4];
-              txPin = argv[5];
+              swRxPin = argv[4];
+              swTxPin = argv[5];
             }
 
             if (portId < 8) {
@@ -885,29 +885,29 @@ void sysexCallback(byte command, byte argc, byte *argv)
               switch (portId) {
                 case SW_SERIAL0:
                   if (swSerial0 == NULL) {
-                    swSerial0 = new SoftwareSerial(rxPin, txPin);
+                    swSerial0 = new SoftwareSerial(swRxPin, swTxPin);
                   }
                   break;
                 case SW_SERIAL1:
                   if (swSerial1 == NULL) {
-                    swSerial1 = new SoftwareSerial(rxPin, txPin);
+                    swSerial1 = new SoftwareSerial(swRxPin, swTxPin);
                   }
                   break;
                 case SW_SERIAL2:
                   if (swSerial2 == NULL) {
-                    swSerial2 = new SoftwareSerial(rxPin, txPin);
+                    swSerial2 = new SoftwareSerial(swRxPin, swTxPin);
                   }
                   break;
                 case SW_SERIAL3:
                   if (swSerial3 == NULL) {
-                    swSerial3 = new SoftwareSerial(rxPin, txPin);
+                    swSerial3 = new SoftwareSerial(swRxPin, swTxPin);
                   }
                   break;
               }
               serialPort = getPortFromId(portId);
               if (serialPort != NULL) {
-                setPinModeCallback(rxPin, PIN_MODE_SERIAL);
-                setPinModeCallback(txPin, PIN_MODE_SERIAL);
+                setPinModeCallback(swRxPin, PIN_MODE_SERIAL);
+                setPinModeCallback(swTxPin, PIN_MODE_SERIAL);
                 ((SoftwareSerial*)serialPort)->begin(baud);
               }
 #endif

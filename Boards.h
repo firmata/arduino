@@ -9,7 +9,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated November 5th, 2015
+  Last updated December 19th, 2015
 */
 
 #ifndef Firmata_Boards_h
@@ -258,6 +258,26 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
 #define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21) // SDA = 20, SCL = 21
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+
+// Arduino 101
+#elif defined(_VARIANT_ARDUINO_101_X_)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS // 15 digital (including ATN pin) + 6 analog
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 20)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p) // 3, 5, 6, 9
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL) // SDA = 18, SCL = 19
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        ((p) - 14)

@@ -25,6 +25,11 @@
 
 #define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
 
+// Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
+#ifdef SET_PIN_MODE
+#undef SET_PIN_MODE
+#endif
+
 // message command bytes (128-255/0x80-0xFF)
 #define DIGITAL_MESSAGE         0x90 // send data for a digital port (collection of 8 pins)
 #define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)

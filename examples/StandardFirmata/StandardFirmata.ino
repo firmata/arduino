@@ -743,7 +743,7 @@ void setup()
 
   Firmata.begin(57600);
   while (!Serial) {
-    ; // wait for serial port to connect. Only needed for ATmega32u4-based boards (Leonardo, etc).
+    ; // wait for serial port to connect. Needed for ATmega32u4-based boards and Arduino 101
   }
   systemResetCallback();  // reset to default config
 }
