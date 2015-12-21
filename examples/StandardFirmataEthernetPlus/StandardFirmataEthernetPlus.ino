@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: December 19th, 2015
+  Last updated by Jeff Hoefs: December 20th, 2015
 */
 
 /*
@@ -723,6 +723,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           if (queryIndex <= 0) {
             queryIndex = -1;
           } else {
+            queryIndexToSkip = 0;
             // if read continuous mode is enabled for multiple devices,
             // determine which device to stop reading and remove it's data from
             // the array, shifiting other array data to fill the space
@@ -862,11 +863,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
             byte swTxPin, swRxPin;
             serial_pins pins;
 
-            if (portId > 7 && argc > 4) {
-              swRxPin = argv[4];
-              swTxPin = argv[5];
-            }
-
             if (portId < 8) {
               serialPort = getPortFromId(portId);
               if (serialPort != NULL) {
@@ -882,6 +878,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
               }
             } else {
 #if defined(SoftwareSerial_h)
+              if (argc > 4) {
+                swRxPin = argv[4];
+                swTxPin = argv[5];
+              } else {
+                // RX and TX pins must be specified when using SW serial
+                Firmata.sendString("Specify serial RX and TX pins");
+                return;
+              }
               switch (portId) {
                 case SW_SERIAL0:
                   if (swSerial0 == NULL) {
@@ -943,7 +947,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
             serialIndex++;
             reportSerial[serialIndex] = portId;
           } else if (argv[1] == SERIAL_STOP_READING) {
-            byte serialIndexToSkip;
+            byte serialIndexToSkip = 0;
             if (serialIndex <= 0) {
               serialIndex = -1;
             } else {
