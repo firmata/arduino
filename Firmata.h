@@ -173,7 +173,7 @@ class FirmataClass
     /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
-    void strobeBlinkPin(int count, int onInterval, int offInterval);
+    void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
 };
 
 extern FirmataClass Firmata;
