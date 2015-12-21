@@ -94,7 +94,6 @@ void FirmataClass::printVersion(void)
 void FirmataClass::blinkVersion(void)
 {
   // flash the pin with the protocol version
-  pinMode(VERSION_BLINK_PIN, OUTPUT);
   strobeBlinkPin(FIRMATA_MAJOR_VERSION, 40, 210);
   delay(250);
   strobeBlinkPin(FIRMATA_MINOR_VERSION, 40, 210);
@@ -454,6 +453,7 @@ void FirmataClass::systemReset(void)
 
 // =============================================================================
 // used for flashing the pin for the version number
+#if defined(VERSION_BLINK_PIN)
 void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
 {
   byte i;
@@ -465,6 +465,11 @@ void FirmataClass::strobeBlinkPin(int count, int onInterval, int offInterval)
     digitalWrite(VERSION_BLINK_PIN, LOW);
   }
 }
+#else
+void FirmataClass::strobeBlinkPin(int, int, int)
+{
+}
+#endif
 
 
 // make one instance for the user to use
