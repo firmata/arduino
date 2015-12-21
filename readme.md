@@ -13,7 +13,7 @@ The second and more common model is to load a general purpose sketch called Stan
 ##Firmata Client Libraries
 Most of the time you will be interacting with Arduino with a client library on the host computers. Several Firmata client libraries have been implemented in a variety of popular programming languages:
 
-* procesing
+* processing
   * [https://github.com/firmata/processing]
   * [http://funnel.cc]
 * python

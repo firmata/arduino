@@ -38,11 +38,11 @@ public:
   void maintain(IPAddress localip);
 
 private:
+  Client &client;
   IPAddress localip;
   IPAddress ip;
   const char* host;
   uint16_t port;
-  Client &client;
   bool connected;
   uint32_t time_connect;
   bool maintain();
