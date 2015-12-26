@@ -26,8 +26,8 @@ test(beginPrintsVersion)
 
   char expected[] = {
     REPORT_VERSION,
-    FIRMATA_MAJOR_VERSION,
-    FIRMATA_MINOR_VERSION,
+    FIRMATA_PROTOCOL_MAJOR_VERSION,
+    FIRMATA_PROTOCOL_MINOR_VERSION,
     0
   };
   assertEqual(expected, stream.bytesWritten());

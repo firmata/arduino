@@ -1,6 +1,7 @@
 /*
-  Firmata.h - Firmata library v2.5.0 - 2015-11-7
+  Firmata.h - Firmata library v2.5.1 - 2015-12-26
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
+  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -16,14 +17,29 @@
 #include "Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
- * version numbers are important.  This number can be queried so that host
- * software can test whether it will be compatible with the currently
- * installed firmware. */
-#define FIRMATA_MAJOR_VERSION   2 // for non-compatible changes
-#define FIRMATA_MINOR_VERSION   5 // for backwards compatible changes
-#define FIRMATA_BUGFIX_VERSION  0 // for bugfix releases
+ * version numbers are important.
+ * Query using the REPORT_VERSION message.
+ */
+#define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
+#define FIRMATA_PROTOCOL_BUGFIX_VERSION 1 // for bugfix releases
 
-#define MAX_DATA_BYTES          64 // max number of data bytes in incoming messages
+/* Version numbers for the Firmata library.
+ * The firmware version will not always equal the protocol version going forward.
+ * Query using the REPORT_FIRMWARE message.
+ */
+#define FIRMATA_FIRMWARE_MAJOR_VERSION  2
+#define FIRMATA_FIRMWARE_MINOR_VERSION  5
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1
+
+/* DEPRECATED as of Firmata v2.5.1. As of 2.5.1 there are separate version numbers for
+ * the protocol version and the firmware version.
+ */
+#define FIRMATA_MAJOR_VERSION           2 // same as FIRMATA_PROTOCOL_MAJOR_VERSION
+#define FIRMATA_MINOR_VERSION           5 // same as FIRMATA_PROTOCOL_MINOR_VERSION
+#define FIRMATA_BUGFIX_VERSION          1 // same as FIRMATA_PROTOCOL_BUGFIX_VERSION
+
+#define MAX_DATA_BYTES                  64 // max number of data bytes in incoming messages
 
 // Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
 #ifdef SET_PIN_MODE

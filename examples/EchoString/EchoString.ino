@@ -28,7 +28,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
 void setup()
 {
-  Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
   Firmata.attach(STRING_DATA, stringCallback);
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.begin(57600);

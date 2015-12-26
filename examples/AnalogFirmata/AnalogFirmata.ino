@@ -66,7 +66,7 @@ void reportAnalogCallback(byte pin, int value)
  *============================================================================*/
 void setup()
 {
-  Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
 
