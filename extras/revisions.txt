@@ -1,4 +1,17 @@
-FIRMATA 2.5.0 0 Nov 7, 2015
+FIRMATA 2.5.1 - Dec 26, 2015
+
+[core library]
+* Added support for Arduino 101
+* Make VERSION_BLINK_PIN optional
+* Separate protocol version from firmware version.
+  Use FIRMATA_PROTOCOL_VERSION_[MAJOR/MINOR/BUGFIX] for protocol and use
+  FIRMATA_FIRMWARE_VERSION_[MAJOR/MINOR/BUGFIX] for firmware (library version).
+
+[StandardFirmata & variants]
+* Added ability to auto-restart I2C transmission by setting bit 6 of byte 3
+  of the I2C_REQUEST message.
+
+FIRMATA 2.5.0 - Nov 7, 2015
 
 [core library]
 * Added Serial feature for interfacing with serial devices via hardware
