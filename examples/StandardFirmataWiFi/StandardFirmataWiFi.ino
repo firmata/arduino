@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jesse Frush: December 15th, 2015
+  Last updated by Jesse Frush: December 31st, 2015
 */
 
 /*
@@ -30,11 +30,11 @@
   boards or shields:
 
   - Arduino WiFi Shield (or clone)
-  - Arduino WiFi Shield 101 (support coming soon)
-  - Arduino MKR1000 board (built-in WiFi 101) (support coming soon)
+  - Arduino WiFi Shield 101
+  - Arduino MKR1000 board (built-in WiFi 101)
   - Adafruit HUZZAH CC3000 WiFi Shield (support coming soon)
 
-  Follow the instructions in the NETWORK CONFIGURATION section below to
+  Follow the instructions in the WIFI CONFIGURATION section below to
   configure your particular hardware.
 
   NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
@@ -68,15 +68,14 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-
 /*==============================================================================
- * NETWORK CONFIGURATION
+ * WIFI CONFIGURATION
  *
  * You must configure your particular hardware. Follow the steps below.
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
-// Uncomment / comment the appropriate set of includes for your hardware (OPTION A or B)
+// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
 // Option A is enabled by default.
 
 /*
@@ -85,7 +84,7 @@
  * To configure StandardFirmataWiFi to use the Arduino WiFi shield based on the HDG204 Wireless LAN 802.11b/g
  * leave the #define below uncommented.
  */
-//#define ARDUINO_WIFI_SHIELD
+#define ARDUINO_WIFI_SHIELD
 
 //do not modify these next 4 lines
 #ifdef ARDUINO_WIFI_SHIELD
@@ -111,10 +110,6 @@ WiFiStream stream;
 WiFi101Stream stream;
 #endif
 
-//------------------------------
- //TODO
-//------------------------------
-
 /*
  * OPTION C: Configure for HUZZAH
  */
@@ -122,10 +117,12 @@ WiFi101Stream stream;
 //------------------------------
  //TODO
 //------------------------------
+//#define HUZZAH_WIFI
+
 
 // STEP 2 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
-char ssid[] = "turkynet";
+char ssid[] = "your_network_name";
 
 // STEP 3 [REQUIRED for all boards and shields]
 // if you do not want to use a static IP (v4) address, comment the line below. You can also change the IP.
@@ -134,7 +131,7 @@ char ssid[] = "turkynet";
 
 // STEP 4 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
-#define PORT 3030
+#define SERVER_PORT 3030
 
 // STEP 5 [REQUIRED for all boards and shields]
 // determine your network security type (OPTION A, B, or C)
@@ -142,32 +139,53 @@ char ssid[] = "turkynet";
 /*
  * OPTION A: Open network (no security)
  *
- * To connect to an open network, do not uncomment the #define values under options B or C
+ * To connect to an open network, leave WIFI_NO_SECURITY uncommented and
+ * do not uncomment the #define values under options B or C
  */
+#define WIFI_NO_SECURITY
  
-
 /*
  * OPTION B: WEP
  *
  * Uncomment the #define below and set your wep_index and wep_key values appropriately
  */
-//#define WEP_SECURITY
+//#define WIFI_WEP_SECURITY
 
-#ifdef WEP_SECURITY
-byte wep_index = 0
+#ifdef WIFI_WEP_SECURITY
+byte wep_index = 0;
 char wep_key[] = "CAFEBABE01";
-#endif  //WEP_SECURITY
+#endif  //WIFI_WEP_SECURITY
 
 /*
  * OPTION C: WPA
  *
  * Uncomment the #define below and set your passphrase appropriately
  */
-//#define WEP_SECURITY
+//#define WIFI_WPA_SECURITY
 
-#ifdef WEP_SECURITY
-char wpa_passphrase[] = "my_secret_passphrase";
-#endif  //WEP_SECURITY
+#ifdef WIFI_WPA_SECURITY
+char wpa_passphrase[] = "your_secret_passphrase";
+#endif  //WIFI_WPA_SECURITY
+
+/*==============================================================================
+ * CONFIGURATION ERROR CHECK
+ *============================================================================*/
+
+#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)))
+#error "you may not define more than one wifi device type."
+#endif //WIFI device type check
+
+#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI))
+#error "you must define a wifi device type."
+#endif
+
+#if ((defined(WIFI_NO_SECURITY) && (defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))) || (defined(WIFI_WEP_SECURITY) && defined(WIFI_WPA_SECURITY)))
+#error "you may not define more than one security type at the same time."
+#endif  //WIFI_* security define check
+
+#if !(defined(WIFI_NO_SECURITY) || defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))
+#error "you must define a wifi security type."
+#endif  //WIFI_* security define check
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -853,30 +871,40 @@ void systemResetCallback()
 }
 
 void printWifiStatus() {
-  // print the SSID of the network you're attached to:
-  DEBUG_PRINT( "SSID: " );
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+  if( WiFi.status() != WL_CONNECTED )
+  {
+    DEBUG_PRINT( "WiFi connection failed. Status value: " );
+    DEBUG_PRINTLN( WiFi.status() );
+  }
+  else
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+  {
+    // print the SSID of the network you're attached to:
+    DEBUG_PRINT( "SSID: " );
 
-#ifdef ARDUINO_WIFI_SHIELD
-  DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //ARDUINO_WIFI_SHIELD
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+    DEBUG_PRINTLN( WiFi.SSID() );
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
   // print your WiFi shield's IP address:
-  DEBUG_PRINT( "IP Address: " );
+    DEBUG_PRINT( "IP Address: " );
 
-#ifdef ARDUINO_WIFI_SHIELD
-  IPAddress ip = WiFi.localIP();
-  DEBUG_PRINTLN( ip );
-#endif    //ARDUINO_WIFI_SHIELD
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+    IPAddress ip = WiFi.localIP();
+    DEBUG_PRINTLN( ip );
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
   // print the received signal strength:
-  DEBUG_PRINT( "signal strength (RSSI): " );
+    DEBUG_PRINT( "signal strength (RSSI): " );
 
-#ifdef ARDUINO_WIFI_SHIELD
-  long rssi = WiFi.RSSI();
-  DEBUG_PRINT( rssi );
-#endif    //ARDUINO_WIFI_SHIELD
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+    long rssi = WiFi.RSSI();
+    DEBUG_PRINT( rssi );
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
-  DEBUG_PRINTLN( " dBm" );
+    DEBUG_PRINTLN( " dBm" );
+  }
 }
 
 void setup()
@@ -901,21 +929,20 @@ void setup()
 #endif
 
   /*
-   * Configure WiFi encryption
+   * Configure WiFi security
    */
-#ifdef USING_WEP        //using WEP encryption
-  DEBUG_PRINTLN( "Using WEP Encyption ..." );
-  stream.begin( ssid, wep_index, wep_key, PORT );
+#if defined(WIFI_WEP_SECURITY)
+  DEBUG_PRINTLN( "Connecting to a WEP-secured network ..." );
+  stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
     
-#elseif USING_WPA       //WPA ENCRYPTION
-  DEBUG_PRINTLN( "Using WPA Encyption ..." );
-  stream.begin( ssid, wpa_passphrase, PORT );
+#elif defined(WIFI_WPA_SECURITY)
+  DEBUG_PRINTLN( "Connecting to a WPA-secured network ..." );
+  stream.begin( ssid, wpa_passphrase, SERVER_PORT );
       
-#else                   //OPEN network
+#else                          //OPEN network
   DEBUG_PRINTLN( "Connecting to an open network ..." );
-  stream.begin( ssid, PORT );
-      
-#endif //END USING_WEP
+  stream.begin( ssid, SERVER_PORT );
+#endif //defined(WIFI_WEP_SECURITY)
 
   DEBUG_PRINTLN( "WiFi setup done" );
   printWifiStatus();
@@ -941,25 +968,32 @@ void setup()
   // ignore SPI and pin 4 that is SS for SD-Card on WiFi-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_PIN_SPI(i)
+    
+#if defined(ARDUINO_WIFI_SHIELD) //Configure pins to ignore for Arduino WiFi shield
         || 4 == i  // SD-Card on Ethernet-shield uses pin 4 for SS
         || 7 == i // WiFi-shield uses pin 7 for handshaking
-        || 10 == i // WiFi-shield uses pin 10 for SS        TODO needs logic for MKR1000 + WiFi 101 shield
+        || 10 == i // WiFi-shield uses pin 10 for SS        TODO needs logic for WiFi 101 -shield-
 #if defined(__AVR_ATmega32U4__)
         || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
         || 28 == i
-#endif
+#endif  //defined(__AVR_ATmega32U4__)
+#endif  //defined(ARDUINO_WIFI_SHIELD)
        ) {
       pinConfig[i] = PIN_MODE_IGNORE;
     }
   }
 
+//Set up controls for the Arduino WiFi Shield SS for the SD Card
+#ifdef ARDUINO_WIFI_SHIELD
   // Arduino WiFi, Arduino WiFi Shield and Arduino Yun all have SD SS wired to D4
   pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif
+#endif  //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+#endif  //ARDUINO_WIFI_SHIELD
 
   // start up Network Firmata:
   Firmata.begin(stream);
