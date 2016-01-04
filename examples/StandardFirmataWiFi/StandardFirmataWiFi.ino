@@ -21,7 +21,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jesse Frush: December 31st, 2015
+  Last updated by Jesse Frush: January 4th, 2016
 */
 
 /*
@@ -818,14 +818,26 @@ void setup()
    * WIFI SETUP
    */
   DEBUG_BEGIN(9600);
-  DEBUG_PRINT( "Attempting to connect to network: " );
-  DEBUG_PRINTLN( ssid );
+  
+  /*
+   * This statement will clarify how a connection is being made
+   */
+  DEBUG_PRINT( "StandardFirmataWiFi will attempt a WiFi connection " );
+#if defined(WIFI_101)
+  DEBUG_PRINTLN( "using the WiFi 101 library." );
+#elif defined(ARDUINO_WIFI_SHIELD)
+  DEBUG_PRINTLN( "using the legacy WiFi library." );
+#elif defined(HUZZAH_WIFI)
+  DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
+//else should never happen here as error-checking in wifiConfig.h will catch this
+#endif  //defined(WIFI_101)
 
   /*
    * Configure WiFi IP Address
    */
 #ifdef STATIC_IP_ADDRESS
-  DEBUG_PRINTLN( "Using static IP ..." );
+  DEBUG_PRINT( "Using static IP: " );
+  DEBUG_PRINTLN( local_ip );
   //you can also provide a static IP in the begin() functions, but this simplifies
   //ifdef logic in this sketch due to support for all different encryption types.
   stream.config( local_ip );
@@ -837,10 +849,8 @@ void setup()
    * Configure WiFi security
    */
 #if defined(WIFI_WEP_SECURITY)
-//  DEBUG_PRINTLN( "Connecting to a WEP-secured network ..." );
-//  stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
   while(wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT("Attempting to connect to WPA SSID: ");
+    DEBUG_PRINT("Attempting to connect to WEP SSID: ");
     DEBUG_PRINTLN(ssid);
     wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
     delay(5000); // TODO - determine minimum delay
@@ -848,8 +858,6 @@ void setup()
   }
 
 #elif defined(WIFI_WPA_SECURITY)
-  //DEBUG_PRINTLN( "Connecting to a WPA-secured network ..." );
-  //stream.begin( ssid, wpa_passphrase, SERVER_PORT );
   while(wifiStatus != WL_CONNECTED) {
     DEBUG_PRINT("Attempting to connect to WPA SSID: ");
     DEBUG_PRINTLN(ssid);
@@ -860,7 +868,11 @@ void setup()
 
 #else                          //OPEN network
   DEBUG_PRINTLN( "Connecting to an open network ..." );
-  stream.begin( ssid, SERVER_PORT );
+  while(wifiStatus != WL_CONNECTED) {
+    wifiStatus = stream.begin( ssid, SERVER_PORT );
+    delay(5000); // TODO - determine minimum delay
+    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
+  }
 #endif //defined(WIFI_WEP_SECURITY)
 
   DEBUG_PRINTLN( "WiFi setup done" );
