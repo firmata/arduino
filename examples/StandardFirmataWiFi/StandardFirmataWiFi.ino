@@ -12,6 +12,7 @@
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2015 Jesse Frush. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -34,24 +35,42 @@
   - Arduino MKR1000 board (built-in WiFi 101)
   - Adafruit HUZZAH CC3000 WiFi Shield (support coming soon)
 
-  Follow the instructions in the WIFI CONFIGURATION section below to
+  Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
   configure your particular hardware.
 
-  NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
+  In order to use the WiFi Shield 101 with Firmata you will need a board with at least
+  35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
+  or any other ATmega328p-based microcontroller or with an Arduino Leonardo or other
+  ATmega32u4-based microcontroller. Some boards that will work are:
+
+  - Arduino Zero
+  - Arduino Due
+  - Arduino 101
+  - Arduino Mega
+
+  NOTE: If you are using an Arduino WiFi (legacy) shield you cannot use the following pins on
   the following boards. Firmata will ignore any requests to use these pins:
 
   - Arduino Uno or other ATMega328 boards: (D4, D7, D10, D11, D12, D13)
   - Arduino Mega: (D4, D7, D10, D50, D51, D52, D53)
-  - Arduino Leonardo: (D4, D7, D10)
-  - Arduino Due: (D4, D7, D10)
+  - Arduino Due, Zero or Leonardo: (D4, D7, D10)
+
+  If you are using an Arduino WiFi 101 shield you cannot use the following pins on the following
+  boards:
+
+  - Arduino Due or Zero: (D5, D7, D10)
+  - Arduino Mega: (D5, D7, D10, D50, D52, D53)
 */
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
+
+// follow the instructions in wifiConfig.h to configure your particular hardware
+#include "wifiConfig.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -68,124 +87,7 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-/*==============================================================================
- * WIFI CONFIGURATION
- *
- * You must configure your particular hardware. Follow the steps below.
- *============================================================================*/
-
-// STEP 1 [REQUIRED]
-// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Option A is enabled by default.
-
-/*
- * OPTION A: Configure for Arduino WiFi shield
- *
- * To configure StandardFirmataWiFi to use the Arduino WiFi shield based on the HDG204 Wireless LAN 802.11b/g
- * leave the #define below uncommented.
- */
-#define ARDUINO_WIFI_SHIELD
-
-//do not modify these next 4 lines
-#ifdef ARDUINO_WIFI_SHIELD
-#include "utility/WiFiStream.h"
-WiFiStream stream;
-#endif
-
-/*
- * OPTION B: Configure for WiFi 101
- * 
- * To configure StandardFirmataWiFi to use the WiFi 101 library, either for the WiFi 101 shield or 
- * any boards that include the WiFi 101 chip (such as the MKR1000), comment out the '#define ARDUINO_WIFI_SHIELD'
- * under OPTION A above, and uncomment the #define WIFI_101 below.
- * 
- * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, opent the library manager via:
- * Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter search for "WiFi101" > Select the result and click 'install'
- */
-#define WIFI_101
-
-//do not modify these next 4 lines
-#ifdef WIFI_101
-#include "utility/WiFi101Stream.h"
-WiFi101Stream stream;
-#endif
-
-/*
- * OPTION C: Configure for HUZZAH
- */
-
-//------------------------------
- //TODO
-//------------------------------
-//#define HUZZAH_WIFI
-
-
-// STEP 2 [REQUIRED for all boards and shields]
-// replace this with your wireless network SSID
-char ssid[] = "your_network_name";
-
-// STEP 3 [REQUIRED for all boards and shields]
-// if you do not want to use a static IP (v4) address, comment the line below. You can also change the IP.
-// if this line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
-#define STATIC_IP_ADDRESS 192,168,1,113
-
-// STEP 4 [REQUIRED for all boards and shields]
-// define your port number here, you will need this to open a TCP connection to your Arduino
-#define SERVER_PORT 3030
-
-// STEP 5 [REQUIRED for all boards and shields]
-// determine your network security type (OPTION A, B, or C)
-
-/*
- * OPTION A: Open network (no security)
- *
- * To connect to an open network, leave WIFI_NO_SECURITY uncommented and
- * do not uncomment the #define values under options B or C
- */
-#define WIFI_NO_SECURITY
- 
-/*
- * OPTION B: WEP
- *
- * Uncomment the #define below and set your wep_index and wep_key values appropriately
- */
-//#define WIFI_WEP_SECURITY
-
-#ifdef WIFI_WEP_SECURITY
-byte wep_index = 0;
-char wep_key[] = "CAFEBABE01";
-#endif  //WIFI_WEP_SECURITY
-
-/*
- * OPTION C: WPA
- *
- * Uncomment the #define below and set your passphrase appropriately
- */
-//#define WIFI_WPA_SECURITY
-
-#ifdef WIFI_WPA_SECURITY
-char wpa_passphrase[] = "your_secret_passphrase";
-#endif  //WIFI_WPA_SECURITY
-
-/*==============================================================================
- * CONFIGURATION ERROR CHECK
- *============================================================================*/
-
-#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)))
-#error "you may not define more than one wifi device type."
-#endif //WIFI device type check
-
-#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI))
-#error "you must define a wifi device type."
-#endif
-
-#if ((defined(WIFI_NO_SECURITY) && (defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))) || (defined(WIFI_WEP_SECURITY) && defined(WIFI_WPA_SECURITY)))
-#error "you may not define more than one security type at the same time."
-#endif  //WIFI_* security define check
-
-#if !(defined(WIFI_NO_SECURITY) || defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))
-#error "you must define a wifi security type."
-#endif  //WIFI_* security define check
+#define WIFI_MAX_CONN_ATTEMPTS      3
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -194,6 +96,9 @@ char wpa_passphrase[] = "your_secret_passphrase";
 #ifdef STATIC_IP_ADDRESS
   IPAddress local_ip(STATIC_IP_ADDRESS);
 #endif
+
+int wifiConnectionAttemptCounter = 0;
+int wifiStatus = WL_IDLE_STATUS;
 
 /* analog inputs */
 int analogInputsToReport = 0;      // bitwise array to store pin reporting
@@ -925,20 +830,34 @@ void setup()
   //ifdef logic in this sketch due to support for all different encryption types.
   stream.config( local_ip );
 #else
-  DEBUG_PRINTLN( "IP will be requested from DHCP ..." ); 
+  DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
 #endif
 
   /*
    * Configure WiFi security
    */
 #if defined(WIFI_WEP_SECURITY)
-  DEBUG_PRINTLN( "Connecting to a WEP-secured network ..." );
-  stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
-    
+//  DEBUG_PRINTLN( "Connecting to a WEP-secured network ..." );
+//  stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
+  while(wifiStatus != WL_CONNECTED) {
+    DEBUG_PRINT("Attempting to connect to WPA SSID: ");
+    DEBUG_PRINTLN(ssid);
+    wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
+    delay(5000); // TODO - determine minimum delay
+    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
+  }
+
 #elif defined(WIFI_WPA_SECURITY)
-  DEBUG_PRINTLN( "Connecting to a WPA-secured network ..." );
-  stream.begin( ssid, wpa_passphrase, SERVER_PORT );
-      
+  //DEBUG_PRINTLN( "Connecting to a WPA-secured network ..." );
+  //stream.begin( ssid, wpa_passphrase, SERVER_PORT );
+  while(wifiStatus != WL_CONNECTED) {
+    DEBUG_PRINT("Attempting to connect to WPA SSID: ");
+    DEBUG_PRINTLN(ssid);
+    wifiStatus = stream.begin(ssid, wpa_passphrase, SERVER_PORT);
+    delay(5000); // TODO - determine minimum delay
+    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
+  }
+
 #else                          //OPEN network
   DEBUG_PRINTLN( "Connecting to an open network ..." );
   stream.begin( ssid, SERVER_PORT );
@@ -963,22 +882,25 @@ void setup()
 
   // StandardFirmataWiFi communicates with WiFi shields over SPI. Therefore all
   // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
-  // add Pin 7 and configure pin 53 as output if using a MEGA with an Ethernet shield.
+  // Additional pins may also need to be ignored depending on the particular board or
+  // shield in use.
 
-  // ignore SPI and pin 4 that is SS for SD-Card on WiFi-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_SPI(i)
-    
-#if defined(ARDUINO_WIFI_SHIELD) //Configure pins to ignore for Arduino WiFi shield
-        || 4 == i  // SD-Card on Ethernet-shield uses pin 4 for SS
-        || 7 == i // WiFi-shield uses pin 7 for handshaking
-        || 10 == i // WiFi-shield uses pin 10 for SS        TODO needs logic for WiFi 101 -shield-
-#if defined(__AVR_ATmega32U4__)
+#if defined(ARDUINO_WIFI_SHIELD)
+    if (IS_IGNORE_WIFI_SHIELD(i)
+  #if defined(__AVR_ATmega32U4__)
         || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
         || 28 == i
-#endif  //defined(__AVR_ATmega32U4__)
-#endif  //defined(ARDUINO_WIFI_SHIELD)
-       ) {
+  #endif  //defined(__AVR_ATmega32U4__)
+    ) {
+#elif defined (WIFI_101)
+    if (IS_IGNORE_WIFI101_SHIELD(i)) {
+#elif defined (HUZZAH_WIFI)
+    // TODO
+    if (false) {
+#else
+    if (false) {
+#endif
       pinConfig[i] = PIN_MODE_IGNORE;
     }
   }
@@ -1013,8 +935,9 @@ void loop()
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
-  while (Firmata.available())
+  while (Firmata.available()) {
     Firmata.processInput();
+  }
 
   // TODO - ensure that Stream buffer doesn't go over 60 bytes
 
@@ -1037,6 +960,6 @@ void loop()
       }
     }
   }
-  
+
   stream.maintain();
 }
