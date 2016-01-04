@@ -102,19 +102,19 @@ char wpa_passphrase[] = "your_wpa_passphrase";
  *============================================================================*/
 
 #if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)))
-#error "you may not define more than one wifi device type."
+#error "you may not define more than one wifi device type in wifiConfig.h."
 #endif //WIFI device type check
 
 #if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI))
-#error "you must define a wifi device type."
+#error "you must define a wifi device type in wifiConfig.h."
 #endif
 
 #if ((defined(WIFI_NO_SECURITY) && (defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))) || (defined(WIFI_WEP_SECURITY) && defined(WIFI_WPA_SECURITY)))
-#error "you may not define more than one security type at the same time."
+#error "you may not define more than one security type at the same time in wifiConfig.h."
 #endif  //WIFI_* security define check
 
 #if !(defined(WIFI_NO_SECURITY) || defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))
-#error "you must define a wifi security type."
+#error "you must define a wifi security type in wifiConfig.h."
 #endif  //WIFI_* security define check
 
 /*==============================================================================
