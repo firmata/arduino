@@ -11,6 +11,8 @@
 #include <Arduino.h>
 #include <CurieBle.h>
 
+#define BLESTREAM_TXBUFFER_FLUSH_INTERVAL 30
+
 class BLEStream : public BLEPeripheral, public Stream
 {
   public:

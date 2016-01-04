@@ -11,7 +11,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: December 26th, 2015
+  Last updated by Jeff Hoefs: January 3rd, 2015
 */
 
 #include <Servo.h>
@@ -29,6 +29,9 @@
 
 #include <CurieBle.h>
 #include "utility/BLEStream.h"
+
+//#define SERIAL_DEBUG
+#include "utility/firmataDebug.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -718,6 +721,8 @@ void systemResetCallback()
 
 void setup()
 {
+  DEBUG_BEGIN(9600);
+
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
@@ -745,12 +750,12 @@ void loop()
   byte pin, analogPin;
 
   // do not process data if no BLE connection is established
+  // poll will send the TX buffer every 30ms while it contains data
   if (!stream.poll()) return;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
    * Stream buffer using Stream.write()  */
   checkDigitalInputs();
-  //stream.flush(); // send digital input values immediately
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
@@ -759,7 +764,7 @@ void loop()
 
   currentMillis = millis();
   if (currentMillis - previousMillis > samplingInterval) {
-    previousMillis += samplingInterval;
+    previousMillis = currentMillis;
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
     for (pin = 0; pin < TOTAL_PINS; pin++) {
       if (IS_PIN_ANALOG(pin) && pinConfig[pin] == PIN_MODE_ANALOG) {
@@ -775,6 +780,5 @@ void loop()
         readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX);
       }
     }
-    //stream.flush();
   }
 }

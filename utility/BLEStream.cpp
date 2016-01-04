@@ -7,7 +7,7 @@
 
 #include "BLEStream.h"
 
-// #define BLE_SERIAL_DEBUG
+//#define BLE_SERIAL_DEBUG
 
 BLEStream* BLEStream::_instance = NULL;
 
@@ -38,7 +38,7 @@ void BLEStream::begin(...) {
 
 bool BLEStream::poll() {
   this->_connected = BLEPeripheral::connected();
-  if (millis() > this->_flushed + 100) flush();
+  if (millis() > this->_flushed + BLESTREAM_TXBUFFER_FLUSH_INTERVAL) flush();
   return this->_connected;
 }
 
@@ -52,8 +52,10 @@ void BLEStream::end() {
 int BLEStream::available(void) {
   int retval = (this->_rxHead - this->_rxTail + sizeof(this->_rxBuffer)) % sizeof(this->_rxBuffer);
   #ifdef BLE_SERIAL_DEBUG
-    Serial.print(F("BLEStream::available() = "));
-    Serial.println(retval);
+    if (retval > 0) {
+      Serial.print(F("BLEStream::available() = "));
+      Serial.println(retval);
+    }
   #endif
   return retval;
 }
@@ -62,9 +64,7 @@ int BLEStream::peek(void) {
   if (this->_rxTail == this->_rxHead) return -1;
   unsigned char byte = this->_rxBuffer[this->_rxTail];
   #ifdef BLE_SERIAL_DEBUG
-    Serial.print(F("BLEStream::peek() = "));
-    Serial.print((char) byte);
-    Serial.print(F(" 0x"));
+    Serial.print(F("BLEStream::peek() = 0x"));
     Serial.println(byte, HEX);
   #endif
   return byte;
@@ -75,9 +75,7 @@ int BLEStream::read(void) {
   this->_rxTail = (this->_rxTail + 1) % sizeof(this->_rxBuffer);
   unsigned char byte = this->_rxBuffer[this->_rxTail];
   #ifdef BLE_SERIAL_DEBUG
-    Serial.print(F("BLEStream::read() = "));
-    Serial.print((char) byte);
-    Serial.print(F(" 0x"));
+    Serial.print(F("BLEStream::read() = 0x"));
     Serial.println(byte, HEX);
   #endif
   return byte;
@@ -97,9 +95,7 @@ size_t BLEStream::write(uint8_t byte) {
   this->_txBuffer[this->_txCount++] = byte;
   if (this->_txCount == sizeof(this->_txBuffer)) flush();
   #ifdef BLE_SERIAL_DEBUG
-    Serial.print(F("BLEStream::write("));
-    Serial.print((char) byte);
-    Serial.print(F(" 0x"));
+    Serial.print(F("BLEStream::write( 0x"));
     Serial.print(byte, HEX);
     Serial.println(F(") = 1"));
   #endif
@@ -122,7 +118,7 @@ void BLEStream::_received(const unsigned char* data, size_t size) {
   }
   #ifdef BLE_SERIAL_DEBUG
     Serial.print(F("BLEStream::received("));
-    for (int i = 0; i < size; i++) Serial.print((char)data[i]);
+    for (int i = 0; i < size; i++) Serial.print(data[i], HEX);
     Serial.println(F(")"));
   #endif
 }
