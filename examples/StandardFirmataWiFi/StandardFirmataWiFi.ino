@@ -11,8 +11,8 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
-  Copyright (C) 2015 Jesse Frush. All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jesse Frush: January 4th, 2016
+  Last updated by Jesse Frush: January 7th, 2016
 */
 
 /*
@@ -66,7 +66,12 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-#define SERIAL_DEBUG
+/*
+ * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your connection
+ * that may help in the event of connection issues. If defined, some boards may not begin executing this sketch
+ * until the Serial console is opened.
+ */
+//#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
 
 // follow the instructions in wifiConfig.h to configure your particular hardware

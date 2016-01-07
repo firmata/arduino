@@ -10,8 +10,12 @@
 
 /*
  * OPTION A: Configure for Arduino WiFi shield
+ * 
+ * This will configure StandardFirmataWiFi to use the original WiFi library (deprecated) provided
+ * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
+ * is compatible with 802.11 B/G networks.
  *
- * To configure StandardFirmataWiFi to use the Arduino WiFi shield based on the HDG204 Wireless LAN 802.11b/g
+ * To configure StandardFirmataWiFi to use the Arduino WiFi shield 
  * leave the #define below uncommented.
  */
 #define ARDUINO_WIFI_SHIELD
@@ -24,10 +28,13 @@ WiFiStream stream;
 
 /*
  * OPTION B: Configure for WiFi 101
+ * 
+ * This will configure StandardFirmataWiFi to use the WiFi101 library, which works with the Arduino WiFi101
+ * shield and devices that have the WiFi101 chip built in (such as the MKR1000). It is compatible 
+ * with 802.11 B/G/N networks.
  *
- * To configure StandardFirmataWiFi to use the WiFi 101 library, either for the WiFi 101 shield or
- * any boards that include the WiFi 101 chip (such as the MKR1000), comment out the '#define ARDUINO_WIFI_SHIELD'
- * under OPTION A above, and uncomment the #define WIFI_101 below.
+ * To enable, uncomment the #define WIFI_101 below and verify the #define values under
+ * options A and C are commented out.
  *
  * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, opent the library manager via:
  * Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter search for "WiFi101" > Select the result and click 'install'
@@ -42,10 +49,12 @@ WiFi101Stream stream;
 
 /*
  * OPTION C: Configure for HUZZAH
+ * 
+ * HUZZAH is not yet supported, this will be added in a later revision to StandardFirmataWiFi
  */
 
 //------------------------------
- //TODO
+// TODO
 //------------------------------
 //#define HUZZAH_WIFI
 
@@ -64,38 +73,51 @@ char ssid[] = "your_network_name";
 #define SERVER_PORT 3030
 
 // STEP 5 [REQUIRED for all boards and shields]
-// determine your network security type (OPTION A, B, or C)
+// determine your network security type (OPTION A, B, or C). Option A is the most common, and the default.
+
 
 /*
- * OPTION A: Open network (no security)
- *
- * To connect to an open network, leave WIFI_NO_SECURITY uncommented and
- * do not uncomment the #define values under options B or C
- */
-//#define WIFI_NO_SECURITY
-
-/*
- * OPTION B: WEP
- *
- * Uncomment the #define below and set your wep_index and wep_key values appropriately
- */
-//#define WIFI_WEP_SECURITY
-
-#ifdef WIFI_WEP_SECURITY
-byte wep_index = 0;
-char wep_key[] = "your_wep_key";
-#endif  //WIFI_WEP_SECURITY
-
-/*
- * OPTION C: WPA / WPA2
- *
- * Uncomment the #define below and set your passphrase appropriately
+ * OPTION A: WPA / WPA2
+ * 
+ * WPA is the most common network security type. A passphrase is required to connect to this type.
+ * 
+ * To enable, leave #define WIFI_WPA_SECURITY uncommented below, set your wpa_passphrase value appropriately,
+ * and do not uncomment the #define values under options B and C
  */
 #define WIFI_WPA_SECURITY
 
 #ifdef WIFI_WPA_SECURITY
 char wpa_passphrase[] = "your_wpa_passphrase";
 #endif  //WIFI_WPA_SECURITY
+
+/*
+ * OPTION B: WEP
+ *
+ * WEP is a less common (and regarded as less safe) security type. A WEP key and its associated index are required
+ * to connect to this type.
+ * 
+ * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately, and verify
+ * the #define values under options A and C are commented out.
+ */
+//#define WIFI_WEP_SECURITY
+
+#ifdef WIFI_WEP_SECURITY
+//The wep_index below is a zero-indexed value.
+//Valid indices are [0-3], even if your router/gateway numbers your keys [1-4].
+byte wep_index = 0;
+char wep_key[] = "your_wep_key";
+#endif  //WIFI_WEP_SECURITY
+
+
+/*
+ * OPTION C: Open network (no security)
+ * 
+ * Open networks have no security, can be connected to by any device that knows the ssid, and are unsafe.
+ *
+ * To enable, uncomment #define WIFI_NO_SECURITY below and verify the #define values
+ * under options A and B are commented out.
+ */
+//#define WIFI_NO_SECURITY
 
 /*==============================================================================
  * CONFIGURATION ERROR CHECK (don't change anything here)
