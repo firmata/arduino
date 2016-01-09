@@ -2,6 +2,9 @@
  * WIFI CONFIGURATION
  *
  * You must configure your particular hardware. Follow the steps below.
+ *
+ * Currently StandardFirmataWiFi is configured as a server. An option to
+ * configure as a client may be added in the future.
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
@@ -10,12 +13,12 @@
 
 /*
  * OPTION A: Configure for Arduino WiFi shield
- * 
+ *
  * This will configure StandardFirmataWiFi to use the original WiFi library (deprecated) provided
  * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
  * is compatible with 802.11 B/G networks.
  *
- * To configure StandardFirmataWiFi to use the Arduino WiFi shield 
+ * To configure StandardFirmataWiFi to use the Arduino WiFi shield
  * leave the #define below uncommented.
  */
 #define ARDUINO_WIFI_SHIELD
@@ -28,9 +31,9 @@ WiFiStream stream;
 
 /*
  * OPTION B: Configure for WiFi 101
- * 
+ *
  * This will configure StandardFirmataWiFi to use the WiFi101 library, which works with the Arduino WiFi101
- * shield and devices that have the WiFi101 chip built in (such as the MKR1000). It is compatible 
+ * shield and devices that have the WiFi101 chip built in (such as the MKR1000). It is compatible
  * with 802.11 B/G/N networks.
  *
  * To enable, uncomment the #define WIFI_101 below and verify the #define values under
@@ -49,7 +52,7 @@ WiFi101Stream stream;
 
 /*
  * OPTION C: Configure for HUZZAH
- * 
+ *
  * HUZZAH is not yet supported, this will be added in a later revision to StandardFirmataWiFi
  */
 
@@ -78,9 +81,9 @@ char ssid[] = "your_network_name";
 
 /*
  * OPTION A: WPA / WPA2
- * 
+ *
  * WPA is the most common network security type. A passphrase is required to connect to this type.
- * 
+ *
  * To enable, leave #define WIFI_WPA_SECURITY uncommented below, set your wpa_passphrase value appropriately,
  * and do not uncomment the #define values under options B and C
  */
@@ -95,7 +98,7 @@ char wpa_passphrase[] = "your_wpa_passphrase";
  *
  * WEP is a less common (and regarded as less safe) security type. A WEP key and its associated index are required
  * to connect to this type.
- * 
+ *
  * To enable, Uncomment the #define below, set your wep_index and wep_key values appropriately, and verify
  * the #define values under options A and C are commented out.
  */
@@ -111,7 +114,7 @@ char wep_key[] = "your_wep_key";
 
 /*
  * OPTION C: Open network (no security)
- * 
+ *
  * Open networks have no security, can be connected to by any device that knows the ssid, and are unsafe.
  *
  * To enable, uncomment #define WIFI_NO_SECURITY below and verify the #define values
@@ -150,4 +153,3 @@ char wep_key[] = "your_wep_key";
 
 // ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
 #define IS_IGNORE_WIFI_SHIELD(p)     ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
-
