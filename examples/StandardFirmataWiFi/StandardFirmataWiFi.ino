@@ -27,6 +27,9 @@
 /*
   README
 
+  StandardFirmataWiFi is a WiFi server application. You will need a Firmata client library with
+  a network transport in order to establish a connection with StandardFirmataWiFi.
+
   To use StandardFirmataWiFi you will need to have one of the following
   boards or shields:
 
@@ -37,6 +40,11 @@
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
   configure your particular hardware.
+
+  Dependencies:
+  - WiFi Shield 101 requires version 0.7.0 or higher of the WiFi101 library (available in Arduino
+    1.6.8 or higher, or update the library via the Arduino Library Manager or clone from source:
+    https://github.com/arduino-libraries/WiFi101)
 
   In order to use the WiFi Shield 101 with Firmata you will need a board with at least
   35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
@@ -99,7 +107,7 @@
  *============================================================================*/
 
 #ifdef STATIC_IP_ADDRESS
-  IPAddress local_ip(STATIC_IP_ADDRESS);
+IPAddress local_ip(STATIC_IP_ADDRESS);
 #endif
 
 int wifiConnectionAttemptCounter = 0;
@@ -782,7 +790,7 @@ void systemResetCallback()
 
 void printWifiStatus() {
 #if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
-  if( WiFi.status() != WL_CONNECTED )
+  if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
@@ -797,7 +805,7 @@ void printWifiStatus() {
     DEBUG_PRINTLN( WiFi.SSID() );
 #endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
-  // print your WiFi shield's IP address:
+    // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
 
 #if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
@@ -805,7 +813,7 @@ void printWifiStatus() {
     DEBUG_PRINTLN( ip );
 #endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
 
-  // print the received signal strength:
+    // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
 
 #if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
@@ -823,7 +831,7 @@ void setup()
    * WIFI SETUP
    */
   DEBUG_BEGIN(9600);
-  
+
   /*
    * This statement will clarify how a connection is being made
    */
@@ -834,7 +842,7 @@ void setup()
   DEBUG_PRINTLN( "using the legacy WiFi library." );
 #elif defined(HUZZAH_WIFI)
   DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
-//else should never happen here as error-checking in wifiConfig.h will catch this
+  //else should never happen here as error-checking in wifiConfig.h will catch this
 #endif  //defined(WIFI_101)
 
   /*
@@ -854,8 +862,8 @@ void setup()
    * Configure WiFi security
    */
 #if defined(WIFI_WEP_SECURITY)
-  while(wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT("Attempting to connect to WEP SSID: ");
+  while (wifiStatus != WL_CONNECTED) {
+    DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
     DEBUG_PRINTLN(ssid);
     wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
     delay(5000); // TODO - determine minimum delay
@@ -863,8 +871,8 @@ void setup()
   }
 
 #elif defined(WIFI_WPA_SECURITY)
-  while(wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT("Attempting to connect to WPA SSID: ");
+  while (wifiStatus != WL_CONNECTED) {
+    DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
     DEBUG_PRINTLN(ssid);
     wifiStatus = stream.begin(ssid, wpa_passphrase, SERVER_PORT);
     delay(5000); // TODO - determine minimum delay
@@ -872,9 +880,10 @@ void setup()
   }
 
 #else                          //OPEN network
-  DEBUG_PRINTLN( "Connecting to an open network ..." );
-  while(wifiStatus != WL_CONNECTED) {
-    wifiStatus = stream.begin( ssid, SERVER_PORT );
+  while (wifiStatus != WL_CONNECTED) {
+    DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
+    DEBUG_PRINTLN(ssid);
+    wifiStatus = stream.begin(ssid, SERVER_PORT);
     delay(5000); // TODO - determine minimum delay
     if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
   }
@@ -909,7 +918,7 @@ void setup()
         || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
         || 28 == i
   #endif  //defined(__AVR_ATmega32U4__)
-    ) {
+       ) {
 #elif defined (WIFI_101)
     if (IS_IGNORE_WIFI101_SHIELD(i)) {
 #elif defined (HUZZAH_WIFI)
@@ -922,7 +931,7 @@ void setup()
     }
   }
 
-//Set up controls for the Arduino WiFi Shield SS for the SD Card
+  //Set up controls for the Arduino WiFi Shield SS for the SD Card
 #ifdef ARDUINO_WIFI_SHIELD
   // Arduino WiFi, Arduino WiFi Shield and Arduino Yun all have SD SS wired to D4
   pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
