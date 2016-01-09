@@ -583,6 +583,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
           if (queryIndex <= 0) {
             queryIndex = -1;
           } else {
+            queryIndexToSkip = 0;
             // if read continuous mode is enabled for multiple devices,
             // determine which device to stop reading and remove it's data from
             // the array, shifiting other array data to fill the space
@@ -895,7 +896,7 @@ void setup()
   /*
    * FIRMATA SETUP
    */
-  Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
