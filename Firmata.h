@@ -142,6 +142,8 @@ class FirmataClass
     /* serial receive handling */
     int available(void);
     void processInput(void);
+    void parse(unsigned char value);
+    boolean isParsingMessage(void);
     /* serial send handling */
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
@@ -156,6 +158,13 @@ class FirmataClass
     void attach(byte command, stringCallbackFunction newFunction);
     void attach(byte command, sysexCallbackFunction newFunction);
     void detach(byte command);
+
+    /* access pin state and config */
+    byte getPinConfig(byte pin);
+    void setPinConfig(byte pin, byte config);
+    /* access pin state */
+    int getPinState(byte pin);
+    void setPinState(byte pin, int state);
 
     /* utility methods */
     void sendValueAsTwo7bitBytes(int value);
@@ -175,6 +184,10 @@ class FirmataClass
     /* sysex */
     boolean parsingSysex;
     int sysexBytesRead;
+    /* pin configuration */
+    byte pinConfig[TOTAL_PINS];
+    int pinState[TOTAL_PINS];
+
     /* callback functions */
     callbackFunction currentAnalogCallback;
     callbackFunction currentDigitalCallback;
