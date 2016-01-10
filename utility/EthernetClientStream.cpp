@@ -71,7 +71,8 @@ EthernetClientStream::maintain(IPAddress localip)
 // temporary hack to Firmata to compile for Intel Galileo
 // the issue is documented here: https://github.com/firmata/arduino/issues/218
 #if !defined(ARDUINO_LINUX)
-  if (this->localip!=localip)
+  // ensure the local IP is updated in the case that it is changed by the DHCP server
+  if (this->localip != localip)
     {
       this->localip = localip;
       if (connected)
@@ -98,12 +99,13 @@ EthernetClientStream::maintain()
     {
       stop();
     }
+  // if the client is disconnected, attempt to reconnect every 5 seconds
   else if (millis()-time_connect >= MILLIS_RECONNECT)
     {
-      connected = host ? client.connect(host,port) : client.connect(ip,port);
+      connected = host ? client.connect(host, port) : client.connect(ip, port);
       if (!connected) {
         time_connect = millis();
-        DEBUG_PRINTLN("connection failed");
+        DEBUG_PRINTLN("connection failed. attempting to reconnect...");
       } else {
         DEBUG_PRINTLN("connected");
       }

@@ -11,7 +11,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,15 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: December 26th, 2015
+  Last updated by Jeff Hoefs: January 9th, 2015
 */
 
 /*
   README
+
+  StandardFirmataEthernetPlus is a client implementation. You will need a Firmata client library
+  with a network transport that can act as a server in order to establish a connection between
+  StandardFirmataEthernetPlus and the Firmata client application.
 
   StandardFirmataEthernetPlus adds additional features that may exceed the Flash and
   RAM sizes of Arduino boards such as ATMega328p (Uno) and ATMega32u4
@@ -41,7 +45,7 @@
   - Arduino Ethernet shield (or clone)
   - Arduino Ethernet board (or clone)
 
-  Follow the instructions in the NETWORK CONFIGURATION section below to
+  Follow the instructions in the ethernetConfig.h file (ethernetConfig.h tab in Arduino IDE) to
   configure your particular hardware.
 
   NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
@@ -49,6 +53,7 @@
 
   - Arduino Mega: (D4, D10, D50, D51, D52, D53)
   - Arduino Due: (D4, D10)
+  - Arduino Zero: (D4, D10)
   - Arduino Uno or other ATMega328p boards: (D4, D10, D11, D12, D13)
 
   If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
@@ -67,8 +72,17 @@
 #endif
 #include "utility/serialUtils.h"
 
+/*
+ * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your connection
+ * that may help in the event of connection issues. If defined, some boards may not begin executing this sketch
+ * until the Serial console is opened.
+ */
 //#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
+
+// follow the instructions in ethernetConfig.h to configure your particular hardware
+#include "ethernetConfig.h"
+#include "utility/EthernetClientStream.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -85,50 +99,9 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-
-/*==============================================================================
- * NETWORK CONFIGURATION
- *
- * You must configure your particular hardware. Follow the steps below.
- *============================================================================*/
-
-#include <SPI.h>
-#include <Ethernet.h>
-
-// STEP 1 [REQUIRED for all boards and shields]
-// replace with IP of the server you want to connect to, comment out if using 'remote_host'
-#define remote_ip IPAddress(10, 0, 0, 3)
-// *** REMOTE HOST IS NOT YET WORKING ***
-// replace with hostname of server you want to connect to, comment out if using 'remote_ip'
-// #define remote_host "server.local"
-
-// STEP 2 [REQUIRED]
-// Replace with the port that your server is listening on
-#define remote_port 3030
-
-// STEP 3 [REQUIRED if not using DHCP]
-// Replace with your board or ethernet shield's IP address
-// Comment out if you want to use DHCP
-#define local_ip IPAddress(10, 0, 0, 15)
-
-// STEP 4 [REQUIRED]
-// replace with ethernet shield mac. Must be unique for your network
-const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
-
-#if defined remote_ip && defined remote_host
-#error "cannot define both remote_ip and remote_host at the same time!"
-#endif
-
-
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
-
-/* network */
-
-#include "utility/EthernetClientStream.h"
-
-EthernetClient client;
 
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
@@ -1121,23 +1094,21 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefor all
+#ifdef WIZ5100_ETHERNET
+  // StandardFirmataEthernetPlus communicates with Ethernet shields over SPI. Therefore all
   // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
   // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
 
-  // ignore SPI and pin 4 that is SS for SD-Card on Ethernet-shield
   for (byte i = 0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_SPI(i)
-        || 4 == i  // SD-Card on Ethernet-shiedl uses pin 4 for SS
-        || 10 == i // Ethernet-shield uses pin 10 for SS
-       ) {
+    if (IS_IGNORE_ETHERNET_SHIELD(i)) {
       pinConfig[i] = PIN_MODE_IGNORE;
     }
   }
 
-  // Arduino EthernetShield has SD SS wired to D4
+  // Arduino Ethernet and Arduino EthernetShield have SD SS wired to D4
   pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+#endif // WIZ5100_ETHERNET
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
@@ -1189,8 +1160,8 @@ void loop()
   checkSerial();
 
 #if !defined local_ip
-  if (Ethernet.maintain())
-  {
+  // only necessary when using DHCP, ensures local IP is updated appropriately if it changes
+  if (Ethernet.maintain()) {
     stream.maintain(Ethernet.localIP());
   }
 #endif
