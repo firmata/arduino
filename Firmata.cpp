@@ -548,7 +548,7 @@ void FirmataClass::detach(byte command)
  * @param pin The pin to get the configuration of.
  * @return The configuration of the specified pin.
  */
-byte FirmataClass::getPinConfig(byte pin)
+byte FirmataClass::getPinMode(byte pin)
 {
   return pinConfig[pin];
 }
@@ -560,7 +560,7 @@ byte FirmataClass::getPinConfig(byte pin)
  * @param pin The pin to configure.
  * @param config The configuration value for the specified pin.
  */
-void FirmataClass::setPinConfig(byte pin, byte config)
+void FirmataClass::setPinMode(byte pin, byte config)
 {
   if (pinConfig[pin] == PIN_MODE_IGNORE)
     return;
