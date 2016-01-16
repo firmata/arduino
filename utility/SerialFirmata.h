@@ -23,10 +23,10 @@
 
 #include <Firmata.h>
 #include "FirmataFeature.h"
-// SoftwareSerial is only supported for AVR-based boards
-// The second condition checks if the IDE is in the 1.0.x series, if so, include SoftwareSerial
+// SoftwareSerial is currently only supported for AVR-based boards and the Arduino 101
+// The third condition checks if the IDE is in the 1.0.x series, if so, include SoftwareSerial
 // since it should be available to all boards in that IDE.
-#if defined(ARDUINO_ARCH_AVR) || (ARDUINO >= 100 && ARDUINO < 10500)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ARC32) || (ARDUINO >= 100 && ARDUINO < 10500)
 #include <SoftwareSerial.h>
 #endif
 
