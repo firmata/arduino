@@ -127,8 +127,6 @@ void FirmataClass::printVersion(void)
  * does nothing.
  * The first series of flashes indicates the firmware major version (2 flashes = 2).
  * The second series of flashes indicates the firmware minor version (5 flashes = 5).
- *
- * TODO - figure out a way to make this optional aside from not defining VERSION_BLINK_PIN.
  */
 void FirmataClass::blinkVersion(void)
 {
