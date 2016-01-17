@@ -15,7 +15,7 @@
   - Defines FIRMATA_SERIAL_FEATURE (could add to Configurable version as well)
   - Imports Firmata.h rather than ConfigurableFirmata.h
 
-  Last updated by Jeff Hoefs: January 10th, 2016
+  Last updated by Jeff Hoefs: January 16th, 2016
 */
 
 #ifndef SerialFirmata_h
@@ -65,6 +65,7 @@
 #define SERIAL_CLOSE                0x50
 #define SERIAL_FLUSH                0x60
 #define SERIAL_LISTEN               0x70
+#define SERIAL_UPDATE_BAUD          0x80
 
 // Serial read modes
 #define SERIAL_READ_CONTINUOUSLY    0x00

@@ -14,7 +14,7 @@
 
   - handlePinMode calls Firmata::setPinMode
 
-  Last updated by Jeff Hoefs: January 10th, 2016
+  Last updated by Jeff Hoefs: January 16th, 2016
 */
 
 #include "SerialFirmata.h"
@@ -199,6 +199,23 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
         }
         break; // SERIAL_LISTEN
 #endif
+      case SERIAL_UPDATE_BAUD:
+        serialPort = getPortFromId(portId);
+        if (serialPort == NULL) {
+          break;
+        }
+        long newBaud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
+        if (portId < 8) {
+          ((HardwareSerial*)serialPort)->end();
+          delay(100); // delay required for HW serial only
+          ((HardwareSerial*)serialPort)->begin(newBaud);
+        } else {
+#if defined(SoftwareSerial_h)
+          ((SoftwareSerial*)serialPort)->end();
+          ((SoftwareSerial*)serialPort)->begin(newBaud);
+#endif
+        }
+        break; // SERIAL_UPDATE_BAUD
     } // end switch
     return true;
   }
