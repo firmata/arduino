@@ -139,6 +139,7 @@ class FirmataClass
     void printFirmwareVersion(void);
     //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
+    void disableBlinkVersion();
     /* serial receive handling */
     int available(void);
     void processInput(void);
@@ -198,6 +199,8 @@ class FirmataClass
     systemResetCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
+
+    boolean blinkVersionDisabled = false;
 
     /* private methods ------------------------------ */
     void processSysexMessage(void);

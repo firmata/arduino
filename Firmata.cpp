@@ -81,7 +81,10 @@ void FirmataClass::begin(void)
 }
 
 /**
- * Initialize the default Serial transport and  override the default baud.
+ * Initialize the default Serial transport and override the default baud.
+ * Sends the protocol version to the host application followed by the firmware version and name.
+ * blinkVersion is also called. To skip the call to blinkVersion, call Firmata.disableBlinkVersion()
+ * before calling Firmata.begin(baud).
  * @param speed The baud to use. 57600 baud is the default value.
  */
 void FirmataClass::begin(long speed)
@@ -89,8 +92,8 @@ void FirmataClass::begin(long speed)
   Serial.begin(speed);
   FirmataStream = &Serial;
   blinkVersion();
-  printVersion();
-  printFirmwareVersion();
+  printVersion();         // send the protocol version
+  printFirmwareVersion(); // send the firmware name and version
 }
 
 /**
@@ -130,6 +133,7 @@ void FirmataClass::printVersion(void)
 void FirmataClass::blinkVersion(void)
 {
 #if defined(VERSION_BLINK_PIN)
+  if (blinkVersionDisabled) return;
   // flash the pin with the protocol version
   pinMode(VERSION_BLINK_PIN, OUTPUT);
   strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_FIRMWARE_MAJOR_VERSION, 40, 210);
@@ -137,6 +141,16 @@ void FirmataClass::blinkVersion(void)
   strobeBlinkPin(VERSION_BLINK_PIN, FIRMATA_FIRMWARE_MINOR_VERSION, 40, 210);
   delay(125);
 #endif
+}
+
+/**
+ * Provides a means to disable the version blink sequence on the onboard LED, trimming startup
+ * time by a couple of seconds.
+ * Call this before Firmata.begin(). It only applies when using the default Serial transport.
+ */
+void FirmataClass::disableBlinkVersion()
+{
+  blinkVersionDisabled = true;
 }
 
 /**

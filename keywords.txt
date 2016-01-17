@@ -43,6 +43,7 @@ startSysex			KEYWORD2
 endSysex			KEYWORD2
 writePort			KEYWORD2
 readPort			KEYWORD2
+disableBlinkVersion		KEYWORD2
 
 
 #######################################
