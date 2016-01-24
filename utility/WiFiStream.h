@@ -1,3 +1,19 @@
+/*
+  WiFiStream.h
+  An Arduino Stream that wraps an instance of a WiFi server. For use
+  with legacy Arduino WiFi shield and other boards and sheilds that
+  are compatible with the Arduino WiFi library.
+
+  Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  See file LICENSE.txt for further informations on licensing terms.
+ */
+
 #ifndef WIFI_STREAM_H
 #define WIFI_STREAM_H
 

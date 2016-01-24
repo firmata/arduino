@@ -1,3 +1,19 @@
+/*
+  WiFi101Stream.h
+  An Arduino Stream that wraps an instance of a WiFi101 server. For use
+  with Arduino WiFi 101 shield, Arduino MKR1000 and other boards and
+  shields that are compatible with the Arduino WiFi101 library.
+
+  Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  See file LICENSE.txt for further informations on licensing terms.
+ */
+
 #ifndef WIFI101_STREAM_H
 #define WIFI101_STREAM_H
 
