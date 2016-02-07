@@ -39,6 +39,7 @@ Most of the time you will be interacting with Arduino with a client library on t
 * java
   * [https://github.com/kurbatov/firmata4j]
   * [https://github.com/4ntoine/Firmata]
+  * [https://github.com/reapzor/FiloFirmata]
 * .NET
   * [https://github.com/SolidSoils/Arduino]
   * [http://www.imagitronics.org/projects/firmatanet/]
