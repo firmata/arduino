@@ -3,7 +3,7 @@ FIRMATA 2.5.2 - Feb 15, 2016
 [core library]
 * Added Wi-Fi transport (Jesse Frush)
 * Added support for Arduino MKR1000 (Jesse Frush)
-* Moved Serial feature to own class SerialFimata
+* Moved Serial feature to own class SerialFirmata
 * Moved pin config and pin state handling to Firmata.cpp
 * Added new method disableBlinkVersion to provide a way to optionally bypass startup blink sequence
 
