@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.5.1 - 2015-12-26
+  Firmata.h - Firmata library v2.5.2 - 2016-2-15
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
@@ -30,7 +30,7 @@
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2
 #define FIRMATA_FIRMWARE_MINOR_VERSION  5
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 1
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 2
 
 /* DEPRECATED as of Firmata v2.5.1. As of 2.5.1 there are separate version numbers for
  * the protocol version and the firmware version.
@@ -115,6 +115,7 @@
 #define ONEWIRE                 0x07 // same as PIN_MODE_ONEWIRE
 #define STEPPER                 0x08 // same as PIN_MODE_STEPPER
 #define ENCODER                 0x09 // same as PIN_MODE_ENCODER
+#define IGNORE                  0x7F // same as PIN_MODE_IGNORE
 
 extern "C" {
   // callback function types
