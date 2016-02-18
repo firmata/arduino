@@ -140,7 +140,7 @@ char wep_key[] = "your_wep_key";
  * CONFIGURATION ERROR CHECK (don't change anything here)
  *============================================================================*/
 
-#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)  || (defined(WIFI_101) && defined(ESP_WIFI)  || (defined(ESP_WIFI) && defined(HUZZAH_WIFI) || (defined(ESP_WIFI) && defined(ARDUINO_WIFI_SHIELD) ))
+#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI))  || (defined(WIFI_101) && defined(ESP_WIFI))  || (defined(ESP_WIFI) && defined(HUZZAH_WIFI)) || (defined(ESP_WIFI) && defined(ARDUINO_WIFI_SHIELD)))
 #error "you may not define more than one wifi device type in wifiConfig.h."
 #endif //WIFI device type check
 
