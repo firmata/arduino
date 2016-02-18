@@ -665,6 +665,24 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// ESP8266 generic
+#elif defined(ESP8266)
+#define TOTAL_ANALOG_PINS       0
+#define TOTAL_PINS              17
+#define VERSION_BLINK_PIN       4
+// #define IS_PIN_DIGITAL(p)       ((p) == 0 || (p) == 1 || (p) == 2 || (p) == 3 || (p) == 4 || (p) == 5 || (p) == 12 || (p) == 13 || (p) == 14 || (p) == 15 || (p) == 16) //for wifi dont protect serial pins because these things only have 2 pins otherwise
+#define IS_PIN_DIGITAL(p)       ((p) == 0 || (p) == 2 || (p) == 4 || (p) == 5 || (p) == 12 || (p) == 13 || (p) == 14 || (p) == 15 || (p) == 16)
+#define IS_PIN_ANALOG(p)        (false)
+#define IS_PIN_PWM(p)           (false)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           (false)
+#define IS_PIN_SPI(p)           (false)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 17)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         p
+
+ 
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"

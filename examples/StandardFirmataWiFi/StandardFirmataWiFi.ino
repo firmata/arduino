@@ -74,6 +74,11 @@
 #include <Wire.h>
 #include <Firmata.h>
 
+// I dont understand either
+void disableI2CPins();
+void enableI2CPins();
+void reportAnalogCallback(byte analogPin, int value);
+
 /*
  * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your
  * connection that may help in the event of connection issues. If defined, some boards may not begin

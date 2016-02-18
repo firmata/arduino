@@ -61,6 +61,20 @@ WiFi101Stream stream;
 //------------------------------
 //#define HUZZAH_WIFI
 
+/*
+ * OPTION D: Configure for ESP6288
+ *
+ * ESP6288 is supported through its Arduino Core at
+ * https://github.com/esp8266/Arduino/
+ */
+
+//#define ESP_WIFI
+
+//do not modify these next 4 lines
+#ifdef ESP_WIFI
+#include "utility/ESPWiFiStream.h"
+WiFiStream stream;
+#endif
 
 // STEP 2 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
@@ -126,11 +140,11 @@ char wep_key[] = "your_wep_key";
  * CONFIGURATION ERROR CHECK (don't change anything here)
  *============================================================================*/
 
-#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)))
+#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI)  || (defined(WIFI_101) && defined(ESP_WIFI)  || (defined(ESP_WIFI) && defined(HUZZAH_WIFI) || (defined(ESP_WIFI) && defined(ARDUINO_WIFI_SHIELD) ))
 #error "you may not define more than one wifi device type in wifiConfig.h."
 #endif //WIFI device type check
 
-#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI))
+#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI) || defined(ESP_WIFI))
 #error "you must define a wifi device type in wifiConfig.h."
 #endif
 
