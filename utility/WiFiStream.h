@@ -1,7 +1,7 @@
 /*
   WiFiStream.h
   An Arduino Stream that wraps an instance of a WiFi server. For use
-  with legacy Arduino WiFi shield and other boards and sheilds that
+  with legacy Arduino WiFi shield and other boards and shields that
   are compatible with the Arduino WiFi library.
 
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
@@ -12,6 +12,8 @@
   version 2.1 of the License, or (at your option) any later version.
 
   See file LICENSE.txt for further informations on licensing terms.
+
+  Last updated April 10th, 2016
  */
 
 #ifndef WIFI_STREAM_H
@@ -19,7 +21,6 @@
 
 #include <inttypes.h>
 #include <Stream.h>
-#include <WiFi.h>
 
 class WiFiStream : public Stream
 {
@@ -29,11 +30,14 @@ private:
 
   //configuration members
   IPAddress _local_ip;
+  IPAddress _gateway;
+  IPAddress _subnet;
   uint16_t _port = 0;
   uint8_t _key_idx = 0;               //WEP
   const char *_key = nullptr;         //WEP
   const char *_passphrase = nullptr;  //WPA
   char *_ssid = nullptr;
+  bool _new_connection = false;
 
   inline int connect_client()
   {
@@ -50,6 +54,16 @@ private:
     return 1;
   }
 
+  inline bool is_new_connection()
+  {
+    if (_new_connection && WiFi.status() == WL_CONNECTED) {
+      _new_connection = false;
+      return true;
+    }
+    _new_connection = true;
+    return false;
+  }
+
   inline bool is_ready()
   {
     uint8_t status = WiFi.status();
@@ -59,11 +73,26 @@ private:
 public:
   WiFiStream() {};
 
+#ifndef ESP8266
   // allows another way to configure a static IP before begin is called
   inline void config(IPAddress local_ip)
   {
     _local_ip = local_ip;
     WiFi.config( local_ip );
+  }
+#endif
+
+  // allows another way to configure a static IP before begin is called
+  inline void config(IPAddress local_ip, IPAddress gateway, IPAddress subnet)
+  {
+    _local_ip = local_ip;
+    _gateway = gateway;
+    _subnet = subnet;
+#ifndef ESP8266
+    WiFi.config( local_ip, IPAddress(0, 0, 0, 0), gateway, subnet );
+#else
+    WiFi.config( local_ip, gateway, subnet );
+#endif
   }
 
   // get DCHP IP
@@ -72,6 +101,9 @@ public:
     return WiFi.localIP();
   }
 
+  /**
+   * @return true if connected
+   */
   inline bool maintain()
   {
     if( connect_client() ) return true;
@@ -82,20 +114,36 @@ public:
     {
       if( _local_ip )
       {
+#ifndef ESP8266
         WiFi.config( _local_ip );
+#else
+        WiFi.config( _local_ip, _gateway, _subnet );
+#endif
       }
 
       if( _passphrase )
       {
+#ifndef ESP8266
         result = WiFi.begin( _ssid, _passphrase);
+#else
+        WiFi.begin( _ssid, _passphrase);
+        result = WiFi.status();
+#endif
       }
+#ifndef ESP8266
       else if( _key_idx && _key )
       {
         result = WiFi.begin( _ssid, _key_idx, _key );
       }
+#endif
       else
       {
-        result = WiFi.begin( _ssid );
+#ifndef ESP8266
+        result = WiFi.begin( _ssid);
+#else
+        WiFi.begin( _ssid);
+        result = WiFi.status();
+#endif
       }
     }
     if( result == 0 ) return false;
@@ -112,11 +160,14 @@ public:
   //OPEN networks
   inline int begin(char *ssid, uint16_t port)
   {
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
     _port = port;
-    int result = WiFi.begin( ssid );
+
+    int result = WiFi.begin(ssid);
+    // will always return 0 for ESP8266
     if( result == 0 ) return 0;
 
     _server = WiFiServer( port );
@@ -124,9 +175,11 @@ public:
     return result;
   }
 
+#ifndef ESP8266
   //WEP-encrypted networks
   inline int begin(char *ssid, uint8_t key_idx, const char *key, uint16_t port)
   {
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
@@ -141,17 +194,25 @@ public:
     _server.begin();
     return result;
   }
+#endif
 
   //WPA-encrypted networks
   inline int begin(char *ssid, const char *passphrase, uint16_t port)
   {
+    // TODO - figure out a cleaner way to handle this. The issue is that with the ESP8266
+    // WiFi.begin does not wait so the connect state is is therefore not updated until the
+    // next time begin is called. The call to !is_ready() below however returns 0 if
+    // WL_CONNECTED is true. This is to allow a new connection with different parameters than
+    // the original connection. is_new_connection is a temporary solution.
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
     _port = port;
     _passphrase = passphrase;
 
-    int result = WiFi.begin( ssid, passphrase);
+    int result = WiFi.begin(ssid, passphrase);
+    // will always return 0 for ESP8266
     if( result == 0 ) return 0;
 
     _server = WiFiServer( port );
@@ -163,9 +224,12 @@ public:
  *           Connection functions without DHCP
  ******************************************************************************/
 
+// ESP8266 requires gateway and subnet so the following functions are not compatible
+#ifndef ESP8266
   //OPEN networks with static IP
   inline int begin(char *ssid, IPAddress local_ip, uint16_t port)
   {
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
@@ -184,6 +248,7 @@ public:
   //WEP-encrypted networks with static IP
   inline int begin(char *ssid, IPAddress local_ip, uint8_t key_idx, const char *key, uint16_t port)
   {
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
@@ -204,6 +269,7 @@ public:
   //WPA-encrypted networks with static IP
   inline int begin(char *ssid, IPAddress local_ip, const char *passphrase, uint16_t port)
   {
+    if( is_new_connection() ) return WL_CONNECTED;
     if( !is_ready() ) return 0;
 
     _ssid = ssid;
@@ -219,6 +285,7 @@ public:
     _server.begin();
     return result;
   }
+#endif
 
 /******************************************************************************
  *             Stream implementations
