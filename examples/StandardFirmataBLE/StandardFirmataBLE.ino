@@ -20,26 +20,25 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 3rd, 2015
+  Last updated by Jeff Hoefs: February 20th, 2016
 */
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 
-#include <CurieBle.h>
-#include "utility/BLEStream.h"
+#include "bleConfig.h"
 
 //#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
 
-#define I2C_WRITE                   B00000000
-#define I2C_READ                    B00001000
-#define I2C_READ_CONTINUOUSLY       B00010000
-#define I2C_STOP_READING            B00011000
-#define I2C_READ_WRITE_MODE_MASK    B00011000
-#define I2C_10BIT_ADDRESS_MODE_MASK B00100000
-#define I2C_END_TX_MASK             B01000000
+#define I2C_WRITE                   0x00 //B00000000
+#define I2C_READ                    0x08 //B00001000
+#define I2C_READ_CONTINUOUSLY       0x10 //B00010000
+#define I2C_STOP_READING            0x18 //B00011000
+#define I2C_READ_WRITE_MODE_MASK    0x18 //B00011000
+#define I2C_10BIT_ADDRESS_MODE_MASK 0x20 //B00100000
+#define I2C_END_TX_MASK             0x40 //B01000000
 #define I2C_STOP_TX                 1
 #define I2C_RESTART_TX              0
 #define I2C_MAX_QUERIES             8
@@ -94,8 +93,6 @@ byte detachedServoCount = 0;
 byte servoCount = 0;
 
 boolean isResetting = false;
-
-BLEStream stream(0);
 
 /* utility functions */
 void wireWrite(byte data)
@@ -735,6 +732,14 @@ void setup()
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
   stream.setLocalName("FIRMATA");
+
+#ifdef BLE_REQ
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_IGNORE_BLE_PINS(i)) {
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
+    }
+  }
+#endif
 
   stream.begin();
   Firmata.begin(stream);

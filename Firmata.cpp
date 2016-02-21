@@ -33,8 +33,8 @@ extern "C" {
  */
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
-  FirmataStream->write(value & B01111111); // LSB
-  FirmataStream->write(value >> 7 & B01111111); // MSB
+  FirmataStream->write(value & 0x7F); // LSB
+  FirmataStream->write(value >> 7 & 0x7F); // MSB
 }
 
 /**
