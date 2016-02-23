@@ -736,6 +736,7 @@ void setup()
 #ifdef BLE_REQ
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_IGNORE_BLE_PINS(i)) {
+      pinConfig[i] = PIN_MODE_IGNORE; 
       Firmata.setPinMode(i, PIN_MODE_IGNORE);
     }
   }
