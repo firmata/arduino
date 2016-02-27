@@ -21,6 +21,7 @@ BLEStream::BLEStream(unsigned char req, unsigned char rdy, unsigned char rst) :
   this->_txCount = 0;
   this->_rxHead = this->_rxTail = 0;
   this->_flushed = 0;
+  this->_packetTxCount = 0;
   BLEStream::_instance = this;
 
   addAttribute(this->_uartService);
@@ -109,6 +110,24 @@ int BLEStream::read(void)
 void BLEStream::flush(void)
 {
   if (this->_txCount == 0) return;
+#ifndef _VARIANT_ARDUINO_101_X_
+  long diff = millis() - this->_flushed;
+  // flush() is called approximately every 1ms or less when sending multiple packets and
+  // otherwise no more frequently than BLESTREAM_TXBUFFER_FLUSH_INTERVAL
+  // TODO - determine if 2 is the best value or if something higher is necessary
+  if (diff < 2) {
+    // 2 is the max number of packets that can be sent in short succession
+    // TODO - get the max packet value programatically
+    if (++this->_packetTxCount >= 2) {
+      // delay after 2 packets have been sent in short succession
+      // 100ms is the minimum necessary delay value
+      delay(100);
+      this->_packetTxCount = 0;
+    }
+  } else {
+    this->_packetTxCount = 0;
+  }
+#endif
   this->_txCharacteristic.setValue(this->_txBuffer, this->_txCount);
   this->_flushed = millis();
   this->_txCount = 0;
