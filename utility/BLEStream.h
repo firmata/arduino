@@ -3,6 +3,8 @@
 
   Based on BLESerial.cpp by Voita Molda
   https://github.com/sandeepmistry/arduino-BLEPeripheral/blob/master/examples/serial/BLESerial.h
+
+  Last updated by Jeff Hoefs: February 28th, 2016
  */
 
 #ifndef _BLE_STREAM_H_
@@ -52,8 +54,6 @@ class BLEStream : public BLEPeripheral, public Stream
     unsigned char _rxBuffer[256];
     size_t _txCount;
     unsigned char _txBuffer[_MAX_ATTR_DATA_LEN_];
-
-    uint8_t _packetTxCount;
 
     BLEService _uartService = BLEService("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
     BLEDescriptor _uartNameDescriptor = BLEDescriptor("2901", "UART");
