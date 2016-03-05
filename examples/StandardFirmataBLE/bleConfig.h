@@ -8,6 +8,7 @@
  * Supported boards and shields:
  * - Arduino 101 (recommended)
  * - RedBearLab BLE Shield (v2)  ** to be verified **
+ * - RedBearLab BLE Nano ** works with modifications **
  *
  *==================================================================================*/
 
@@ -59,11 +60,17 @@ BLEStream stream;
 
 
 /*
- * RedBearLab BLE Nano
+ * RedBearLab BLE Nano (with default switch settings)
+ *
  * Blocked on this issue: https://github.com/RedBearLab/nRF51822-Arduino/issues/46
- * Also, need to skip Capability Query (see example in test script)
+ * Works with modifications. See comments at top of the test script referenced below.
+ * When the RBL nRF51822-Arduino library issue is resolved, this should work witout
+ * any modifications.
  *
  * Test script: https://gist.github.com/soundanalogous/d39bb3eb36333a0906df
+ *
+ * Note: If you have changed the solder jumpers on the Nano you may encounter issues since
+ * the pins are currently mapped in Firmata only for the default (factory) jumper settings.
  */
 // #ifdef BLE_NANO
 // #include <BLEPeripheral.h>
@@ -74,8 +81,10 @@ BLEStream stream;
 
 /*
  * RedBearLab Blend and Blend Micro
- * StandardFirmataBLE is requires too much Flash and RAM to run on Blend Micro
- * may work with ConfigurableFirmata selecting only analog and digital I/O
+ *
+ * StandardFirmataBLE requires too much Flash and RAM to run on the ATmega32u4-based Blend
+ * and Blend Micro boards. It may work with ConfigurableFirmata selecting only analog and/or
+ * digital I/O.
  */
 // #if defined(BLEND_MICRO) || defined(BLEND)
 // #include <SPI.h>
