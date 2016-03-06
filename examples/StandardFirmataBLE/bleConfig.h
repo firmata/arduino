@@ -1,16 +1,20 @@
-/*===================================================================================
+/*==================================================================================================
  * BLE CONFIGURATION
  *
- * If you are using an Arduino 101, you do not need to make any changes to this
- * file. If you are using another supported BLE board or shield, follow the
- * instructions for the specific board or shield below.
+ * If you are using an Arduino 101, you do not need to make any changes to this file (unless you
+ * need a unique ble local name (see below). If you are using another supported BLE board or shield,
+ * follow the instructions for the specific board or shield below.
  *
  * Supported boards and shields:
  * - Arduino 101 (recommended)
  * - RedBearLab BLE Shield (v2)  ** to be verified **
  * - RedBearLab BLE Nano ** works with modifications **
  *
- *==================================================================================*/
+ *================================================================================================*/
+
+// change this to a unique name per board if running StandardFirmataBLE on multiple boards
+// within the same physical space
+#define FIRMATA_BLE_LOCAL_NAME "FIRMATA"
 
 /*
  * RedBearLab BLE Shield
@@ -42,9 +46,9 @@ BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
 #endif
 
 
-/*===================================================================================
+/*==================================================================================================
  * END BLE CONFIGURATION - you should not need to change anything below this line
- *==================================================================================*/
+ *================================================================================================*/
 
 /*
  * Arduino 101
@@ -52,8 +56,7 @@ BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
  * Test script: https://gist.github.com/soundanalogous/927360b797574ed50e27
  */
 #ifdef _VARIANT_ARDUINO_101_X_
-#include <CurieBle.h>
-//#include <CurieBLE.h> // switch to this once new Arduino 101 board package is available
+#include <CurieBLE.h>
 #include "utility/BLEStream.h"
 BLEStream stream;
 #endif

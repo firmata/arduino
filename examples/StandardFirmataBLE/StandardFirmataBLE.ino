@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: February 27th, 2016
+  Last updated by Jeff Hoefs: March 5th, 2016
 */
 
 #include <Servo.h>
@@ -47,6 +47,9 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
+// min cannot be < 0x0006. Adjust max if necessary
+#define FIRMATA_BLE_MIN_INTERVAL    0x0006 // 7.5ms (7.5 / 1.25)
+#define FIRMATA_BLE_MAX_INTERVAL    0x0018 // 30ms (30 / 1.25)
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -751,7 +754,12 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  stream.setLocalName("FIRMATA");
+  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
+
+  // set the BLE connection interval - this is the fastest interval you can read inputs
+  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
+  // set how often the BLE TX buffer is flushed (if not full)
+  stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
 
 #ifdef BLE_REQ
   for (byte i = 0; i < TOTAL_PINS; i++) {
@@ -775,7 +783,7 @@ void loop()
   byte pin, analogPin;
 
   // do not process data if no BLE connection is established
-  // poll will send the TX buffer every 30ms while it contains data
+  // poll will send the TX buffer at the specified flush interval or when the buffer is full
   if (!stream.poll()) return;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the

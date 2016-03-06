@@ -4,7 +4,7 @@
   Based on BLESerial.cpp by Voita Molda
   https://github.com/sandeepmistry/arduino-BLEPeripheral/blob/master/examples/serial/BLESerial.h
 
-  Last updated by Jeff Hoefs: February 28th, 2016
+  Last updated by Jeff Hoefs: March 5th, 2016
  */
 
 #ifndef _BLE_STREAM_H_
@@ -12,8 +12,7 @@
 
 #include <Arduino.h>
 #if defined(_VARIANT_ARDUINO_101_X_)
-#include <CurieBle.h>
-//#include <CurieBLE.h> // switch to this once new Arduino 101 board package is available
+#include <CurieBLE.h>
 #define _MAX_ATTR_DATA_LEN_ BLE_MAX_ATTR_DATA_LEN
 #else
 #include <BLEPeripheral.h>
@@ -25,6 +24,7 @@
 #else
 #define BLESTREAM_TXBUFFER_FLUSH_INTERVAL 80
 #endif
+#define BLESTREAM_MIN_FLUSH_INTERVAL 8 // minimum interval for flushing the TX buffer
 
 class BLEStream : public BLEPeripheral, public Stream
 {
@@ -34,6 +34,7 @@ class BLEStream : public BLEPeripheral, public Stream
     void begin(...);
     bool poll();
     void end();
+    void setFlushInterval(int);
 
     virtual int available(void);
     virtual int peek(void);
@@ -46,6 +47,7 @@ class BLEStream : public BLEPeripheral, public Stream
   private:
     bool _connected;
     unsigned long _flushed;
+    int _flushInterval;
     static BLEStream* _instance;
 
     size_t _rxHead;

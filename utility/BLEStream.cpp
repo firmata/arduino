@@ -4,7 +4,7 @@
   Based on BLESerial.cpp by Voita Molda
   https://github.com/sandeepmistry/arduino-BLEPeripheral/blob/master/examples/serial/BLESerial.cpp
 
-  Last updated by Jeff Hoefs: February 28th, 2016
+  Last updated by Jeff Hoefs: March 5th, 2016
  */
 
 #include "BLEStream.h"
@@ -23,6 +23,7 @@ BLEStream::BLEStream(unsigned char req, unsigned char rdy, unsigned char rst) :
   this->_txCount = 0;
   this->_rxHead = this->_rxTail = 0;
   this->_flushed = 0;
+  this->_flushInterval = BLESTREAM_TXBUFFER_FLUSH_INTERVAL;
   BLEStream::_instance = this;
 
   addAttribute(this->_uartService);
@@ -47,7 +48,7 @@ bool BLEStream::poll()
 {
   // BLEPeripheral::poll is called each time connected() is called
   this->_connected = BLEPeripheral::connected();
-  if (millis() > this->_flushed + BLESTREAM_TXBUFFER_FLUSH_INTERVAL) {
+  if (millis() > this->_flushed + this->_flushInterval) {
     flush();
   }
   return this->_connected;
@@ -149,6 +150,13 @@ BLEStream::operator bool()
   Serial.println(retval);
 #endif
   return retval;
+}
+
+void BLEStream::setFlushInterval(int interval)
+{
+  if (interval > BLESTREAM_MIN_FLUSH_INTERVAL) {
+    this->_flushInterval = interval;
+  }
 }
 
 void BLEStream::_received(const unsigned char* data, size_t size)
