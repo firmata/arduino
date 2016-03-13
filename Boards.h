@@ -672,10 +672,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ESP8266)
 #define TOTAL_ANALOG_PINS       1
 #define TOTAL_PINS              18 // 11 digital + 1 analog + 6 inaccessible
-#define VERSION_BLINK_PIN       LED_BUILTIN
 #define PIN_SERIAL_RX           3
 #define PIN_SERIAL_TX           1
-#define PIN_SERIAL1_TX          2
 #define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 5) || ((p) >= 12 && (p) <= 16))
 #define IS_PIN_ANALOG(p)        ((p) == A0)
 #define IS_PIN_PWM(p)           IS_PIN_DIGITAL(p)
