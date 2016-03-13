@@ -685,7 +685,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_INTERRUPT(p)     (((p) >= 0 && (p) <= 5) || ((p) >= 12 && (p) <= 15))
 #define IS_PIN_SERIAL(p)        ((p) == 1 || (p) == 3)
 #define PIN_TO_DIGITAL(p)       (p)
-#define PIN_TO_ANALOG(p)        (p)
+#define PIN_TO_ANALOG(p)        ((p) - 17)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 
