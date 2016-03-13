@@ -665,22 +665,29 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
-// ESP8266 generic
+// ESP8266
+// hardware: TX0=1, TX1=2, RX0=3, MISO=12, MOSI=13, SCLK=14, CS=15, A0=17  
+// board depended defaults: LED_BUILTIN, SDA, SCL
+// note: boot mode GPIOs 0, 2 and 15 can be used as outputs (GPIOs 6-11 are in use for flash IO)
 #elif defined(ESP8266)
-#define TOTAL_ANALOG_PINS       0
-#define TOTAL_PINS              17
-#define VERSION_BLINK_PIN       4
-// #define IS_PIN_DIGITAL(p)       ((p) == 0 || (p) == 1 || (p) == 2 || (p) == 3 || (p) == 4 || (p) == 5 || (p) == 12 || (p) == 13 || (p) == 14 || (p) == 15 || (p) == 16) //for wifi dont protect serial pins because these things only have 2 pins otherwise
-#define IS_PIN_DIGITAL(p)       ((p) == 0 || (p) == 2 || (p) == 4 || (p) == 5 || (p) == 12 || (p) == 13 || (p) == 14 || (p) == 15 || (p) == 16)
-#define IS_PIN_ANALOG(p)        (false)
-#define IS_PIN_PWM(p)           (false)
-#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
-#define IS_PIN_I2C(p)           (false)
-#define IS_PIN_SPI(p)           (false)
+#define TOTAL_ANALOG_PINS       1
+#define TOTAL_PINS              18 // 11 digital + 1 analog + 6 inaccessible
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define PIN_SERIAL_RX           3
+#define PIN_SERIAL_TX           1
+#define PIN_SERIAL1_TX          2
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 5) || ((p) >= 12 && (p) <= 16))
+#define IS_PIN_ANALOG(p)        ((p) == A0)
+#define IS_PIN_PWM(p)           IS_PIN_DIGITAL(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) >= 12 && (p) <= 15)
+#define IS_PIN_INTERRUPT(p)     (((p) >= 0 && (p) <= 5) || ((p) >= 12 && (p) <= 15))
+#define IS_PIN_SERIAL(p)        ((p) == 1 || (p) == 3)
 #define PIN_TO_DIGITAL(p)       (p)
-#define PIN_TO_ANALOG(p)        ((p) - 17)
+#define PIN_TO_ANALOG(p)        (p)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
-#define PIN_TO_SERVO(p)         p
+#define PIN_TO_SERVO(p)         (p)
 
  
 // anything else
