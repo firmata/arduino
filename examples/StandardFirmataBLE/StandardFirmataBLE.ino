@@ -27,10 +27,17 @@
 #include <Wire.h>
 #include <Firmata.h>
 
-#include "bleConfig.h"
-
 //#define SERIAL_DEBUG
 #include "utility/firmataDebug.h"
+
+/*
+ * Uncomment the following include to enable interfacing
+ * with Serial devices via hardware or software serial.
+ */
+//#include "utility/SerialFirmata.h"
+
+// follow the instructions in bleConfig.h to configure your BLE hardware
+#include "bleConfig.h"
 
 #define I2C_WRITE                   0x00 //B00000000
 #define I2C_READ                    0x08 //B00001000
