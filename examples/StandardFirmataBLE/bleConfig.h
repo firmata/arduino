@@ -22,14 +22,13 @@
  * If you are using a RedBearLab BLE shield, uncomment the define below.
  * Also, change the define for BLE_RST if you have the jumper set to pin 7 rather than pin 4.
  *
- * You will need to use the shield with an Arduino Mega, Due or other board with sufficient
+ * You will need to use the shield with an Arduino Zero, Due, Mega, or other board with sufficient
  * Flash and RAM. Arduino Uno, Leonardo and other ATmega328p and Atmega32u4 boards to not have
  * enough memory to run StandardFirmataBLE.
  *
  * TODO: verify if this works and with which boards it works.
  *
  * Test script: https://gist.github.com/soundanalogous/927360b797574ed50e27
- * (may need to skip capabilities - see https://gist.github.com/soundanalogous/d39bb3eb36333a0906df)
  */
 //#define REDBEAR_BLE_SHIELD
 

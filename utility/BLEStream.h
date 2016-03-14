@@ -4,7 +4,7 @@
   Based on BLESerial.cpp by Voita Molda
   https://github.com/sandeepmistry/arduino-BLEPeripheral/blob/master/examples/serial/BLESerial.h
 
-  Last updated by Jeff Hoefs: March 5th, 2016
+  Last updated March 13th, 2016
  */
 
 #ifndef _BLE_STREAM_H_
@@ -19,11 +19,7 @@
 #define _MAX_ATTR_DATA_LEN_ BLE_ATTRIBUTE_MAX_VALUE_LENGTH
 #endif
 
-#if defined(_VARIANT_ARDUINO_101_X_)
-#define BLESTREAM_TXBUFFER_FLUSH_INTERVAL 30
-#else
 #define BLESTREAM_TXBUFFER_FLUSH_INTERVAL 80
-#endif
 #define BLESTREAM_MIN_FLUSH_INTERVAL 8 // minimum interval for flushing the TX buffer
 
 class BLEStream : public BLEPeripheral, public Stream

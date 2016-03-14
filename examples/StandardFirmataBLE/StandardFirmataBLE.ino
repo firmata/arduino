@@ -756,10 +756,27 @@ void setup()
 
   stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
 
+// setConnectionInterval is not available in the CurieBLE library included in the
+// Intel Curie Boards package v1.0.5 (latest version via the Boards Manager). Without
+// setConnectionInterval, the BLE reporting rate for analog input and I2C read continuous mode
+// will be very slow (150ms instead of 30ms).
+// However, you can manually update CurieBLE to get the functionality now. Follow these steps:
+// 1. Install Intel Curie Boards v1.0.5 via the Arduino Boards manager (use Arduino 1.6.7 or newer)
+// 2. Download or clone corelibs-arduino101: https://github.com/01org/corelibs-arduino101
+// 3. Make a copy of the CurieBLE directory found in corelibs-arduino101/libraries/
+// 4. Find the Arduino15 directory on your computer:
+//    OS X:    ~/Library/Arduino15
+//    Windows: C:\Users\(username)\AppData\Local\Arduino15
+//    Linux:   ~/.arduino15
+// 5. From the Arduino15 directory, navigate to: /packages/Intel/hardware/arc32/1.0.5/libraries/
+// 6. Replace the CurieBLE library with the version you copied in step 3
+// 7. Comment out the #ifndef statement below and the following #endif statement
+#ifndef _VARIANT_ARDUINO_101_X_
   // set the BLE connection interval - this is the fastest interval you can read inputs
   stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
   // set how often the BLE TX buffer is flushed (if not full)
   stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
+#endif
 
 #ifdef BLE_REQ
   for (byte i = 0; i < TOTAL_PINS; i++) {
