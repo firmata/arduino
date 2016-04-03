@@ -615,7 +615,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_PWM(pin)) {
           Firmata.write(PIN_MODE_PWM);
-          Firmata.write(8); // 8 = 8-bit resolution
+          Firmata.write(DEFAULT_PWM_RESOLUTION);
         }
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write(PIN_MODE_SERVO);
