@@ -1,7 +1,7 @@
 /*
   WiFiStream.h
   An Arduino Stream that wraps an instance of a WiFi server. For use
-  with legacy Arduino WiFi shield and other boards and sheilds that
+  with legacy Arduino WiFi shield and other boards and shields that
   are compatible with the Arduino WiFi library.
 
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
@@ -19,7 +19,6 @@
 
 #include <inttypes.h>
 #include <Stream.h>
-#include <WiFi.h>
 
 class WiFiStream : public Stream
 {
@@ -29,6 +28,8 @@ private:
 
   //configuration members
   IPAddress _local_ip;
+  IPAddress _gateway;
+  IPAddress _subnet;
   uint16_t _port = 0;
   uint8_t _key_idx = 0;               //WEP
   const char *_key = nullptr;         //WEP
@@ -59,11 +60,26 @@ private:
 public:
   WiFiStream() {};
 
+#ifndef ESP8266
   // allows another way to configure a static IP before begin is called
   inline void config(IPAddress local_ip)
   {
     _local_ip = local_ip;
     WiFi.config( local_ip );
+  }
+#endif
+
+  // allows another way to configure a static IP before begin is called
+  inline void config(IPAddress local_ip, IPAddress gateway, IPAddress subnet)
+  {
+    _local_ip = local_ip;
+    _gateway = gateway;
+    _subnet = subnet;
+#ifdef ESP8266
+    WiFi.config( local_ip, gateway, subnet );
+#else
+    WiFi.config( local_ip, IPAddress(0, 0, 0, 0), gateway, subnet );
+#endif
   }
 
   // get DCHP IP
@@ -72,6 +88,9 @@ public:
     return WiFi.localIP();
   }
 
+  /**
+   * @return true if connected
+   */
   inline bool maintain()
   {
     if( connect_client() ) return true;
@@ -82,17 +101,23 @@ public:
     {
       if( _local_ip )
       {
+#ifdef ESP8266
+        WiFi.config( _local_ip, _gateway, _subnet );
+#else
         WiFi.config( _local_ip );
+#endif
       }
 
       if( _passphrase )
       {
         result = WiFi.begin( _ssid, _passphrase);
       }
+#ifndef ESP8266
       else if( _key_idx && _key )
       {
         result = WiFi.begin( _ssid, _key_idx, _key );
       }
+#endif
       else
       {
         result = WiFi.begin( _ssid );
@@ -124,6 +149,7 @@ public:
     return result;
   }
 
+#ifndef ESP8266
   //WEP-encrypted networks
   inline int begin(char *ssid, uint8_t key_idx, const char *key, uint16_t port)
   {
@@ -141,6 +167,7 @@ public:
     _server.begin();
     return result;
   }
+#endif
 
   //WPA-encrypted networks
   inline int begin(char *ssid, const char *passphrase, uint16_t port)
@@ -163,6 +190,7 @@ public:
  *           Connection functions without DHCP
  ******************************************************************************/
 
+#ifndef ESP8266
   //OPEN networks with static IP
   inline int begin(char *ssid, IPAddress local_ip, uint16_t port)
   {
@@ -219,6 +247,7 @@ public:
     _server.begin();
     return result;
   }
+#endif
 
 /******************************************************************************
  *             Stream implementations

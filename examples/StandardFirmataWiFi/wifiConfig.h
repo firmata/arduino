@@ -23,8 +23,9 @@
  */
 #define ARDUINO_WIFI_SHIELD
 
-//do not modify these next 4 lines
+//do not modify these next 5 lines
 #ifdef ARDUINO_WIFI_SHIELD
+#include <WiFi.h>
 #include "utility/WiFiStream.h"
 WiFiStream stream;
 #endif
@@ -44,16 +45,39 @@ WiFiStream stream;
  */
 //#define WIFI_101
 
-//do not modify these next 4 lines
+//do not modify these next 5 lines
 #ifdef WIFI_101
+#include <WiFi101.h>
 #include "utility/WiFi101Stream.h"
-WiFi101Stream stream;
+WiFiStream stream;
 #endif
 
 /*
- * OPTION C: Configure for HUZZAH
+ * OPTION C: Configure for ESP8266
  *
- * HUZZAH is not yet supported, this will be added in a later revision to StandardFirmataWiFi
+ * This will configure StandardFirmataWiFi to use the ESP8266WiFi library for boards
+ * with an ESP8266 chip. It is compatible with 802.11 B/G/N networks.
+ *
+ * To enable, uncomment the #define ESP8266_WIFI below and verify the #define values under
+ * options A and B are commented out.
+ *
+ * IMPORTANT: You must have the esp8266 board support installed. To easily install this board, open the board manager via:
+ * Arduino IDE Menus: Tools > Board > Manage Boards > filter search for "esp8266" > Select the result and click 'install'
+ */
+//#define ESP8266_WIFI
+
+//do not modify these next 5 lines
+#ifdef ESP8266_WIFI
+#include <ESP8266WiFi.h>
+#include "utility/WiFiStream.h"
+WiFiStream stream;
+#endif
+
+/*
+ * OPTION D: Configure for HUZZAH
+ *
+ * HUZZAH with CC3000 is not yet supported, this will be added in a later revision to StandardFirmataWiFi.
+ * For HUZZAH with ESP8266 use ESP8266_WIFI.
  */
 
 //------------------------------
@@ -61,20 +85,6 @@ WiFi101Stream stream;
 //------------------------------
 //#define HUZZAH_WIFI
 
-/*
- * OPTION D: Configure for ESP6288
- *
- * ESP6288 is supported through its Arduino Core at
- * https://github.com/esp8266/Arduino/
- */
-
-//#define ESP_WIFI
-
-//do not modify these next 4 lines
-#ifdef ESP_WIFI
-#include "utility/ESPWiFiStream.h"
-WiFiStream stream;
-#endif
 
 // STEP 2 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
@@ -82,8 +92,10 @@ char ssid[] = "your_network_name";
 
 // STEP 3 [OPTIONAL for all boards and shields]
 // if you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
-// if this line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
-// #define STATIC_IP_ADDRESS 192,168,1,113
+// if the first line is commented out, the WiFi shield will attempt to get an IP from the DHCP server
+#define STATIC_IP_ADDRESS  192,168,1,113
+#define SUBNET_MASK        255,255,255,0 // REQUIRED for ESP8266_WIFI, ignored for others
+#define GATEWAY_IP_ADDRESS 0,0,0,0       // REQUIRED for ESP8266_WIFI, ignored for others
 
 // STEP 4 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
@@ -106,6 +118,7 @@ char ssid[] = "your_network_name";
 #ifdef WIFI_WPA_SECURITY
 char wpa_passphrase[] = "your_wpa_passphrase";
 #endif  //WIFI_WPA_SECURITY
+
 
 /*
  * OPTION B: WEP
@@ -140,11 +153,11 @@ char wep_key[] = "your_wep_key";
  * CONFIGURATION ERROR CHECK (don't change anything here)
  *============================================================================*/
 
-#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI))  || (defined(WIFI_101) && defined(ESP_WIFI))  || (defined(ESP_WIFI) && defined(HUZZAH_WIFI)) || (defined(ESP_WIFI) && defined(ARDUINO_WIFI_SHIELD)))
+#if ((defined(ARDUINO_WIFI_SHIELD) && (defined(WIFI_101) || defined(HUZZAH_WIFI))) || (defined(WIFI_101) && defined(HUZZAH_WIFI))  || (defined(WIFI_101) && defined(ESP8266_WIFI))  || (defined(ESP8266_WIFI) && defined(HUZZAH_WIFI)) || (defined(ESP8266_WIFI) && defined(ARDUINO_WIFI_SHIELD)))
 #error "you may not define more than one wifi device type in wifiConfig.h."
 #endif //WIFI device type check
 
-#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI) || defined(ESP_WIFI))
+#if !(defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(HUZZAH_WIFI) || defined(ESP8266_WIFI))
 #error "you must define a wifi device type in wifiConfig.h."
 #endif
 
@@ -155,6 +168,10 @@ char wep_key[] = "your_wep_key";
 #if !(defined(WIFI_NO_SECURITY) || defined(WIFI_WEP_SECURITY) || defined(WIFI_WPA_SECURITY))
 #error "you must define a wifi security type in wifiConfig.h."
 #endif  //WIFI_* security define check
+
+#if (defined(ESP8266_WIFI) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
+#error "you must choose between WIFI_NO_SECURITY and WIFI_WPA_SECURITY"
+#endif 
 
 /*==============================================================================
  * PIN IGNORE MACROS (don't change anything here)

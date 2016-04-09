@@ -125,6 +125,16 @@ SerialFirmata serialFeature;
 #ifdef STATIC_IP_ADDRESS
 IPAddress local_ip(STATIC_IP_ADDRESS);
 #endif
+#ifdef SUBNET_MASK
+IPAddress subnet(SUBNET_MASK);
+#else
+IPAddress subnet(0,0,0,0);
+#endif
+#ifdef GATEWAY_IP_ADDRESS
+IPAddress gateway(GATEWAY_IP_ADDRESS);
+#else
+IPAddress gateway(0,0,0,0);
+#endif
 
 int wifiConnectionAttemptCounter = 0;
 int wifiStatus = WL_IDLE_STATUS;
@@ -822,37 +832,37 @@ void systemResetCallback()
 }
 
 void printWifiStatus() {
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
   }
   else
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   {
     // print the SSID of the network you're attached to:
     DEBUG_PRINT( "SSID: " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     IPAddress ip = WiFi.localIP();
     DEBUG_PRINTLN( ip );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     long rssi = WiFi.RSSI();
     DEBUG_PRINT( rssi );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     DEBUG_PRINTLN( " dBm" );
   }
@@ -873,6 +883,8 @@ void setup()
   DEBUG_PRINTLN( "using the WiFi 101 library." );
 #elif defined(ARDUINO_WIFI_SHIELD)
   DEBUG_PRINTLN( "using the legacy WiFi library." );
+#elif defined(ESP8266_WIFI)
+  DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
 #elif defined(HUZZAH_WIFI)
   DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
   //else should never happen here as error-checking in wifiConfig.h will catch this
@@ -886,7 +898,11 @@ void setup()
   DEBUG_PRINTLN( local_ip );
   //you can also provide a static IP in the begin() functions, but this simplifies
   //ifdef logic in this sketch due to support for all different encryption types.
+#ifdef ESP8266_WIFI  
+  stream.config( local_ip , gateway, subnet );
+#else  
   stream.config( local_ip );
+#endif  
 #else
   DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
 #endif
