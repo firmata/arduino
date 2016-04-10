@@ -12,25 +12,7 @@
 // Option A is enabled by default.
 
 /*
- * OPTION A: Configure for Arduino WiFi shield
- *
- * This will configure StandardFirmataWiFi to use the original WiFi library (deprecated) provided
- * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
- * is compatible with 802.11 B/G networks.
- *
- * To configure StandardFirmataWiFi to use the Arduino WiFi shield
- * leave the #define below uncommented.
- */
-#define ARDUINO_WIFI_SHIELD
-
-//do not modify these next 4 lines
-#ifdef ARDUINO_WIFI_SHIELD
-#include "utility/WiFiStream.h"
-WiFiStream stream;
-#endif
-
-/*
- * OPTION B: Configure for WiFi 101
+ * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
  *
  * This will configure StandardFirmataWiFi to use the WiFi101 library, which works with the Arduino WiFi101
  * shield and devices that have the WiFi101 chip built in (such as the MKR1000). It is compatible
@@ -42,12 +24,30 @@ WiFiStream stream;
  * IMPORTANT: You must have the WiFI 101 library installed. To easily install this library, opent the library manager via:
  * Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter search for "WiFi101" > Select the result and click 'install'
  */
-//#define WIFI_101
+#define WIFI_101
 
 //do not modify these next 4 lines
 #ifdef WIFI_101
 #include "utility/WiFi101Stream.h"
 WiFi101Stream stream;
+#endif
+
+/*
+ * OPTION B: Configure for Arduino WiFi shield
+ *
+ * This will configure StandardFirmataWiFi to use the original WiFi library (deprecated) provided
+ * with the Arduino IDE. It is supported by the Arduino WiFi shield (a discontinued product) and
+ * is compatible with 802.11 B/G networks.
+ *
+ * To configure StandardFirmataWiFi to use the Arduino WiFi shield
+ * leave the #define below uncommented.
+ */
+//#define ARDUINO_WIFI_SHIELD
+
+//do not modify these next 4 lines
+#ifdef ARDUINO_WIFI_SHIELD
+#include "utility/WiFiStream.h"
+WiFiStream stream;
 #endif
 
 /*
@@ -148,7 +148,7 @@ char wep_key[] = "your_wep_key";
 
 // ignore SPI pins, pin 5 (reset WiFi101 shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
 // also don't ignore SS pin if it's not pin 10
-// TODO - need to differentiate between Arduino WiFi1 101 Shield and Arduino MKR1000
+// Not needed for Arduino MKR1000.
 #define IS_IGNORE_WIFI101_SHIELD(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
 
 // ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
