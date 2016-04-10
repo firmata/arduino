@@ -947,7 +947,8 @@ void setup()
         || 28 == i
   #endif  //defined(__AVR_ATmega32U4__)
        ) {
-#elif defined (WIFI_101)
+// don't ignore pins when using Wi-Fi 101 library with the MKR1000
+#elif defined (WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
     if (IS_IGNORE_WIFI101_SHIELD(i)) {
 #elif defined (HUZZAH_WIFI)
     // TODO
