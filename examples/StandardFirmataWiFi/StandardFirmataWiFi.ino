@@ -13,6 +13,7 @@
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
   Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
+  Copyright (C) 2016 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 10th, 2016
+  Last updated by Jeff Hoefs: April 10th, 2016
 */
 
 /*
@@ -36,7 +37,7 @@
   - Arduino WiFi Shield (or clone)
   - Arduino WiFi Shield 101
   - Arduino MKR1000 board (built-in WiFi 101)
-  - Adafruit HUZZAH CC3000 WiFi Shield (support coming soon)
+  - ESP8266 WiFi board compatible with ESP8266 Arduino core
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
   configure your particular hardware.
@@ -45,6 +46,8 @@
   - WiFi Shield 101 requires version 0.7.0 or higher of the WiFi101 library (available in Arduino
     1.6.8 or higher, or update the library via the Arduino Library Manager or clone from source:
     https://github.com/arduino-libraries/WiFi101)
+  - ESP8266 requires the Arduino ESP8266 core which can be obtained here:
+    https://github.com/esp8266/Arduino
 
   In order to use the WiFi Shield 101 with Firmata you will need a board with at least
   35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
@@ -119,6 +122,12 @@ SerialFirmata serialFeature;
 
 #ifdef STATIC_IP_ADDRESS
 IPAddress local_ip(STATIC_IP_ADDRESS);
+#endif
+#ifdef SUBNET_MASK
+IPAddress subnet(SUBNET_MASK);
+#endif
+#ifdef GATEWAY_IP_ADDRESS
+IPAddress gateway(GATEWAY_IP_ADDRESS);
 #endif
 
 int wifiConnectionAttemptCounter = 0;
@@ -687,7 +696,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_PWM(pin)) {
           Firmata.write(PIN_MODE_PWM);
-          Firmata.write(8); // 8 = 8-bit resolution
+          Firmata.write(DEFAULT_PWM_RESOLUTION);
         }
         if (IS_PIN_DIGITAL(pin)) {
           Firmata.write(PIN_MODE_SERVO);
@@ -817,37 +826,37 @@ void systemResetCallback()
 }
 
 void printWifiStatus() {
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
   }
   else
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   {
     // print the SSID of the network you're attached to:
     DEBUG_PRINT( "SSID: " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     IPAddress ip = WiFi.localIP();
     DEBUG_PRINTLN( ip );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
 
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     long rssi = WiFi.RSSI();
     DEBUG_PRINT( rssi );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101)
+#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     DEBUG_PRINTLN( " dBm" );
   }
@@ -868,6 +877,8 @@ void setup()
   DEBUG_PRINTLN( "using the WiFi 101 library." );
 #elif defined(ARDUINO_WIFI_SHIELD)
   DEBUG_PRINTLN( "using the legacy WiFi library." );
+#elif defined(ESP8266_WIFI)
+  DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
 #elif defined(HUZZAH_WIFI)
   DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
   //else should never happen here as error-checking in wifiConfig.h will catch this
@@ -879,9 +890,13 @@ void setup()
 #ifdef STATIC_IP_ADDRESS
   DEBUG_PRINT( "Using static IP: " );
   DEBUG_PRINTLN( local_ip );
-  //you can also provide a static IP in the begin() functions, but this simplifies
-  //ifdef logic in this sketch due to support for all different encryption types.
+#ifdef ESP8266_WIFI
+  stream.config( local_ip , gateway, subnet );
+#else
+  // you can also provide a static IP in the begin() functions, but this simplifies
+  // ifdef logic in this sketch due to support for all different encryption types.
   stream.config( local_ip );
+#endif
 #else
   DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
 #endif
