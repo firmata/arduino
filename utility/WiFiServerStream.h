@@ -15,12 +15,12 @@
   See file LICENSE.txt for further informations on licensing terms.
 
   Parts of this class are based on
-  
+
   - WiFiStream - Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
-  
+
   published under the same license.
 
-  Last updated April 15th, 2016
+  Last updated April 16th, 2016
  */
 
 #ifndef WIFI_SERVER_STREAM_H
@@ -46,21 +46,21 @@ protected:
     {
       stop();
     }
-  
+
     // passive TCP connect (accept)
-    WiFiClient newClient = _server.available();    
+    WiFiClient newClient = _server.available();
     if( !_client ) return false;  // could this work on all platforms? if( !(_client && _client.connected()) ) return false;
     _client = newClient;
-  
+
     return true;
   }
-  
+
 public:
   /**
    * create a WiFi stream with a TCP server
    */
-  WiFiServerStream(uint16_t server_port) : WiFiStream(server_port), _server(WiFiServer(server_port)) {}
-  
+  WiFiServerStream(uint16_t server_port) : WiFiStream(server_port) {}
+
   /**
    * maintain WiFi and TCP connection
    * @return true if WiFi and TCP connection are established
@@ -70,14 +70,15 @@ public:
     if( connect_client() ) return true;
 
     stop();
-    
+
     if( !_listening && WiFi.status() == WL_CONNECTED )
     {
       // start TCP server after first WiFi connect
+      _server = WiFiServer(_port);
       _server.begin();
       _listening = true;
     }
-    
+
     return false;
   }
 
@@ -92,7 +93,7 @@ public:
     }
     _connected = false;
   }
-  
+
 };
 
 #endif //WIFI_SERVER_STREAM_H

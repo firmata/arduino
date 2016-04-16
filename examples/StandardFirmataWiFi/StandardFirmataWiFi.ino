@@ -918,6 +918,7 @@ void setup()
    */
   while (!streamConnected && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
     delay(500);
+    DEBUG_PRINT(".");
     streamConnected = stream.maintain();
   }
   if (streamConnected) {  
