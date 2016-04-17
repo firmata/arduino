@@ -51,6 +51,7 @@ protected:
     WiFiClient newClient = _server.available();
     if( !newClient ) return false;
     _client = newClient;
+    _connected = true;
     if ( _currentHostConnectionCallback )
     {
       (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
