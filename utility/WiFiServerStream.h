@@ -20,7 +20,7 @@
 
   published under the same license.
 
-  Last updated April 16th, 2016
+  Last updated April 17th, 2016
  */
 
 #ifndef WIFI_SERVER_STREAM_H
@@ -49,8 +49,12 @@ protected:
 
     // passive TCP connect (accept)
     WiFiClient newClient = _server.available();
-    if( !_client ) return false;  // could this work on all platforms? if( !(_client && _client.connected()) ) return false;
+    if( !newClient ) return false;
     _client = newClient;
+    if ( _currentHostConnectionCallback )
+    {
+      (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
+    }
 
     return true;
   }
@@ -90,6 +94,10 @@ public:
     if( _client)
     {
       _client.stop();
+      if ( _currentHostConnectionCallback )
+      {
+        (*_currentHostConnectionCallback)(HOST_CONNECTION_DISCONNECTED);
+      }
     }
     _connected = false;
   }

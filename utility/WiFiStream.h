@@ -15,20 +15,29 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated April 15th, 2016
+  Last updated April 17th, 2016
  */
- 
+
 #ifndef WIFI_STREAM_H
 #define WIFI_STREAM_H
 
 #include <inttypes.h>
 #include <Stream.h>
 
+#define HOST_CONNECTION_DISCONNECTED 0
+#define HOST_CONNECTION_CONNECTED    1
+
+extern "C" {
+  // callback function types
+  typedef void (*hostConnectionCallbackFunction)(byte);
+}
+
 class WiFiStream : public Stream
 {
 protected:
   WiFiClient _client;
   bool _connected = false;
+  hostConnectionCallbackFunction _currentHostConnectionCallback;
 
   //configuration members
   IPAddress _local_ip;                // DHCP
@@ -54,6 +63,7 @@ public:
   /** constructor for TCP client */
   WiFiStream(IPAddress server_ip, uint16_t server_port) : _remote_ip(server_ip), _port(server_port) {}
 
+  inline void attach( hostConnectionCallbackFunction newFunction ) { _currentHostConnectionCallback = newFunction; }
 
 /******************************************************************************
  *           network configuration

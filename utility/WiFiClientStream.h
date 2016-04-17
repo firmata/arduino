@@ -15,12 +15,12 @@
   See file LICENSE.txt for further informations on licensing terms.
 
   Parts of this class are based on
-  
+
   - EthernetClientStream - Copyright (C) 2013 Norbert Truchsess. All rights reserved.
-  
+
   published under the same license.
 
-  Last updated April 15th, 2016
+  Last updated April 17th, 2016
  */
 
 #ifndef WIFI_CLIENT_STREAM_H
@@ -55,8 +55,13 @@ protected:
       if( millis() - _time_connect >= MILLIS_RECONNECT )
       {
         _connected = _client.connect( _remote_ip, _port );
-        if( !_connected ) {
+        if( !_connected )
+        {
           _time_connect = millis();
+        }
+        else if ( _currentHostConnectionCallback )
+        {
+          (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
         }
       }
     }
@@ -87,6 +92,10 @@ public:
     if( _client)
     {
       _client.stop();
+      if ( _currentHostConnectionCallback )
+      {
+        (*_currentHostConnectionCallback)(HOST_CONNECTION_DISCONNECTED);
+      }
     }
     _connected = false;
     _time_connect = millis();
