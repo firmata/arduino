@@ -3,13 +3,13 @@
  *
  * You must configure your particular hardware. Follow the steps below.
  *
- * Currently StandardFirmataWiFi is configured as a Wi-Fi server. An option to
- * configure as a Wi-Fi client will be added in the future.
+ * By default, StandardFirmataWiFi is configured as a TCP server, to configure
+ * as a TCP client, see STEP 2.
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
 // Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Option A is enabled by default.
+// Arduino MKR1000 or ESP8266 are enabled by default if compiling for either of those boards.
 
 /*
  * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
@@ -75,8 +75,8 @@
  * The appropriate libraries are included automatically when compiling for the ESP8266 so
  * continue on to STEP 2.
  *
- * IMPORTANT: You must have the esp8266 board support installed. To easily install this board, open
- * see the instructions here: https://github.com/esp8266/Arduino#installing-with-boards-manager.
+ * IMPORTANT: You must have the esp8266 board support installed. To easily install this board see
+ * the instructions here: https://github.com/esp8266/Arduino#installing-with-boards-manager.
  */
 //do not modify the following 14 lines
 #ifdef ESP8266
@@ -108,23 +108,24 @@
 //#define HUZZAH_WIFI
 
 
-// STEP 2 [REQUIRED for all boards and shields]
+// STEP 2 [OPTIONAL for all boards and shields]
+// If you want to setup you board as a TCP client, uncomment the following define and replace
+// the IP address with the IP address of your server.
+//#define SERVER_IP 10, 0, 0, 15
+
+
+// STEP 3 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
 char ssid[] = "your_network_name";
 
 
-// STEP 3 [OPTIONAL for all boards and shields]
+// STEP 4 [OPTIONAL for all boards and shields]
 // If you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
 // If the first line is commented out, the WiFi shield will attempt to get an IP from the DHCP server.
 // If you are using a static IP with the ESP8266 then you must also uncomment the SUBNET and GATEWAY.
 //#define STATIC_IP_ADDRESS  192,168,1,113
 //#define SUBNET_MASK        255,255,255,0 // REQUIRED for ESP8266_WIFI, optional for others
 //#define GATEWAY_IP_ADDRESS 0,0,0,0       // REQUIRED for ESP8266_WIFI, optional for others
-
-
-// STEP 4 [OPTIONAL for all boards and shields]
-// uncomment and replace with the IP address of your server if the Arduino is the TCP client
-//#define SERVER_IP 10, 0, 0, 15
 
 
 // STEP 5 [REQUIRED for all boards and shields]
@@ -214,7 +215,7 @@ char wep_key[] = "your_wep_key";
 #else
   WiFiServerStream stream(SERVER_PORT);
 #endif
- 
+
 /*==============================================================================
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/

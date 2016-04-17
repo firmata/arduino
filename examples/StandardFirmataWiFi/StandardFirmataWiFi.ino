@@ -22,14 +22,14 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 10th, 2016
+  Last updated by Jeff Hoefs: April 17th, 2016
 */
 
 /*
   README
 
-  StandardFirmataWiFi is a WiFi server application. You will need a Firmata client library with
-  a network transport in order to establish a connection with StandardFirmataWiFi.
+  StandardFirmataWiFi enables the use of Firmata over a TCP connection. It can be configured as
+  either a TCP server or TCP client.
 
   To use StandardFirmataWiFi you will need to have one of the following
   boards or shields:
@@ -49,10 +49,10 @@
   - ESP8266 requires the Arduino ESP8266 core which can be obtained here:
     https://github.com/esp8266/Arduino
 
-  In order to use the WiFi Shield 101 with Firmata you will need a board with at least
-  35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
-  or any other ATmega328p-based microcontroller or with an Arduino Leonardo or other
-  ATmega32u4-based microcontroller. Some boards that will work are:
+  In order to use the WiFi Shield 101 with Firmata you will need a board with at least 35k of Flash
+  memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno or any other
+  ATmega328p-based microcontroller or with an Arduino Leonardo or other ATmega32u4-based
+  microcontroller. Some boards that will work are:
 
   - Arduino Zero
   - Arduino Due
@@ -87,8 +87,7 @@
 
 /*
  * Uncomment the following include to enable interfacing with Serial devices via hardware or
- * software serial. Note that if enabled, this sketch will likely consume too much memory to run on
- * an Arduino Uno or Leonardo or other ATmega328p-based or ATmega32u4-based boards.
+ * software serial.
  */
 //#include "utility/SerialFirmata.h"
 
@@ -921,10 +920,10 @@ void setup()
     DEBUG_PRINT(".");
     streamConnected = stream.maintain();
   }
-  if (streamConnected) {  
+  if (streamConnected) {
     DEBUG_PRINTLN( "TCP connection established" );
   } else {
-    DEBUG_PRINTLN( "failed to establish TCP connection" );    
+    DEBUG_PRINTLN( "failed to establish TCP connection" );
   }
   printWifiStatus();
 
