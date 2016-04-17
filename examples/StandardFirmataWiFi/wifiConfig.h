@@ -30,16 +30,16 @@
  */
 //#define WIFI_101
 
-//do not modify the following 10 lines
+//do not modify the following 11 lines
 #if defined(ARDUINO_SAMD_MKR1000) && !defined(WIFI_101)
 // automatically include if compiling for MRK1000
 #define WIFI_101
 #endif
 #ifdef WIFI_101
 #include <WiFi101.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
-#define WIFI_LIB_INCLUDED
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #define WIFI_LIB_INCLUDED
 #endif
 
 /*
@@ -57,8 +57,8 @@ WiFiStream stream;
 //do not modify the following 10 lines
 #ifdef ARDUINO_WIFI_SHIELD
 #include <WiFi.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
   #ifdef WIFI_LIB_INCLUDED
   #define MULTIPLE_WIFI_LIB_INCLUDES
   #else
@@ -85,8 +85,8 @@ WiFiStream stream;
 #endif
 #ifdef ESP8266_WIFI
 #include <ESP8266WiFi.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
   #ifdef WIFI_LIB_INCLUDED
   #define MULTIPLE_WIFI_LIB_INCLUDES
   #else
@@ -122,12 +122,17 @@ char ssid[] = "your_network_name";
 //#define GATEWAY_IP_ADDRESS 0,0,0,0       // REQUIRED for ESP8266_WIFI, optional for others
 
 
-// STEP 4 [REQUIRED for all boards and shields]
+// STEP 4 [OPTIONAL for all boards and shields]
+// uncomment and replace with the IP address of your server if the Arduino is the TCP client
+//#define SERVER_IP 10, 0, 0, 15
+
+
+// STEP 5 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
 #define SERVER_PORT 3030
 
 
-// STEP 5 [REQUIRED for all boards and shields]
+// STEP 6 [REQUIRED for all boards and shields]
 // determine your network security type (OPTION A, B, or C). Option A is the most common, and the
 // default.
 
@@ -200,6 +205,16 @@ char wep_key[] = "your_wep_key";
 #error "you must choose between WIFI_NO_SECURITY and WIFI_WPA_SECURITY"
 #endif
 
+/*==============================================================================
+ * WIFI STREAM (don't change anything here)
+ *============================================================================*/
+
+#ifdef SERVER_IP
+  WiFiClientStream stream(IPAddress(SERVER_IP), SERVER_PORT);
+#else
+  WiFiServerStream stream(SERVER_PORT);
+#endif
+ 
 /*==============================================================================
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/

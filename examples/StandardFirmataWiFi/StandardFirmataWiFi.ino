@@ -110,7 +110,7 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-#define WIFI_MAX_CONN_ATTEMPTS      3
+#define MAX_CONN_ATTEMPTS           20  // [500 ms] -> 10 s
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -130,8 +130,8 @@ IPAddress subnet(SUBNET_MASK);
 IPAddress gateway(GATEWAY_IP_ADDRESS);
 #endif
 
-int wifiConnectionAttemptCounter = 0;
-int wifiStatus = WL_IDLE_STATUS;
+int connectionAttempts = 0;
+bool streamConnected = false;
 
 /* analog inputs */
 int analogInputsToReport = 0;      // bitwise array to store pin reporting
@@ -307,6 +307,12 @@ void checkDigitalInputs(void)
   if (TOTAL_PORTS > 14 && reportPINs[14]) outputPort(14, readPort(14, portConfigInputs[14]), false);
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
 }
+
+// -----------------------------------------------------------------------------
+// function forward declarations
+void enableI2CPins();
+void disableI2CPins();
+void reportAnalogCallback(byte analogPin, int value);
 
 // -----------------------------------------------------------------------------
 /* sets the pin mode to the correct state and sets the relevant bits in the
@@ -826,38 +832,26 @@ void systemResetCallback()
 }
 
 void printWifiStatus() {
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
   }
   else
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   {
     // print the SSID of the network you're attached to:
     DEBUG_PRINT( "SSID: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     IPAddress ip = WiFi.localIP();
     DEBUG_PRINTLN( ip );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     long rssi = WiFi.RSSI();
     DEBUG_PRINT( rssi );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
-
     DEBUG_PRINTLN( " dBm" );
   }
 }
@@ -890,7 +884,7 @@ void setup()
 #ifdef STATIC_IP_ADDRESS
   DEBUG_PRINT( "Using static IP: " );
   DEBUG_PRINTLN( local_ip );
-#ifdef ESP8266_WIFI
+#if defined(ESP8266_WIFI) || (defined(SUBNET_MASK) && defined(GATEWAY_IP_ADDRESS))
   stream.config( local_ip , gateway, subnet );
 #else
   // you can also provide a static IP in the begin() functions, but this simplifies
@@ -902,37 +896,36 @@ void setup()
 #endif
 
   /*
-   * Configure WiFi security
+   * Configure WiFi security and initiate WiFi connection
    */
 #if defined(WIFI_WEP_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
     DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
     DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  stream.begin(ssid, wep_index, wep_key);
 #elif defined(WIFI_WPA_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
     DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
     DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, wpa_passphrase, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  stream.begin(ssid, wpa_passphrase);
 #else                          //OPEN network
-  while (wifiStatus != WL_CONNECTED) {
     DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
     DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
+  stream.begin(ssid);
 #endif //defined(WIFI_WEP_SECURITY)
-
   DEBUG_PRINTLN( "WiFi setup done" );
+
+  /*
+   * Wait for TCP connection to be established
+   */
+  while (!streamConnected && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
+    delay(500);
+    DEBUG_PRINT(".");
+    streamConnected = stream.maintain();
+  }
+  if (streamConnected) {  
+    DEBUG_PRINTLN( "TCP connection established" );
+  } else {
+    DEBUG_PRINTLN( "failed to establish TCP connection" );    
+  }
   printWifiStatus();
 
   /*
