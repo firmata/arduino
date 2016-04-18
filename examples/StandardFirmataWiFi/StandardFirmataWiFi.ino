@@ -830,6 +830,28 @@ void systemResetCallback()
   isResetting = false;
 }
 
+/*
+ * Called when a TCP connection is either connected or disconnected.
+ * TODO - figure out why the callback is not being called when using ESP8266 as a TCP server and
+ * why only connect is called when using ESP8266 as a TCP client. In both cases the actual
+ * connection is working but not reported via the callback.
+ */
+void hostConnectionCallback(byte state)
+{
+  switch (state) {
+    case HOST_CONNECTION_CONNECTED:
+      DEBUG_PRINTLN( "TCP connection established" );
+      break;
+    case HOST_CONNECTION_DISCONNECTED:
+      DEBUG_PRINTLN( "TCP connection disconnected" );
+      break;
+  }
+}
+
+/*
+ * Print the status of the WiFi connection. This is the connection to the access point rather
+ * than the TCP connection.
+ */
 void printWifiStatus() {
   if ( WiFi.status() != WL_CONNECTED )
   {
@@ -855,103 +877,20 @@ void printWifiStatus() {
   }
 }
 
-void setup()
+/*
+ * StandardFirmataWiFi communicates with WiFi shields over SPI. Therefore all
+ * SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
+ * Additional pins may also need to be ignored depending on the particular board or
+ * shield in use.
+ */
+void ignoreWiFiPins()
 {
-  /*
-   * WIFI SETUP
-   */
-  DEBUG_BEGIN(9600);
-
-  /*
-   * This statement will clarify how a connection is being made
-   */
-  DEBUG_PRINT( "StandardFirmataWiFi will attempt a WiFi connection " );
-#if defined(WIFI_101)
-  DEBUG_PRINTLN( "using the WiFi 101 library." );
-#elif defined(ARDUINO_WIFI_SHIELD)
-  DEBUG_PRINTLN( "using the legacy WiFi library." );
-#elif defined(ESP8266_WIFI)
-  DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
-#elif defined(HUZZAH_WIFI)
-  DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
-  //else should never happen here as error-checking in wifiConfig.h will catch this
-#endif  //defined(WIFI_101)
-
-  /*
-   * Configure WiFi IP Address
-   */
-#ifdef STATIC_IP_ADDRESS
-  DEBUG_PRINT( "Using static IP: " );
-  DEBUG_PRINTLN( local_ip );
-#if defined(ESP8266_WIFI) || (defined(SUBNET_MASK) && defined(GATEWAY_IP_ADDRESS))
-  stream.config( local_ip , gateway, subnet );
-#else
-  // you can also provide a static IP in the begin() functions, but this simplifies
-  // ifdef logic in this sketch due to support for all different encryption types.
-  stream.config( local_ip );
-#endif
-#else
-  DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
-#endif
-
-  /*
-   * Configure WiFi security and initiate WiFi connection
-   */
-#if defined(WIFI_WEP_SECURITY)
-    DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
-    DEBUG_PRINTLN(ssid);
-  stream.begin(ssid, wep_index, wep_key);
-#elif defined(WIFI_WPA_SECURITY)
-    DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
-    DEBUG_PRINTLN(ssid);
-  stream.begin(ssid, wpa_passphrase);
-#else                          //OPEN network
-    DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
-    DEBUG_PRINTLN(ssid);
-  stream.begin(ssid);
-#endif //defined(WIFI_WEP_SECURITY)
-  DEBUG_PRINTLN( "WiFi setup done" );
-
-  /*
-   * Wait for TCP connection to be established
-   */
-  while (!streamConnected && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
-    delay(500);
-    DEBUG_PRINT(".");
-    streamConnected = stream.maintain();
-  }
-  if (streamConnected) {
-    DEBUG_PRINTLN( "TCP connection established" );
-  } else {
-    DEBUG_PRINTLN( "failed to establish TCP connection" );
-  }
-  printWifiStatus();
-
-  /*
-   * FIRMATA SETUP
-   */
-  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
-
-  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
-  Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
-  Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
-  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
-  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
-  Firmata.attach(SET_DIGITAL_PIN_VALUE, setPinValueCallback);
-  Firmata.attach(START_SYSEX, sysexCallback);
-  Firmata.attach(SYSTEM_RESET, systemResetCallback);
-
-  // StandardFirmataWiFi communicates with WiFi shields over SPI. Therefore all
-  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
-  // Additional pins may also need to be ignored depending on the particular board or
-  // shield in use.
-
   for (byte i = 0; i < TOTAL_PINS; i++) {
 #if defined(ARDUINO_WIFI_SHIELD)
     if (IS_IGNORE_WIFI_SHIELD(i)
   #if defined(__AVR_ATmega32U4__)
-        || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
-        || 28 == i
+      || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
+      || 28 == i
   #endif  //defined(__AVR_ATmega32U4__)
        ) {
 // don't ignore pins when using Wi-Fi 101 library with the MKR1000
@@ -978,10 +917,94 @@ void setup()
 #endif  //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #endif  //ARDUINO_WIFI_SHIELD
+}
 
-  // start up Network Firmata:
+void initWiFi()
+{
+  // This statement will clarify how a connection is being made
+  DEBUG_PRINT( "StandardFirmataWiFi will attempt a WiFi connection " );
+#if defined(WIFI_101)
+  DEBUG_PRINTLN( "using the WiFi 101 library." );
+#elif defined(ARDUINO_WIFI_SHIELD)
+  DEBUG_PRINTLN( "using the legacy WiFi library." );
+#elif defined(ESP8266_WIFI)
+  DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
+#elif defined(HUZZAH_WIFI)
+  DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
+  //else should never happen here as error-checking in wifiConfig.h will catch this
+#endif  //defined(WIFI_101)
+
+  // Configure WiFi IP Address
+#ifdef STATIC_IP_ADDRESS
+  DEBUG_PRINT( "Using static IP: " );
+  DEBUG_PRINTLN( local_ip );
+#if defined(ESP8266_WIFI) || (defined(SUBNET_MASK) && defined(GATEWAY_IP_ADDRESS))
+  stream.config( local_ip , gateway, subnet );
+#else
+  // you can also provide a static IP in the begin() functions, but this simplifies
+  // ifdef logic in this sketch due to support for all different encryption types.
+  stream.config( local_ip );
+#endif
+#else
+  DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
+#endif
+
+  stream.attach(hostConnectionCallback);
+
+  // Configure WiFi security and initiate WiFi connection
+#if defined(WIFI_WEP_SECURITY)
+  DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wep_index, wep_key);
+#elif defined(WIFI_WPA_SECURITY)
+  DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wpa_passphrase);
+#else                          //OPEN network
+  DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid);
+#endif //defined(WIFI_WEP_SECURITY)
+  DEBUG_PRINTLN( "WiFi setup done" );
+
+  // Wait for connection to access point to be established. This is necessary for ESP8266
+  // or we won't have a connection state once printWiFiStatus() is called and the state
+  // will be reported as disconnected. We don't want to wait until the TCP connection is
+  // established before calling printWiFiStatus() because printing the IP address upon
+  // connection with the access point is useful when using DHCP
+  while (WiFi.status() != WL_CONNECTED && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
+    delay(500);
+    DEBUG_PRINT(".");
+  }
+  printWifiStatus();
+}
+
+void initFirmata()
+{
+  Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
+  Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
+  Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
+  Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
+  Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+  Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+  Firmata.attach(SET_DIGITAL_PIN_VALUE, setPinValueCallback);
+  Firmata.attach(START_SYSEX, sysexCallback);
+  Firmata.attach(SYSTEM_RESET, systemResetCallback);
+
+  ignoreWiFiPins();
+
+  // Initialize Firmata to use the WiFi stream object as the transport.
   Firmata.begin(stream);
   systemResetCallback();  // reset to default config
+}
+
+void setup()
+{
+  DEBUG_BEGIN(9600);
+
+  initWiFi();
+
+  initFirmata();
 }
 
 /*==============================================================================
