@@ -15,7 +15,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated April 17th, 2016
+  Last updated April 23rd, 2016
  */
 
 #ifndef WIFI_STREAM_H
@@ -114,6 +114,28 @@ public:
    * @return true if WiFi and TCP connection are established
    */
   virtual bool maintain() = 0;
+  
+#ifdef ESP8266
+  /**
+   * get status of TCP connection
+   * @return status of TCP connection
+   *         CLOSED      = 0 (typical)
+   *         LISTEN      = 1 (not used)
+   *         SYN_SENT    = 2
+   *         SYN_RCVD    = 3
+   *         ESTABLISHED = 4 (typical)
+   *         FIN_WAIT_1  = 5
+   *         FIN_WAIT_2  = 6
+   *         CLOSE_WAIT  = 7
+   *         CLOSING     = 8
+   *         LAST_ACK    = 9
+   *         TIME_WAIT   = 10
+   */
+  inline uint8_t status() 
+  {
+    return _client.status();
+  }
+#endif
 
   /**
    * close TCP client connection
