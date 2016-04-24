@@ -22,7 +22,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 17th, 2016
+  Last updated by Jeff Hoefs: April 24th, 2016
 */
 
 /*
@@ -36,7 +36,7 @@
 
   - Arduino WiFi Shield (or clone)
   - Arduino WiFi Shield 101
-  - Arduino MKR1000 board (built-in WiFi 101)
+  - Arduino MKR1000 board
   - ESP8266 WiFi board compatible with ESP8266 Arduino core
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
@@ -46,7 +46,7 @@
   - WiFi Shield 101 requires version 0.7.0 or higher of the WiFi101 library (available in Arduino
     1.6.8 or higher, or update the library via the Arduino Library Manager or clone from source:
     https://github.com/arduino-libraries/WiFi101)
-  - ESP8266 requires the Arduino ESP8266 core which can be obtained here:
+  - ESP8266 requires the Arduino ESP8266 core v2.1.0 or higher which can be obtained here:
     https://github.com/esp8266/Arduino
 
   In order to use the WiFi Shield 101 with Firmata you will need a board with at least 35k of Flash
@@ -308,7 +308,7 @@ void checkDigitalInputs(void)
 }
 
 // -----------------------------------------------------------------------------
-// function forward declarations
+// function forward declarations for xtensa compiler (ESP8266)
 void enableI2CPins();
 void disableI2CPins();
 void reportAnalogCallback(byte analogPin, int value);
@@ -832,9 +832,9 @@ void systemResetCallback()
 
 /*
  * Called when a TCP connection is either connected or disconnected.
- * TODO - figure out why the callback is not being called when using ESP8266 as a TCP server and
- * why only connect is called when using ESP8266 as a TCP client. In both cases the actual
- * connection is working but not reported via the callback.
+ * TODO:
+ * - report connected or reconnected state to host (to be added to protocol)
+ * - report current state to host (to be added to protocol)
  */
 void hostConnectionCallback(byte state)
 {
@@ -883,43 +883,30 @@ void printWifiStatus() {
  * Additional pins may also need to be ignored depending on the particular board or
  * shield in use.
  */
-void ignoreWiFiPins()
+void ignorePins()
 {
+#ifdef IS_IGNORE_PIN
   for (byte i = 0; i < TOTAL_PINS; i++) {
-#if defined(ARDUINO_WIFI_SHIELD)
-    if (IS_IGNORE_WIFI_SHIELD(i)
-  #if defined(__AVR_ATmega32U4__)
-      || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
-      || 28 == i
-  #endif  //defined(__AVR_ATmega32U4__)
-       ) {
-// don't ignore pins when using Wi-Fi 101 library with the MKR1000
-#elif defined (WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
-    if (IS_IGNORE_WIFI101_SHIELD(i)) {
-#elif defined (HUZZAH_WIFI)
-    // TODO
-    if (false) {
-#else
-    if (false) {
-#endif
+    if (IS_IGNORE_PIN(i)) {
       Firmata.setPinMode(i, PIN_MODE_IGNORE);
     }
   }
+#endif
 
   //Set up controls for the Arduino WiFi Shield SS for the SD Card
 #ifdef ARDUINO_WIFI_SHIELD
-  // Arduino WiFi, Arduino WiFi Shield and Arduino Yun all have SD SS wired to D4
+  // Arduino WiFi Shield has SD SS wired to D4
   pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
   digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif  //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#endif //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#endif  //ARDUINO_WIFI_SHIELD
+#endif //ARDUINO_WIFI_SHIELD
 }
 
-void initWiFi()
+void initTransport()
 {
   // This statement will clarify how a connection is being made
   DEBUG_PRINT( "StandardFirmataWiFi will attempt a WiFi connection " );
@@ -967,11 +954,7 @@ void initWiFi()
 #endif //defined(WIFI_WEP_SECURITY)
   DEBUG_PRINTLN( "WiFi setup done" );
 
-  // Wait for connection to access point to be established. This is necessary for ESP8266
-  // or we won't have a connection state once printWiFiStatus() is called and the state
-  // will be reported as disconnected. We don't want to wait until the TCP connection is
-  // established before calling printWiFiStatus() because printing the IP address upon
-  // connection with the access point is useful when using DHCP
+  // Wait for connection to access point to be established.
   while (WiFi.status() != WL_CONNECTED && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
     delay(500);
     DEBUG_PRINT(".");
@@ -991,7 +974,7 @@ void initFirmata()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  ignoreWiFiPins();
+  ignorePins();
 
   // Initialize Firmata to use the WiFi stream object as the transport.
   Firmata.begin(stream);
@@ -1002,7 +985,7 @@ void setup()
 {
   DEBUG_BEGIN(9600);
 
-  initWiFi();
+  initTransport();
 
   initFirmata();
 }
