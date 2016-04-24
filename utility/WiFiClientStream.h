@@ -20,7 +20,7 @@
 
   published under the same license.
 
-  Last updated April 17th, 2016
+  Last updated April 23rd, 2016
  */
 
 #ifndef WIFI_CLIENT_STREAM_H
@@ -41,21 +41,20 @@ protected:
    */
   virtual inline bool connect_client()
   {
-    if( _client && _client.connected() ) return true;
-
-    if( _connected )
+    if ( _connected )
     {
+      if ( _client && _client.connected() ) return true;
       stop();
     }
 
     // active TCP connect
-    if( WiFi.status() == WL_CONNECTED )
+    if ( WiFi.status() == WL_CONNECTED )
     {
       // if the client is disconnected, try to reconnect every 5 seconds
-      if( millis() - _time_connect >= MILLIS_RECONNECT )
+      if ( millis() - _time_connect >= MILLIS_RECONNECT )
       {
         _connected = _client.connect( _remote_ip, _port );
-        if( !_connected )
+        if ( !_connected )
         {
           _time_connect = millis();
         }
@@ -89,7 +88,7 @@ public:
    */
   virtual inline void stop()
   {
-    if( _client)
+    if ( _client)
     {
       _client.stop();
       if ( _currentHostConnectionCallback )

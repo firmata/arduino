@@ -20,7 +20,7 @@
 
   published under the same license.
 
-  Last updated April 17th, 2016
+  Last updated April 23rd, 2016
  */
 
 #ifndef WIFI_SERVER_STREAM_H
@@ -40,16 +40,15 @@ protected:
    */
   virtual inline bool connect_client()
   {
-    if( _client && _client.connected() ) return true;
-
-    if( _connected )
+    if ( _connected )
     {
+      if ( _client && _client.connected() ) return true;
       stop();
     }
 
     // passive TCP connect (accept)
     WiFiClient newClient = _server.available();
-    if( !newClient ) return false;
+    if ( !newClient ) return false;
     _client = newClient;
     _connected = true;
     if ( _currentHostConnectionCallback )
@@ -72,11 +71,11 @@ public:
    */
   virtual inline bool maintain()
   {
-    if( connect_client() ) return true;
+    if ( connect_client() ) return true;
 
     stop();
 
-    if( !_listening && WiFi.status() == WL_CONNECTED )
+    if ( !_listening && WiFi.status() == WL_CONNECTED )
     {
       // start TCP server after first WiFi connect
       _server = WiFiServer(_port);
@@ -92,7 +91,7 @@ public:
    */
   virtual inline void stop()
   {
-    if( _client)
+    if ( _client)
     {
       _client.stop();
       if ( _currentHostConnectionCallback )
