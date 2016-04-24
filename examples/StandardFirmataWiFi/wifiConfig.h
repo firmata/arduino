@@ -220,10 +220,21 @@ char wep_key[] = "your_wep_key";
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/
 
+#if defined(WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
 // ignore SPI pins, pin 5 (reset WiFi101 shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-// also don't ignore SS pin if it's not pin 10
-// Not needed for Arduino MKR1000.
-#define IS_IGNORE_WIFI101_SHIELD(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
+// also don't ignore SS pin if it's not pin 10. Not needed for Arduino MKR1000.
+#define IS_IGNORE_PIN(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
 
+#elif defined(ARDUINO_WIFI_SHIELD) && defined(__AVR_ATmega32U4__)
 // ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-#define IS_IGNORE_WIFI_SHIELD(p)     ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+// On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10 || (p) == 24 || (p) == 28)
+
+#elif defined(ARDUINO_WIFI_SHIELD)
+// ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+
+#elif defined(ESP8266_WIFI) && defined(SERIAL_DEBUG)
+#define IS_IGNORE_PIN(p)  ((p) == 1)
+
+#endif
