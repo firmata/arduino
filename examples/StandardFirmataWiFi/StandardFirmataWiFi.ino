@@ -22,21 +22,21 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: April 10th, 2016
+  Last updated by Jeff Hoefs: April 24th, 2016
 */
 
 /*
   README
 
-  StandardFirmataWiFi is a WiFi server application. You will need a Firmata client library with
-  a network transport in order to establish a connection with StandardFirmataWiFi.
+  StandardFirmataWiFi enables the use of Firmata over a TCP connection. It can be configured as
+  either a TCP server or TCP client.
 
   To use StandardFirmataWiFi you will need to have one of the following
   boards or shields:
 
   - Arduino WiFi Shield (or clone)
   - Arduino WiFi Shield 101
-  - Arduino MKR1000 board (built-in WiFi 101)
+  - Arduino MKR1000 board
   - ESP8266 WiFi board compatible with ESP8266 Arduino core
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
@@ -46,13 +46,13 @@
   - WiFi Shield 101 requires version 0.7.0 or higher of the WiFi101 library (available in Arduino
     1.6.8 or higher, or update the library via the Arduino Library Manager or clone from source:
     https://github.com/arduino-libraries/WiFi101)
-  - ESP8266 requires the Arduino ESP8266 core which can be obtained here:
+  - ESP8266 requires the Arduino ESP8266 core v2.1.0 or higher which can be obtained here:
     https://github.com/esp8266/Arduino
 
-  In order to use the WiFi Shield 101 with Firmata you will need a board with at least
-  35k of Flash memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno
-  or any other ATmega328p-based microcontroller or with an Arduino Leonardo or other
-  ATmega32u4-based microcontroller. Some boards that will work are:
+  In order to use the WiFi Shield 101 with Firmata you will need a board with at least 35k of Flash
+  memory. This means you cannot use the WiFi Shield 101 with an Arduino Uno or any other
+  ATmega328p-based microcontroller or with an Arduino Leonardo or other ATmega32u4-based
+  microcontroller. Some boards that will work are:
 
   - Arduino Zero
   - Arduino Due
@@ -87,8 +87,7 @@
 
 /*
  * Uncomment the following include to enable interfacing with Serial devices via hardware or
- * software serial. Note that if enabled, this sketch will likely consume too much memory to run on
- * an Arduino Uno or Leonardo or other ATmega328p-based or ATmega32u4-based boards.
+ * software serial.
  */
 //#include "utility/SerialFirmata.h"
 
@@ -110,7 +109,7 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-#define WIFI_MAX_CONN_ATTEMPTS      3
+#define MAX_CONN_ATTEMPTS           20  // [500 ms] -> 10 s
 
 /*==============================================================================
  * GLOBAL VARIABLES
@@ -130,8 +129,8 @@ IPAddress subnet(SUBNET_MASK);
 IPAddress gateway(GATEWAY_IP_ADDRESS);
 #endif
 
-int wifiConnectionAttemptCounter = 0;
-int wifiStatus = WL_IDLE_STATUS;
+int connectionAttempts = 0;
+bool streamConnected = false;
 
 /* analog inputs */
 int analogInputsToReport = 0;      // bitwise array to store pin reporting
@@ -307,6 +306,12 @@ void checkDigitalInputs(void)
   if (TOTAL_PORTS > 14 && reportPINs[14]) outputPort(14, readPort(14, portConfigInputs[14]), false);
   if (TOTAL_PORTS > 15 && reportPINs[15]) outputPort(15, readPort(15, portConfigInputs[15]), false);
 }
+
+// -----------------------------------------------------------------------------
+// function forward declarations for xtensa compiler (ESP8266)
+void enableI2CPins();
+void disableI2CPins();
+void reportAnalogCallback(byte analogPin, int value);
 
 // -----------------------------------------------------------------------------
 /* sets the pin mode to the correct state and sets the relevant bits in the
@@ -825,53 +830,85 @@ void systemResetCallback()
   isResetting = false;
 }
 
+/*
+ * Called when a TCP connection is either connected or disconnected.
+ * TODO:
+ * - report connected or reconnected state to host (to be added to protocol)
+ * - report current state to host (to be added to protocol)
+ */
+void hostConnectionCallback(byte state)
+{
+  switch (state) {
+    case HOST_CONNECTION_CONNECTED:
+      DEBUG_PRINTLN( "TCP connection established" );
+      break;
+    case HOST_CONNECTION_DISCONNECTED:
+      DEBUG_PRINTLN( "TCP connection disconnected" );
+      break;
+  }
+}
+
+/*
+ * Print the status of the WiFi connection. This is the connection to the access point rather
+ * than the TCP connection.
+ */
 void printWifiStatus() {
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   if ( WiFi.status() != WL_CONNECTED )
   {
     DEBUG_PRINT( "WiFi connection failed. Status value: " );
     DEBUG_PRINTLN( WiFi.status() );
   }
   else
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
   {
     // print the SSID of the network you're attached to:
     DEBUG_PRINT( "SSID: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     DEBUG_PRINTLN( WiFi.SSID() );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print your WiFi shield's IP address:
     DEBUG_PRINT( "IP Address: " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     IPAddress ip = WiFi.localIP();
     DEBUG_PRINTLN( ip );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
 
     // print the received signal strength:
     DEBUG_PRINT( "signal strength (RSSI): " );
-
-#if defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
     long rssi = WiFi.RSSI();
     DEBUG_PRINT( rssi );
-#endif    //defined(ARDUINO_WIFI_SHIELD) || defined(WIFI_101) || defined(ESP8266_WIFI)
-
     DEBUG_PRINTLN( " dBm" );
   }
 }
 
-void setup()
+/*
+ * StandardFirmataWiFi communicates with WiFi shields over SPI. Therefore all
+ * SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
+ * Additional pins may also need to be ignored depending on the particular board or
+ * shield in use.
+ */
+void ignorePins()
 {
-  /*
-   * WIFI SETUP
-   */
-  DEBUG_BEGIN(9600);
+#ifdef IS_IGNORE_PIN
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_IGNORE_PIN(i)) {
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
+    }
+  }
+#endif
 
-  /*
-   * This statement will clarify how a connection is being made
-   */
+  //Set up controls for the Arduino WiFi Shield SS for the SD Card
+#ifdef ARDUINO_WIFI_SHIELD
+  // Arduino WiFi Shield has SD SS wired to D4
+  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
+  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+#endif //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+#endif //ARDUINO_WIFI_SHIELD
+}
+
+void initTransport()
+{
+  // This statement will clarify how a connection is being made
   DEBUG_PRINT( "StandardFirmataWiFi will attempt a WiFi connection " );
 #if defined(WIFI_101)
   DEBUG_PRINTLN( "using the WiFi 101 library." );
@@ -884,13 +921,11 @@ void setup()
   //else should never happen here as error-checking in wifiConfig.h will catch this
 #endif  //defined(WIFI_101)
 
-  /*
-   * Configure WiFi IP Address
-   */
+  // Configure WiFi IP Address
 #ifdef STATIC_IP_ADDRESS
   DEBUG_PRINT( "Using static IP: " );
   DEBUG_PRINTLN( local_ip );
-#ifdef ESP8266_WIFI
+#if defined(ESP8266_WIFI) || (defined(SUBNET_MASK) && defined(GATEWAY_IP_ADDRESS))
   stream.config( local_ip , gateway, subnet );
 #else
   // you can also provide a static IP in the begin() functions, but this simplifies
@@ -901,45 +936,35 @@ void setup()
   DEBUG_PRINTLN( "IP will be requested from DHCP ..." );
 #endif
 
-  /*
-   * Configure WiFi security
-   */
+  stream.attach(hostConnectionCallback);
+
+  // Configure WiFi security and initiate WiFi connection
 #if defined(WIFI_WEP_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin( ssid, wep_index, wep_key, SERVER_PORT );
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  DEBUG_PRINT( "Attempting to connect to WEP SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wep_index, wep_key);
 #elif defined(WIFI_WPA_SECURITY)
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, wpa_passphrase, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
-
+  DEBUG_PRINT( "Attempting to connect to WPA SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid, wpa_passphrase);
 #else                          //OPEN network
-  while (wifiStatus != WL_CONNECTED) {
-    DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
-    DEBUG_PRINTLN(ssid);
-    wifiStatus = stream.begin(ssid, SERVER_PORT);
-    delay(5000); // TODO - determine minimum delay
-    if (++wifiConnectionAttemptCounter > WIFI_MAX_CONN_ATTEMPTS) break;
-  }
+  DEBUG_PRINTLN( "Attempting to connect to open SSID: " );
+  DEBUG_PRINTLN(ssid);
+  stream.begin(ssid);
 #endif //defined(WIFI_WEP_SECURITY)
-
   DEBUG_PRINTLN( "WiFi setup done" );
+
+  // Wait for connection to access point to be established.
+  while (WiFi.status() != WL_CONNECTED && ++connectionAttempts <= MAX_CONN_ATTEMPTS) {
+    delay(500);
+    DEBUG_PRINT(".");
+  }
   printWifiStatus();
+}
 
-  /*
-   * FIRMATA SETUP
-   */
+void initFirmata()
+{
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
-
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
@@ -949,47 +974,20 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // StandardFirmataWiFi communicates with WiFi shields over SPI. Therefore all
-  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
-  // Additional pins may also need to be ignored depending on the particular board or
-  // shield in use.
+  ignorePins();
 
-  for (byte i = 0; i < TOTAL_PINS; i++) {
-#if defined(ARDUINO_WIFI_SHIELD)
-    if (IS_IGNORE_WIFI_SHIELD(i)
-  #if defined(__AVR_ATmega32U4__)
-        || 24 == i // On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
-        || 28 == i
-  #endif  //defined(__AVR_ATmega32U4__)
-       ) {
-// don't ignore pins when using Wi-Fi 101 library with the MKR1000
-#elif defined (WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
-    if (IS_IGNORE_WIFI101_SHIELD(i)) {
-#elif defined (HUZZAH_WIFI)
-    // TODO
-    if (false) {
-#else
-    if (false) {
-#endif
-      Firmata.setPinMode(i, PIN_MODE_IGNORE);
-    }
-  }
-
-  //Set up controls for the Arduino WiFi Shield SS for the SD Card
-#ifdef ARDUINO_WIFI_SHIELD
-  // Arduino WiFi, Arduino WiFi Shield and Arduino Yun all have SD SS wired to D4
-  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
-  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
-
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
-#endif  //defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-
-#endif  //ARDUINO_WIFI_SHIELD
-
-  // start up Network Firmata:
+  // Initialize Firmata to use the WiFi stream object as the transport.
   Firmata.begin(stream);
   systemResetCallback();  // reset to default config
+}
+
+void setup()
+{
+  DEBUG_BEGIN(9600);
+
+  initTransport();
+
+  initFirmata();
 }
 
 /*==============================================================================

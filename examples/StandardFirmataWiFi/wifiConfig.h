@@ -3,13 +3,13 @@
  *
  * You must configure your particular hardware. Follow the steps below.
  *
- * Currently StandardFirmataWiFi is configured as a Wi-Fi server. An option to
- * configure as a Wi-Fi client will be added in the future.
+ * By default, StandardFirmataWiFi is configured as a TCP server, to configure
+ * as a TCP client, see STEP 2.
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
 // Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Option A is enabled by default.
+// Arduino MKR1000 or ESP8266 are enabled by default if compiling for either of those boards.
 
 /*
  * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
@@ -30,16 +30,16 @@
  */
 //#define WIFI_101
 
-//do not modify the following 10 lines
+//do not modify the following 11 lines
 #if defined(ARDUINO_SAMD_MKR1000) && !defined(WIFI_101)
 // automatically include if compiling for MRK1000
 #define WIFI_101
 #endif
 #ifdef WIFI_101
 #include <WiFi101.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
-#define WIFI_LIB_INCLUDED
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #define WIFI_LIB_INCLUDED
 #endif
 
 /*
@@ -57,8 +57,8 @@ WiFiStream stream;
 //do not modify the following 10 lines
 #ifdef ARDUINO_WIFI_SHIELD
 #include <WiFi.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
   #ifdef WIFI_LIB_INCLUDED
   #define MULTIPLE_WIFI_LIB_INCLUDES
   #else
@@ -75,8 +75,8 @@ WiFiStream stream;
  * The appropriate libraries are included automatically when compiling for the ESP8266 so
  * continue on to STEP 2.
  *
- * IMPORTANT: You must have the esp8266 board support installed. To easily install this board, open
- * see the instructions here: https://github.com/esp8266/Arduino#installing-with-boards-manager.
+ * IMPORTANT: You must have the esp8266 board support installed. To easily install this board see
+ * the instructions here: https://github.com/esp8266/Arduino#installing-with-boards-manager.
  */
 //do not modify the following 14 lines
 #ifdef ESP8266
@@ -85,8 +85,8 @@ WiFiStream stream;
 #endif
 #ifdef ESP8266_WIFI
 #include <ESP8266WiFi.h>
-#include "utility/WiFiStream.h"
-WiFiStream stream;
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
   #ifdef WIFI_LIB_INCLUDED
   #define MULTIPLE_WIFI_LIB_INCLUDES
   #else
@@ -108,12 +108,18 @@ WiFiStream stream;
 //#define HUZZAH_WIFI
 
 
-// STEP 2 [REQUIRED for all boards and shields]
+// STEP 2 [OPTIONAL for all boards and shields]
+// If you want to setup you board as a TCP client, uncomment the following define and replace
+// the IP address with the IP address of your server.
+//#define SERVER_IP 10, 0, 0, 15
+
+
+// STEP 3 [REQUIRED for all boards and shields]
 // replace this with your wireless network SSID
 char ssid[] = "your_network_name";
 
 
-// STEP 3 [OPTIONAL for all boards and shields]
+// STEP 4 [OPTIONAL for all boards and shields]
 // If you want to use a static IP (v4) address, uncomment the line below. You can also change the IP.
 // If the first line is commented out, the WiFi shield will attempt to get an IP from the DHCP server.
 // If you are using a static IP with the ESP8266 then you must also uncomment the SUBNET and GATEWAY.
@@ -122,12 +128,12 @@ char ssid[] = "your_network_name";
 //#define GATEWAY_IP_ADDRESS 0,0,0,0       // REQUIRED for ESP8266_WIFI, optional for others
 
 
-// STEP 4 [REQUIRED for all boards and shields]
+// STEP 5 [REQUIRED for all boards and shields]
 // define your port number here, you will need this to open a TCP connection to your Arduino
 #define SERVER_PORT 3030
 
 
-// STEP 5 [REQUIRED for all boards and shields]
+// STEP 6 [REQUIRED for all boards and shields]
 // determine your network security type (OPTION A, B, or C). Option A is the most common, and the
 // default.
 
@@ -201,13 +207,34 @@ char wep_key[] = "your_wep_key";
 #endif
 
 /*==============================================================================
+ * WIFI STREAM (don't change anything here)
+ *============================================================================*/
+
+#ifdef SERVER_IP
+  WiFiClientStream stream(IPAddress(SERVER_IP), SERVER_PORT);
+#else
+  WiFiServerStream stream(SERVER_PORT);
+#endif
+
+/*==============================================================================
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/
 
+#if defined(WIFI_101) && !defined(ARDUINO_SAMD_MKR1000)
 // ignore SPI pins, pin 5 (reset WiFi101 shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-// also don't ignore SS pin if it's not pin 10
-// Not needed for Arduino MKR1000.
-#define IS_IGNORE_WIFI101_SHIELD(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
+// also don't ignore SS pin if it's not pin 10. Not needed for Arduino MKR1000.
+#define IS_IGNORE_PIN(p)  ((p) == 10 || (IS_PIN_SPI(p) && (p) != SS) || (p) == 5 || (p) == 7)
 
+#elif defined(ARDUINO_WIFI_SHIELD) && defined(__AVR_ATmega32U4__)
 // ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
-#define IS_IGNORE_WIFI_SHIELD(p)     ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+// On Leonardo, pin 24 maps to D4 and pin 28 maps to D10
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10 || (p) == 24 || (p) == 28)
+
+#elif defined(ARDUINO_WIFI_SHIELD)
+// ignore SPI pins, pin 4 (SS for SD-Card on WiFi-shield), pin 7 (WiFi handshake) and pin 10 (WiFi SS)
+#define IS_IGNORE_PIN(p)  ((IS_PIN_SPI(p) || (p) == 4) || (p) == 7 || (p) == 10)
+
+#elif defined(ESP8266_WIFI) && defined(SERIAL_DEBUG)
+#define IS_IGNORE_PIN(p)  ((p) == 1)
+
+#endif
