@@ -5,6 +5,9 @@
  * need a unique ble local name (see below). If you are using another supported BLE board or shield,
  * follow the instructions for the specific board or shield below.
  *
+ * Make sure you have the Intel Curie Boards package v1.0.6 or higher installed via the Arduino
+ * Boards Manager.
+ *
  * Supported boards and shields:
  * - Arduino 101 (recommended)
  * - RedBearLab BLE Shield (v2)  ** to be verified **
@@ -51,6 +54,9 @@ BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
 
 /*
  * Arduino 101
+ *
+ * Make sure you have the Intel Curie Boards package v1.0.6 or higher installed via the Arduino
+ * Boards Manager.
  *
  * Test script: https://gist.github.com/soundanalogous/927360b797574ed50e27
  */
