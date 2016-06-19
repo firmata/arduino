@@ -114,7 +114,7 @@ public:
    * @return true if WiFi and TCP connection are established
    */
   virtual bool maintain() = 0;
-  
+
 #ifdef ESP8266
   /**
    * get status of TCP connection
@@ -131,7 +131,7 @@ public:
    *         LAST_ACK    = 9
    *         TIME_WAIT   = 10
    */
-  inline uint8_t status() 
+  inline uint8_t status()
   {
     return _client.status();
   }
