@@ -4,7 +4,7 @@
   Based on BLESerial.cpp by Voita Molda
   https://github.com/sandeepmistry/arduino-BLEPeripheral/blob/master/examples/serial/BLESerial.h
 
-  Last updated April 04th, 2016
+  Last updated April 4th, 2016
  */
 
 #ifndef _BLE_STREAM_H_

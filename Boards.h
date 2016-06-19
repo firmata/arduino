@@ -1,7 +1,7 @@
 /*
   Boards.h - Hardware Abstraction Layer for Firmata library
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -10,7 +10,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated December 19th, 2015
+  Last updated April 10th, 2016
 */
 
 #ifndef Firmata_Boards_h
@@ -702,7 +702,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  10
 
- 
+
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"

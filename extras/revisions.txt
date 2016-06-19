@@ -1,3 +1,21 @@
+FIRMATA 2.5.3 - Jun 18, 2016
+
+[core library]
+* Added ESP8266 support (Jens B. & Jacob Rosenthal)
+* Added host connection callback (Jens B.)
+* Added Wi-Fi TCP client (Jens B.)
+* Added BLE transport (BLEStream based on BLESerial by Volta Molda)
+* Fixed Arduino Galileo and Edison compile issues
+
+[StandardFirmata & variants]
+* Added StandardFirmataBLE (for use with Arduino 101)
+* Added ability to choose between Wi-Fi TCP client or server (Jens B.)
+* Various updates to StandardFirmataWiFi (Jens B.)
+* Increased I2C RX data buffer from 32 to 64 bytes (Rick Waldron)
+* Removed StandardFirmataEthernetPlus
+* Made StandardFirmataEtherent configurable (to optionally add Plus functionality)
+* Improved configuration instructions for StandardFirmataEthernet and StandardFirmataWiFi
+
 FIRMATA 2.5.2 - Feb 15, 2016
 
 [core library]

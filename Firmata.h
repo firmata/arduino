@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.5.2 - 2016-2-15
+  Firmata.h - Firmata library v2.5.3 - 2016-06-18
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
 
@@ -30,7 +30,7 @@
  */
 #define FIRMATA_FIRMWARE_MAJOR_VERSION  2
 #define FIRMATA_FIRMWARE_MINOR_VERSION  5
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION 2
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION 3
 
 /* DEPRECATED as of Firmata v2.5.1. As of 2.5.1 there are separate version numbers for
  * the protocol version and the firmware version.
