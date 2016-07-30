@@ -3,8 +3,8 @@
   from software on a host computer. It is intended to work with
   any host computer software package.
 
-  To download a host software package, please clink on the following link
-  to open the list of Firmata client libraries your default browser.
+  To download a host software package, please click on the following link
+  to open the list of Firmata client libraries in your default browser.
 
   https://github.com/firmata/arduino#firmata-client-libraries
 
