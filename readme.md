@@ -61,12 +61,14 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/kfatehi/firmata]
 * Modelica
   * [https://www.wolfram.com/system-modeler/libraries/model-plug/]
-* golang
+* Go
   * [https://github.com/kraman/go-firmata]
 * vvvv
   * [https://vvvv.org/blog/arduino-second-service]
 * openFrameworks
   * [http://openframeworks.cc/documentation/communication/ofArduino/]
+* Rust
+  * [https://github.com/zankich/rust-firmata]
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all Arduino and Arduino-compatible boards. Refer to the respective projects for details.
 
