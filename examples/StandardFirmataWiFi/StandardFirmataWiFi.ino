@@ -174,6 +174,8 @@ byte servoCount = 0;
 
 boolean isResetting = false;
 
+// Forward declare a few functions to avoid compiler errors with older versions
+// of the Arduino IDE.
 void setPinModeCallback(byte, int);
 void reportAnalogCallback(byte analogPin, int value);
 void sysexCallback(byte, byte, byte*);
