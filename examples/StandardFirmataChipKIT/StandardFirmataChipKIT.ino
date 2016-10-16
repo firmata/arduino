@@ -325,7 +325,10 @@ void setPinModeCallback(byte pin, int mode)
       break;
     case OUTPUT:
       if (IS_PIN_DIGITAL(pin)) {
-        digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
+        if (Firmata.getPinMode(pin) == PIN_MODE_PWM) {
+          // Disable PWM if pin mode was previously set to PWM.
+          digitalWrite(PIN_TO_DIGITAL(pin), LOW);
+        }
         pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
         Firmata.setPinMode(pin, OUTPUT);
       }
