@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated June 15th, 2016
+  Last updated October 16th, 2016
 */
 
 #include <Servo.h>
@@ -108,6 +108,10 @@ byte servoCount = 0;
 
 boolean isResetting = false;
 
+void setPinModeCallback(byte, int);
+void reportAnalogCallback(byte analogPin, int value);
+void sysexCallback(byte, byte, byte*);
+
 /* utility functions */
 void wireWrite(byte data)
 {
@@ -167,6 +171,30 @@ void detachServo(byte pin)
   }
 
   servoPinMap[pin] = 255;
+}
+
+void enableI2CPins()
+{
+  byte i;
+  // is there a faster way to do this? would probaby require importing
+  // Arduino.h to get SCL and SDA pins
+  for (i = 0; i < TOTAL_PINS; i++) {
+    if (IS_PIN_I2C(i)) {
+      // mark pins as i2c so they are ignore in non i2c data requests
+      setPinModeCallback(i, PIN_MODE_I2C);
+    }
+  }
+
+  isI2CEnabled = true;
+
+  Wire.begin();
+}
+
+/* disable the i2c pins so they can be used for other functions */
+void disableI2CPins() {
+  isI2CEnabled = false;
+  // disable read continuous mode for all devices
+  queryIndex = -1;
 }
 
 void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX) {
@@ -678,30 +706,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #endif
       break;
   }
-}
-
-void enableI2CPins()
-{
-  byte i;
-  // is there a faster way to do this? would probaby require importing
-  // Arduino.h to get SCL and SDA pins
-  for (i = 0; i < TOTAL_PINS; i++) {
-    if (IS_PIN_I2C(i)) {
-      // mark pins as i2c so they are ignore in non i2c data requests
-      setPinModeCallback(i, PIN_MODE_I2C);
-    }
-  }
-
-  isI2CEnabled = true;
-
-  Wire.begin();
-}
-
-/* disable the i2c pins so they can be used for other functions */
-void disableI2CPins() {
-  isI2CEnabled = false;
-  // disable read continuous mode for all devices
-  queryIndex = -1;
 }
 
 /*==============================================================================
