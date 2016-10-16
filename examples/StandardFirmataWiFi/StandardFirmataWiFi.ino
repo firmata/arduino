@@ -89,6 +89,8 @@
  * Uncomment the following include to enable interfacing with Serial devices via hardware or
  * software serial.
  */
+// In order to use software serial, you will need to compile this sketch with
+// Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 //#include "utility/SerialFirmata.h"
 
 // follow the instructions in wifiConfig.h to configure your particular hardware

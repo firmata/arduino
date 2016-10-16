@@ -78,6 +78,8 @@
  * remaining to reliably run Firmata. Arduino Yun is okay because it doesn't import the Ethernet
  * libraries.
  */
+// In order to use software serial, you will need to compile this sketch with
+// Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 //#include "utility/SerialFirmata.h"
 
 #define I2C_WRITE                   B00000000

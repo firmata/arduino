@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: January 10th, 2016
+  Last updated October 16th, 2016
 */
 
 /*
@@ -36,6 +36,9 @@
   - Ability to interface with serial devices using UART, USART, or SoftwareSerial
     depending on the capatilities of the board.
 
+  NOTE: In order to use SoftwareSerial with the Firmata Serial feature,
+  StandardFirmataPlus must be compiled with Arduino v1.6.6 or newer.
+
   At the time of this writing, StandardFirmataPlus will still compile and run
   on ATMega328p and ATMega32u4-based boards, but future versions of this sketch
   may not as new features are added.
@@ -45,6 +48,8 @@
 #include <Wire.h>
 #include <Firmata.h>
 
+// In order to use software serial, you will need to compile this sketch with
+// Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 #include "utility/SerialFirmata.h"
 
 #define I2C_WRITE                   B00000000
