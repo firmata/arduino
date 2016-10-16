@@ -1,7 +1,7 @@
 /*
   Firmata.h - Firmata library v2.5.3 - 2016-06-18
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -201,7 +201,7 @@ class FirmataClass
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
 
-    boolean blinkVersionDisabled = false;
+    boolean blinkVersionDisabled;
 
     /* private methods ------------------------------ */
     void processSysexMessage(void);
