@@ -343,6 +343,36 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 
 
+// Teensy 3.5 and 3.6
+// reference: https://github.com/PaulStoffregen/cores/blob/master/teensy3/pins_arduino.h
+#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define TOTAL_ANALOG_PINS       27 // 3.5 has 27 and 3.6 has 25
+#define TOTAL_PINS              70 // 43 digital + 21 analog-digital + 6 analog (64-69)
+#define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          9
+#define PIN_SERIAL2_TX          10
+#define PIN_SERIAL3_RX          7
+#define PIN_SERIAL3_TX          8
+// The following 2 UARTs are not yet available via SerialFirmata
+#define PIN_SERIAL4_RX          31
+#define PIN_SERIAL5_TX          32
+#define PIN_SERIAL6_RX          34
+#define PIN_SERIAL6_TX          33
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 63)
+#define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 23) || ((p) >= 31 && (p) <= 39) || ((p) >= 49 && (p) <= 50) || ((p) >= 64 && (p) <= 69))
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
+#define IS_PIN_SERIAL(p)        (((p) > 6 && (p) < 11) || ((p) == 0 || (p) == 1))
+#define PIN_TO_DIGITAL(p)       (p)
+// A0-A9 = D14-D23; A12-A20 = D31-D39; A23-A24 = D49-D50; A10-A11 = D64-D65; A21-A22 = D66-D67; A25-A26 = D68-D69
+#define PIN_TO_ANALOG(p)        (((p) <= 23) ? (p) - 14 : (((p) <= 39) ? (p) - 19 : (((p) <= 50) ? (p) - 26 : (((p) <= 65) ? (p) - 55 : (((p) <= 67) ? (p) - 45 : (p) - 43)))))
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+
 // Teensy 3.0, 3.1 and 3.2
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 #define TOTAL_ANALOG_PINS       14
