@@ -1,3 +1,13 @@
+FIRMATA 2.5.4 - Oct 23, 2016
+
+[core library]
+* Added Teensy 3.5 and 3.6 to Boards.h
+* Assign blinkVersionDisabled in constructor to fix compiler issue in Arduino 1.0.6
+
+[StandardFirmata & variants]
+* Only disable PWM when setting pinMode to OUTPUT if pinMode was previously PWM
+* Forward declare some functions to fix compiler issues with older IDE versions
+
 FIRMATA 2.5.3 - Jun 18, 2016
 
 [core library]
