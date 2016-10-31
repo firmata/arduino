@@ -24,6 +24,20 @@ extern "C" {
 }
 
 //******************************************************************************
+//* Static Members
+//******************************************************************************
+// make one instance for the user to use
+FirmataClass Firmata;
+
+void printVersion (void) {
+   Firmata.printVersion();
+}
+
+void printFirmwareVersion (void) {
+   Firmata.printFirmwareVersion();
+}
+
+//******************************************************************************
 //* Support Functions
 //******************************************************************************
 
@@ -66,7 +80,8 @@ FirmataClass::FirmataClass()
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
   blinkVersionDisabled = false;
-  systemReset();
+  parser.attach(REPORT_FIRMWARE, ::printFirmwareVersion);
+  parser.attach(REPORT_VERSION, ::printVersion);
 }
 
 //******************************************************************************
@@ -229,53 +244,13 @@ int FirmataClass::available(void)
 }
 
 /**
- * Process incoming sysex messages. Handles REPORT_FIRMWARE and STRING_DATA internally.
- * Calls callback function for STRING_DATA and all other sysex messages.
- * @private
- */
-void FirmataClass::processSysexMessage(void)
-{
-  switch (storedInputData[0]) { //first byte in buffer is command
-    case REPORT_FIRMWARE:
-      printFirmwareVersion();
-      break;
-    case STRING_DATA:
-      if (currentStringCallback) {
-        byte bufferLength = (sysexBytesRead - 1) / 2;
-        byte i = 1;
-        byte j = 0;
-        while (j < bufferLength) {
-          // The string length will only be at most half the size of the
-          // stored input buffer so we can decode the string within the buffer.
-          storedInputData[j] = storedInputData[i];
-          i++;
-          storedInputData[j] += (storedInputData[i] << 7);
-          i++;
-          j++;
-        }
-        // Make sure string is null terminated. This may be the case for data
-        // coming from client libraries in languages that don't null terminate
-        // strings.
-        if (storedInputData[j - 1] != '\0') {
-          storedInputData[j] = '\0';
-        }
-        (*currentStringCallback)((char *)&storedInputData[0]);
-      }
-      break;
-    default:
-      if (currentSysexCallback)
-        (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
-  }
-}
-
-/**
  * Read a single int from the input stream. If the value is not = -1, pass it on to parse(byte)
  */
 void FirmataClass::processInput(void)
 {
   int inputData = FirmataStream->read(); // this is 'int' to handle -1 when no data
   if (inputData != -1) {
-    parse(inputData);
+    parser.parse(inputData);
   }
 }
 
@@ -285,91 +260,7 @@ void FirmataClass::processInput(void)
  */
 void FirmataClass::parse(byte inputData)
 {
-  int command;
-
-  if (parsingSysex) {
-    if (inputData == END_SYSEX) {
-      //stop sysex byte
-      parsingSysex = false;
-      //fire off handler function
-      processSysexMessage();
-    } else {
-      //normal data byte - add to buffer
-      storedInputData[sysexBytesRead] = inputData;
-      sysexBytesRead++;
-    }
-  } else if ( (waitForData > 0) && (inputData < 128) ) {
-    waitForData--;
-    storedInputData[waitForData] = inputData;
-    if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
-      switch (executeMultiByteCommand) {
-        case ANALOG_MESSAGE:
-          if (currentAnalogCallback) {
-            (*currentAnalogCallback)(multiByteChannel,
-                                     (storedInputData[0] << 7)
-                                     + storedInputData[1]);
-          }
-          break;
-        case DIGITAL_MESSAGE:
-          if (currentDigitalCallback) {
-            (*currentDigitalCallback)(multiByteChannel,
-                                      (storedInputData[0] << 7)
-                                      + storedInputData[1]);
-          }
-          break;
-        case SET_PIN_MODE:
-          if (currentPinModeCallback)
-            (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
-          break;
-        case SET_DIGITAL_PIN_VALUE:
-          if (currentPinValueCallback)
-            (*currentPinValueCallback)(storedInputData[1], storedInputData[0]);
-          break;
-        case REPORT_ANALOG:
-          if (currentReportAnalogCallback)
-            (*currentReportAnalogCallback)(multiByteChannel, storedInputData[0]);
-          break;
-        case REPORT_DIGITAL:
-          if (currentReportDigitalCallback)
-            (*currentReportDigitalCallback)(multiByteChannel, storedInputData[0]);
-          break;
-      }
-      executeMultiByteCommand = 0;
-    }
-  } else {
-    // remove channel info from command byte if less than 0xF0
-    if (inputData < 0xF0) {
-      command = inputData & 0xF0;
-      multiByteChannel = inputData & 0x0F;
-    } else {
-      command = inputData;
-      // commands in the 0xF* range don't use channel data
-    }
-    switch (command) {
-      case ANALOG_MESSAGE:
-      case DIGITAL_MESSAGE:
-      case SET_PIN_MODE:
-      case SET_DIGITAL_PIN_VALUE:
-        waitForData = 2; // two data bytes needed
-        executeMultiByteCommand = command;
-        break;
-      case REPORT_ANALOG:
-      case REPORT_DIGITAL:
-        waitForData = 1; // one data byte needed
-        executeMultiByteCommand = command;
-        break;
-      case START_SYSEX:
-        parsingSysex = true;
-        sysexBytesRead = 0;
-        break;
-      case SYSTEM_RESET:
-        systemReset();
-        break;
-      case REPORT_VERSION:
-        Firmata.printVersion();
-        break;
-    }
-  }
+    parser.parse(inputData);
 }
 
 /**
@@ -377,7 +268,7 @@ void FirmataClass::parse(byte inputData)
  */
 boolean FirmataClass::isParsingMessage(void)
 {
-  return (waitForData > 0 || parsingSysex);
+  return parser.isParsingMessage();
 }
 
 //------------------------------------------------------------------------------
@@ -495,16 +386,9 @@ void FirmataClass::write(byte c)
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
  */
-void FirmataClass::attach(byte command, callbackFunction newFunction)
+void FirmataClass::attach(uint8_t command, callbackFunction newFunction)
 {
-  switch (command) {
-    case ANALOG_MESSAGE: currentAnalogCallback = newFunction; break;
-    case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
-    case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
-    case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;
-    case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
-    case SET_DIGITAL_PIN_VALUE: currentPinValueCallback = newFunction; break;
-  }
+    parser.attach(command, (callbackFunction)newFunction);
 }
 
 /**
@@ -512,11 +396,9 @@ void FirmataClass::attach(byte command, callbackFunction newFunction)
  * @param command Must be set to SYSTEM_RESET or it will be ignored.
  * @param newFunction A reference to the system reset callback function to attach.
  */
-void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
+void FirmataClass::attach(uint8_t command, systemCallbackFunction newFunction)
 {
-  switch (command) {
-    case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
-  }
+    parser.attach(command, (systemCallbackFunction)newFunction);
 }
 
 /**
@@ -524,11 +406,9 @@ void FirmataClass::attach(byte command, systemResetCallbackFunction newFunction)
  * @param command Must be set to STRING_DATA or it will be ignored.
  * @param newFunction A reference to the string callback function to attach.
  */
-void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
+void FirmataClass::attach(uint8_t command, stringCallbackFunction newFunction)
 {
-  switch (command) {
-    case STRING_DATA: currentStringCallback = newFunction; break;
-  }
+    parser.attach(command, (stringCallbackFunction)newFunction);
 }
 
 /**
@@ -536,9 +416,9 @@ void FirmataClass::attach(byte command, stringCallbackFunction newFunction)
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the sysex callback function to attach.
  */
-void FirmataClass::attach(byte command, sysexCallbackFunction newFunction)
+void FirmataClass::attach(uint8_t command, sysexCallbackFunction newFunction)
 {
-  currentSysexCallback = newFunction;
+    parser.attach(command, (sysexCallbackFunction)newFunction);
 }
 
 /**
@@ -546,15 +426,9 @@ void FirmataClass::attach(byte command, sysexCallbackFunction newFunction)
  * ANALOG_MESSAGE, DIGITAL_MESSAGE, etc).
  * @param command The ID of the command to detatch the callback function from.
  */
-void FirmataClass::detach(byte command)
+void FirmataClass::detach(uint8_t command)
 {
-  switch (command) {
-    case SYSTEM_RESET: currentSystemResetCallback = NULL; break;
-    case STRING_DATA: currentStringCallback = NULL; break;
-    case START_SYSEX: currentSysexCallback = NULL; break;
-    default:
-      attach(command, (callbackFunction)NULL);
-  }
+    parser.detach(command);
 }
 
 /**
@@ -624,29 +498,6 @@ void FirmataClass::setPinState(byte pin, int state)
 //******************************************************************************
 
 /**
- * Resets the system state upon a SYSTEM_RESET message from the host software.
- * @private
- */
-void FirmataClass::systemReset(void)
-{
-  byte i;
-
-  waitForData = 0; // this flag says the next serial input will be data
-  executeMultiByteCommand = 0; // execute this after getting multi-byte data
-  multiByteChannel = 0; // channel data for multiByteCommands
-
-  for (i = 0; i < MAX_DATA_BYTES; i++) {
-    storedInputData[i] = 0;
-  }
-
-  parsingSysex = false;
-  sysexBytesRead = 0;
-
-  if (currentSystemResetCallback)
-    (*currentSystemResetCallback)();
-}
-
-/**
  * Flashing the pin for the version number
  * @private
  * @param pin The pin the LED is attached to.
@@ -665,5 +516,3 @@ void FirmataClass::strobeBlinkPin(byte pin, int count, int onInterval, int offIn
   }
 }
 
-// make one instance for the user to use
-FirmataClass Firmata;

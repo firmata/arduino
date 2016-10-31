@@ -15,14 +15,7 @@
 #define Firmata_h
 
 #include "Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
-
-/* Version numbers for the protocol.  The protocol is still changing, so these
- * version numbers are important.
- * Query using the REPORT_VERSION message.
- */
-#define FIRMATA_PROTOCOL_MAJOR_VERSION  2 // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  5 // for backwards compatible changes
-#define FIRMATA_PROTOCOL_BUGFIX_VERSION 1 // for bugfix releases
+#include "FirmataParser.h"
 
 /* Version numbers for the Firmata library.
  * The firmware version will not always equal the protocol version going forward.
@@ -39,34 +32,11 @@
 #define FIRMATA_MINOR_VERSION           5 // same as FIRMATA_PROTOCOL_MINOR_VERSION
 #define FIRMATA_BUGFIX_VERSION          1 // same as FIRMATA_PROTOCOL_BUGFIX_VERSION
 
-#define MAX_DATA_BYTES                  64 // max number of data bytes in incoming messages
-
-// Arduino 101 also defines SET_PIN_MODE as a macro in scss_registers.h
-#ifdef SET_PIN_MODE
-#undef SET_PIN_MODE
-#endif
-
-// message command bytes (128-255/0x80-0xFF)
-#define DIGITAL_MESSAGE         0x90 // send data for a digital port (collection of 8 pins)
-#define ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
-#define REPORT_ANALOG           0xC0 // enable analog input by pin #
-#define REPORT_DIGITAL          0xD0 // enable digital input by port pair
-//
-#define SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
-#define SET_DIGITAL_PIN_VALUE   0xF5 // set value of an individual digital pin
-//
-#define REPORT_VERSION          0xF9 // report protocol version
-#define SYSTEM_RESET            0xFF // reset from MIDI
-//
-#define START_SYSEX             0xF0 // start a MIDI Sysex message
-#define END_SYSEX               0xF7 // end a MIDI Sysex message
-
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
 #define SERIAL_MESSAGE          0x60 // communicate with serial devices, including other boards
 #define ENCODER_DATA            0x61 // reply with encoders current positions
 #define SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
-#define STRING_DATA             0x71 // a string message with 14-bits per char
 #define STEPPER_DATA            0x72 // control a stepper motor
 #define ONEWIRE_DATA            0x73 // send an OneWire read/write/reset/select/skip/search request
 #define SHIFT_DATA              0x75 // a bitstream to/from a shift register
@@ -80,7 +50,6 @@
 #define CAPABILITY_RESPONSE     0x6C // reply with supported modes and resolution
 #define ANALOG_MAPPING_QUERY    0x69 // ask for mapping of analog to pin numbers
 #define ANALOG_MAPPING_RESPONSE 0x6A // reply with mapping info
-#define REPORT_FIRMWARE         0x79 // report name and version of the firmware
 #define SAMPLING_INTERVAL       0x7A // set the poll rate of the main loop
 #define SCHEDULER_DATA          0x7B // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
 #define SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
@@ -117,14 +86,6 @@
 #define ENCODER                 0x09 // same as PIN_MODE_ENCODER
 #define IGNORE                  0x7F // same as PIN_MODE_IGNORE
 
-extern "C" {
-  // callback function types
-  typedef void (*callbackFunction)(byte, int);
-  typedef void (*systemResetCallbackFunction)(void);
-  typedef void (*stringCallbackFunction)(char *);
-  typedef void (*sysexCallbackFunction)(byte command, byte argc, byte *argv);
-}
-
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
 {
@@ -155,11 +116,11 @@ class FirmataClass
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
     /* attach & detach callback functions to messages */
-    void attach(byte command, callbackFunction newFunction);
-    void attach(byte command, systemResetCallbackFunction newFunction);
-    void attach(byte command, stringCallbackFunction newFunction);
-    void attach(byte command, sysexCallbackFunction newFunction);
-    void detach(byte command);
+    void attach(uint8_t command, callbackFunction newFunction);
+    void attach(uint8_t command, systemCallbackFunction newFunction);
+    void attach(uint8_t command, stringCallbackFunction newFunction);
+    void attach(uint8_t command, sysexCallbackFunction newFunction);
+    void detach(uint8_t command);
 
     /* access pin state and config */
     byte getPinMode(byte pin);
@@ -174,38 +135,18 @@ class FirmataClass
     void endSysex(void);
 
   private:
+    FirmataParser parser;
     Stream *FirmataStream;
     /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
-    /* input message handling */
-    byte waitForData; // this flag says the next serial input will be data
-    byte executeMultiByteCommand; // execute this after getting multi-byte data
-    byte multiByteChannel; // channel data for multiByteCommands
-    byte storedInputData[MAX_DATA_BYTES]; // multi-byte data
-    /* sysex */
-    boolean parsingSysex;
-    int sysexBytesRead;
     /* pin configuration */
     byte pinConfig[TOTAL_PINS];
     int pinState[TOTAL_PINS];
 
-    /* callback functions */
-    callbackFunction currentAnalogCallback;
-    callbackFunction currentDigitalCallback;
-    callbackFunction currentReportAnalogCallback;
-    callbackFunction currentReportDigitalCallback;
-    callbackFunction currentPinModeCallback;
-    callbackFunction currentPinValueCallback;
-    systemResetCallbackFunction currentSystemResetCallback;
-    stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;
-
     boolean blinkVersionDisabled;
 
     /* private methods ------------------------------ */
-    void processSysexMessage(void);
-    void systemReset(void);
     void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
 };
 
