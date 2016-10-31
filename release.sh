@@ -7,9 +7,8 @@ mkdir -p temp/Firmata
 cp -r examples temp/Firmata
 cp -r extras temp/Firmata
 cp -r utility temp/Firmata
-cp Boards.h temp/Firmata
-cp Firmata.cpp temp/Firmata
-cp Firmata.h temp/Firmata
+cp *.cpp temp/Firmata
+cp *.h temp/Firmata
 cp keywords.txt temp/Firmata
 cp readme.md temp/Firmata
 cd temp
@@ -23,9 +22,8 @@ cp library.properties temp/Firmata
 cd temp/Firmata
 mv readme.md ./extras/
 mkdir src
-mv Boards.h ./src/
-mv Firmata.cpp ./src/
-mv Firmata.h ./src/
+mv *.cpp ./src/
+mv *.h ./src/
 mv utility ./src/
 cd ..
 find . -name "*.DS_Store" -type f -delete
