@@ -42,7 +42,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/reapzor/FiloFirmata]
 * .NET
   * [https://github.com/SolidSoils/Arduino]
-  * [http://www.imagitronics.org/projects/firmatanet/]
+  * [http://www.acraigie.com/programming/firmatavb/default.html]
 * Flash/AS3
   * [http://funnel.cc]
   * [http://code.google.com/p/as3glue/]
