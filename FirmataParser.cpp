@@ -29,7 +29,6 @@ FirmataParser::FirmataParser()
 :
     executeMultiByteCommand(0),
     multiByteChannel(0),
-    storedInputData{0},
     waitForData(0),
     parsingSysex(false),
     sysexBytesRead(0),
