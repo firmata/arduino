@@ -47,8 +47,7 @@ void printFirmwareVersion (void) {
  */
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
-  FirmataStream->write(value & 0x7F); // LSB
-  FirmataStream->write(value >> 7 & 0x7F); // MSB
+  marshaller.sendValueAsTwo7bitBytes(value);
 }
 
 /**
@@ -106,10 +105,8 @@ void FirmataClass::begin(void)
 void FirmataClass::begin(long speed)
 {
   Serial.begin(speed);
-  FirmataStream = &Serial;
   blinkVersion();
-  printVersion();         // send the protocol version
-  printFirmwareVersion(); // send the firmware name and version
+  begin(Serial);
 }
 
 /**
@@ -121,10 +118,11 @@ void FirmataClass::begin(long speed)
 void FirmataClass::begin(Stream &s)
 {
   FirmataStream = &s;
+  marshaller.begin(s);
   // do not call blinkVersion() here because some hardware such as the
   // Ethernet shield use pin 13
-  printVersion();
-  printFirmwareVersion();
+  printVersion();         // send the protocol version
+  printFirmwareVersion(); // send the firmware name and version
 }
 
 /**
@@ -182,7 +180,7 @@ void FirmataClass::printFirmwareVersion(void)
     FirmataStream->write(firmwareVersionVector[0]); // major version number
     FirmataStream->write(firmwareVersionVector[1]); // minor version number
     for (i = 2; i < firmwareVersionCount; ++i) {
-      sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
+      marshaller.sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
     }
     endSysex();
   }
@@ -285,9 +283,7 @@ boolean FirmataClass::isParsingMessage(void)
  */
 void FirmataClass::sendAnalog(byte pin, int value)
 {
-  // pin can only be 0-15, so chop higher bits
-  FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
-  sendValueAsTwo7bitBytes(value);
+  marshaller.sendAnalog(pin, value);
 }
 
 /* (intentionally left out asterix here)
@@ -326,9 +322,7 @@ void FirmataClass::sendDigital(byte pin, int value)
  */
 void FirmataClass::sendDigitalPort(byte portNumber, int portData)
 {
-  FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
-  FirmataStream->write((byte)portData % 128); // Tx bits 0-6 (protocol v1 and higher)
-  FirmataStream->write(portData >> 7);  // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
+  marshaller.sendDigitalPort(portNumber, portData);
 }
 
 /**
@@ -340,13 +334,7 @@ void FirmataClass::sendDigitalPort(byte portNumber, int portData)
  */
 void FirmataClass::sendSysex(byte command, byte bytec, byte *bytev)
 {
-  byte i;
-  startSysex();
-  FirmataStream->write(command);
-  for (i = 0; i < bytec; i++) {
-    sendValueAsTwo7bitBytes(bytev[i]);
-  }
-  endSysex();
+  marshaller.sendSysex(command, bytec, bytev);
 }
 
 /**
@@ -357,7 +345,7 @@ void FirmataClass::sendSysex(byte command, byte bytec, byte *bytev)
 void FirmataClass::sendString(byte command, const char *string)
 {
   if (command == STRING_DATA) {
-    sendSysex(command, strlen(string), (byte *)string);
+    marshaller.sendString(string);
   }
 }
 
@@ -367,7 +355,7 @@ void FirmataClass::sendString(byte command, const char *string)
  */
 void FirmataClass::sendString(const char *string)
 {
-  sendString(STRING_DATA, string);
+  marshaller.sendString(string);
 }
 
 /**
