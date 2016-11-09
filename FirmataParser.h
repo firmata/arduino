@@ -22,8 +22,6 @@
   #include <stdint.h>
 #endif
 
-#include "FirmataConstants.h"
-
 extern "C" {
   // callback function types
   typedef void (*callbackFunction)(uint8_t, int);
