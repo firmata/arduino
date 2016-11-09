@@ -24,8 +24,6 @@
 
 #include <Stream.h>
 
-#include "FirmataConstants.h"
-
 class FirmataMarshaller
 {
   friend class FirmataClass;
@@ -38,15 +36,15 @@ class FirmataMarshaller
     void end();
 
     /* serial send handling */
-    void sendAnalog(uint8_t pin, uint16_t value);
-    void sendDigital(uint8_t pin, uint16_t value);
-    void sendDigitalPort(uint8_t portNumber, uint16_t portData);
-    void sendString(const char *string);
-    void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev);
+    void sendAnalog(uint8_t pin, uint16_t value) const;
+    void sendDigital(uint8_t pin, uint16_t value) const;
+    void sendDigitalPort(uint8_t portNumber, uint16_t portData) const;
+    void sendString(const char *string) const;
+    void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev) const;
 
   private:
     /* utility methods */
-    void sendValueAsTwo7bitBytes(uint16_t value);
+    void sendValueAsTwo7bitBytes(uint16_t value) const;
 
     Stream *FirmataStream;
 };
