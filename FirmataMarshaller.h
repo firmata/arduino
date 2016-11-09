@@ -24,8 +24,6 @@
 
 #include <Stream.h>
 
-#include "FirmataConstants.h"
-
 class FirmataMarshaller
 {
   friend class FirmataClass;
