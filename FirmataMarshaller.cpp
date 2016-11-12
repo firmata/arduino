@@ -98,6 +98,17 @@ const
   sendValueAsTwo7bitBytes(value);
 }
 
+/**
+ * Send a capability query to the Firmata host application. The resulting sysex message will have
+ * a CAPABILITY_RESPONSE command byte, followed by a list of byte tuples (mode and mode resolution)
+ * for each pin; where each pin list is terminated by 0x7F (128).
+ */
+void FirmataMarshaller::sendCapabilityQuery(void)
+const
+{
+  sendSysex(CAPABILITY_QUERY, 0, NULL);
+}
+
 /* (intentionally left out asterix here)
  * STUB - NOT IMPLEMENTED
  * Send a single digital pin value to the Firmata host application.

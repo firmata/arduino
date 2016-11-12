@@ -37,6 +37,7 @@ class FirmataMarshaller
 
     /* serial send handling */
     void sendAnalog(uint8_t pin, uint16_t value) const;
+    void sendCapabilityQuery(void) const;
     void sendDigital(uint8_t pin, uint16_t value) const;
     void sendDigitalPort(uint8_t portNumber, uint16_t portData) const;
     void sendString(const char *string) const;
