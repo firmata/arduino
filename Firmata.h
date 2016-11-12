@@ -111,7 +111,7 @@ class FirmataClass
 
     /* private methods ------------------------------ */
     void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
-    friend void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value);
+    friend void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value) const;
 };
 
 extern FirmataClass Firmata;

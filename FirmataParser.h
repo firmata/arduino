@@ -38,7 +38,7 @@ class FirmataParser
     FirmataParser();
     /* serial receive handling */
     void parse(uint8_t value);
-    bool isParsingMessage(void);
+    bool isParsingMessage(void) const;
     /* attach & detach callback functions to messages */
     void attach(uint8_t command, callbackFunction newFunction);
     void attach(uint8_t command, systemCallbackFunction newFunction);

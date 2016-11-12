@@ -23,6 +23,8 @@
   #include <string.h>
 #endif
 
+#include "FirmataConstants.h"
+
 //******************************************************************************
 //* Support Functions
 //******************************************************************************
@@ -32,6 +34,7 @@
  * @param value The 16-bit value to be split and written separately.
  */
 void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value)
+const
 {
   FirmataStream->write(value & 0x7F); // LSB
   FirmataStream->write(value >> 7 & 0x7F); // MSB
@@ -87,6 +90,7 @@ void FirmataMarshaller::end(void)
  * The maximum value is 14-bits (16384).
  */
 void FirmataMarshaller::sendAnalog(uint8_t pin, uint16_t value)
+const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
   // pin can only be 0-15, so chop higher bits
@@ -101,6 +105,7 @@ void FirmataMarshaller::sendAnalog(uint8_t pin, uint16_t value)
  * @param value The value of the pin.
  */
 void FirmataMarshaller::sendDigital(uint8_t pin, uint16_t value)
+const
 {
   /* TODO add single pin digital messages to the protocol, this needs to
    * track the last digital data sent so that it can be sure to change just
@@ -129,6 +134,7 @@ void FirmataMarshaller::sendDigital(uint8_t pin, uint16_t value)
  * @param portData The value of the port. The value of each pin in the port is represented by a bit.
  */
 void FirmataMarshaller::sendDigitalPort(uint8_t portNumber, uint16_t portData)
+const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
   FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
@@ -144,6 +150,7 @@ void FirmataMarshaller::sendDigitalPort(uint8_t portNumber, uint16_t portData)
  * @param bytev A pointer to the array of data bytes to send in the message.
  */
 void FirmataMarshaller::sendSysex(uint8_t command, size_t bytec, uint8_t *bytev)
+const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
   size_t i;
@@ -160,6 +167,7 @@ void FirmataMarshaller::sendSysex(uint8_t command, size_t bytec, uint8_t *bytev)
  * @param string A pointer to the char string
  */
 void FirmataMarshaller::sendString(const char *string)
+const
 {
   sendSysex(STRING_DATA, strlen(string), (uint8_t *)string);
 }
