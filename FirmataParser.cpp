@@ -17,33 +17,41 @@
 
 #include "FirmataParser.h"
 
+#include "FirmataConstants.h"
+
 //******************************************************************************
 //* Constructors
 //******************************************************************************
 
 /**
- * The Firmata class.
- * An instance named "Firmata" is created automatically for the user.
+ * The FirmataParser class.
+ * @param dataBuffer A pointer to an external buffer used to store parsed data
+ * @param dataBufferSize The size of the external buffer
  */
-FirmataParser::FirmataParser()
+FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
 :
-    executeMultiByteCommand(0),
-    multiByteChannel(0),
-    waitForData(0),
-    parsingSysex(false),
-    sysexBytesRead(0),
-    currentAnalogCallback((callbackFunction)NULL),
-    currentDigitalCallback((callbackFunction)NULL),
-    currentReportAnalogCallback((callbackFunction)NULL),
-    currentReportDigitalCallback((callbackFunction)NULL),
-    currentPinModeCallback((callbackFunction)NULL),
-    currentPinValueCallback((callbackFunction)NULL),
-    currentReportFirmwareCallback((systemCallbackFunction)NULL),
-    currentReportVersionCallback((systemCallbackFunction)NULL),
-    currentSystemResetCallback((systemCallbackFunction)NULL),
-    currentStringCallback((stringCallbackFunction)NULL),
-    currentSysexCallback((sysexCallbackFunction)NULL)
+  dataBuffer(dataBuffer),
+  dataBufferSize(dataBufferSize),
+  executeMultiByteCommand(0),
+  multiByteChannel(0),
+  waitForData(0),
+  parsingSysex(false),
+  sysexBytesRead(0),
+  currentDataBufferOverflowCallbackContext((void *)NULL),
+  currentAnalogCallback((callbackFunction)NULL),
+  currentDigitalCallback((callbackFunction)NULL),
+  currentReportAnalogCallback((callbackFunction)NULL),
+  currentReportDigitalCallback((callbackFunction)NULL),
+  currentPinModeCallback((callbackFunction)NULL),
+  currentPinValueCallback((callbackFunction)NULL),
+  currentReportFirmwareCallback((systemCallbackFunction)NULL),
+  currentReportVersionCallback((systemCallbackFunction)NULL),
+  currentSystemResetCallback((systemCallbackFunction)NULL),
+  currentStringCallback((stringCallbackFunction)NULL),
+  currentSysexCallback((sysexCallbackFunction)NULL),
+  currentDataBufferOverflowCallback((dataBufferOverflowCallbackFunction)NULL)
 {
+    allowBufferUpdate = ((uint8_t *)NULL == dataBuffer);
 }
 
 //******************************************************************************
@@ -52,47 +60,6 @@ FirmataParser::FirmataParser()
 
 //------------------------------------------------------------------------------
 // Serial Receive Handling
-
-/**
- * Process incoming sysex messages. Handles REPORT_FIRMWARE and STRING_DATA internally.
- * Calls callback function for STRING_DATA and all other sysex messages.
- * @private
- */
-void FirmataParser::processSysexMessage(void)
-{
-  switch (storedInputData[0]) { //first byte in buffer is command
-    case REPORT_FIRMWARE:
-        if (currentReportFirmwareCallback)
-          (*currentReportFirmwareCallback)();
-      break;
-    case STRING_DATA:
-      if (currentStringCallback) {
-        size_t bufferLength = (sysexBytesRead - 1) / 2;
-        size_t i = 1;
-        size_t j = 0;
-        while (j < bufferLength) {
-          // The string length will only be at most half the size of the
-          // stored input buffer so we can decode the string within the buffer.
-          storedInputData[j] = storedInputData[i];
-          i++;
-          storedInputData[j] += (storedInputData[i] << 7);
-          i++;
-          j++;
-        }
-        // Make sure string is null terminated. This may be the case for data
-        // coming from client libraries in languages that don't null terminate
-        // strings.
-        if (storedInputData[j - 1] != '\0') {
-          storedInputData[j] = '\0';
-        }
-        (*currentStringCallback)((char *)&storedInputData[0]);
-      }
-      break;
-    default:
-      if (currentSysexCallback)
-        (*currentSysexCallback)(storedInputData[0], sysexBytesRead - 1, storedInputData + 1);
-  }
-}
 
 /**
  * Parse data from the input stream.
@@ -110,43 +77,43 @@ void FirmataParser::parse(uint8_t inputData)
       processSysexMessage();
     } else {
       //normal data byte - add to buffer
-      storedInputData[sysexBytesRead] = inputData;
-      sysexBytesRead++;
+      bufferDataAtPosition(inputData, sysexBytesRead);
+      ++sysexBytesRead;
     }
   } else if ( (waitForData > 0) && (inputData < 128) ) {
-    waitForData--;
-    storedInputData[waitForData] = inputData;
+    --waitForData;
+    bufferDataAtPosition(inputData, waitForData);
     if ( (waitForData == 0) && executeMultiByteCommand ) { // got the whole message
       switch (executeMultiByteCommand) {
         case ANALOG_MESSAGE:
           if (currentAnalogCallback) {
             (*currentAnalogCallback)(multiByteChannel,
-                                     (storedInputData[0] << 7)
-                                     + storedInputData[1]);
+                                     (dataBuffer[0] << 7)
+                                     + dataBuffer[1]);
           }
           break;
         case DIGITAL_MESSAGE:
           if (currentDigitalCallback) {
             (*currentDigitalCallback)(multiByteChannel,
-                                      (storedInputData[0] << 7)
-                                      + storedInputData[1]);
+                                      (dataBuffer[0] << 7)
+                                      + dataBuffer[1]);
           }
           break;
         case SET_PIN_MODE:
           if (currentPinModeCallback)
-            (*currentPinModeCallback)(storedInputData[1], storedInputData[0]);
+            (*currentPinModeCallback)(dataBuffer[1], dataBuffer[0]);
           break;
         case SET_DIGITAL_PIN_VALUE:
           if (currentPinValueCallback)
-            (*currentPinValueCallback)(storedInputData[1], storedInputData[0]);
+            (*currentPinValueCallback)(dataBuffer[1], dataBuffer[0]);
           break;
         case REPORT_ANALOG:
           if (currentReportAnalogCallback)
-            (*currentReportAnalogCallback)(multiByteChannel, storedInputData[0]);
+            (*currentReportAnalogCallback)(multiByteChannel, dataBuffer[0]);
           break;
         case REPORT_DIGITAL:
           if (currentReportDigitalCallback)
-            (*currentReportDigitalCallback)(multiByteChannel, storedInputData[0]);
+            (*currentReportDigitalCallback)(multiByteChannel, dataBuffer[0]);
           break;
       }
       executeMultiByteCommand = 0;
@@ -195,6 +162,31 @@ bool FirmataParser::isParsingMessage(void)
 const
 {
   return (waitForData > 0 || parsingSysex);
+}
+
+/**
+ * Provides a mechanism to either set or update the working buffer of the parser.
+ * The method will be enabled when no buffer has been provided, or an overflow
+ * condition exists.
+ * @param dataBuffer A pointer to an external buffer used to store parsed data
+ * @param dataBufferSize The size of the external buffer
+ */
+int FirmataParser::setDataBufferOfSize(uint8_t * dataBuffer, size_t dataBufferSize)
+{
+    int result;
+
+    if ( !allowBufferUpdate ) {
+      result = __LINE__;
+    } else if ((uint8_t *)NULL == dataBuffer) {
+      result = __LINE__;
+    } else {
+      this->dataBuffer = dataBuffer;
+      this->dataBufferSize = dataBufferSize;
+      allowBufferUpdate = false;
+      result = 0;
+    }
+
+    return result;
 }
 
 /**
@@ -249,7 +241,19 @@ void FirmataParser::attach(uint8_t command, stringCallbackFunction newFunction)
  */
 void FirmataParser::attach(uint8_t command, sysexCallbackFunction newFunction)
 {
+  (void)command;
   currentSysexCallback = newFunction;
+}
+
+/**
+ * Attach a buffer overflow callback
+ * @param newFunction A reference to the buffer overflow callback function to attach.
+ * @param context The context supplied by the end-user, and provided during the execution of the callback
+ */
+void FirmataParser::attach(dataBufferOverflowCallbackFunction newFunction, void * context)
+{
+  currentDataBufferOverflowCallback = newFunction;
+  currentDataBufferOverflowCallbackContext = context;
 }
 
 /**
@@ -272,9 +276,90 @@ void FirmataParser::detach(uint8_t command)
   }
 }
 
+/**
+ * Detach the buffer overflow callback
+ * @param <unused> Any pointer of type dataBufferOverflowCallbackFunction.
+ */
+void FirmataParser::detach(dataBufferOverflowCallbackFunction)
+{
+  currentDataBufferOverflowCallback = (dataBufferOverflowCallbackFunction)NULL;
+  currentDataBufferOverflowCallbackContext = (void *)NULL;
+}
+
 //******************************************************************************
 //* Private Methods
 //******************************************************************************
+
+/**
+ * Buffer abstraction to prevent memory corruption
+ * @param data The byte to put into the buffer
+ * @param pos The position to insert the byte into the buffer
+ * @return writeError A boolean to indicate if an error occured
+ * @private
+ */
+bool FirmataParser::bufferDataAtPosition(const uint8_t data, const size_t pos)
+{
+  bool bufferOverflow = (pos >= dataBufferSize);
+
+  // Notify of overflow condition
+  if ( bufferOverflow
+  && ((dataBufferOverflowCallbackFunction)NULL != currentDataBufferOverflowCallback) )
+  {
+    allowBufferUpdate = true;
+    currentDataBufferOverflowCallback(currentDataBufferOverflowCallbackContext);
+    // Check if overflow was resolved during callback
+    bufferOverflow = (pos >= dataBufferSize);
+  }
+
+  // Write data to buffer if no overflow condition persist
+  if ( !bufferOverflow )
+  {
+    dataBuffer[pos] = data;
+  }
+
+  return bufferOverflow;
+}
+
+/**
+ * Process incoming sysex messages. Handles REPORT_FIRMWARE and STRING_DATA internally.
+ * Calls callback function for STRING_DATA and all other sysex messages.
+ * @private
+ */
+void FirmataParser::processSysexMessage(void)
+{
+  switch (dataBuffer[0]) { //first byte in buffer is command
+    case REPORT_FIRMWARE:
+      if (currentReportFirmwareCallback)
+        (*currentReportFirmwareCallback)();
+      break;
+    case STRING_DATA:
+      if (currentStringCallback) {
+        size_t bufferLength = (sysexBytesRead - 1) / 2;
+        size_t i = 1;
+        size_t j = 0;
+        while (j < bufferLength) {
+          // The string length will only be at most half the size of the
+          // stored input buffer so we can decode the string within the buffer.
+          bufferDataAtPosition(dataBuffer[i], j);
+          ++i;
+          bufferDataAtPosition((dataBuffer[j] + (dataBuffer[i] << 7)), j);
+          ++i;
+          ++j;
+        }
+        // Make sure string is null terminated. This may be the case for data
+        // coming from client libraries in languages that don't null terminate
+        // strings.
+        if (dataBuffer[j - 1] != '\0') {
+          bufferDataAtPosition('\0', j);
+        }
+        (*currentStringCallback)((char *)&dataBuffer[0]);
+      }
+      break;
+    default:
+      if (currentSysexCallback)
+        (*currentSysexCallback)(dataBuffer[0], sysexBytesRead - 1, dataBuffer + 1);
+  }
+}
 
 /**
  * Resets the system state upon a SYSTEM_RESET message from the host software.
@@ -288,8 +373,8 @@ void FirmataParser::systemReset(void)
   executeMultiByteCommand = 0; // execute this after getting multi-byte data
   multiByteChannel = 0; // channel data for multiByteCommands
 
-  for (i = 0; i < MAX_DATA_BYTES; i++) {
-    storedInputData[i] = 0;
+  for (i = 0; i < dataBufferSize; ++i) {
+    dataBuffer[i] = 0;
   }
 
   parsingSysex = false;
@@ -298,4 +383,3 @@ void FirmataParser::systemReset(void)
   if (currentSystemResetCallback)
     (*currentSystemResetCallback)();
 }
-

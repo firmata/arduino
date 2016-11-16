@@ -97,6 +97,7 @@ class FirmataClass
     void endSysex(void);
 
   private:
+    uint8_t parserBuffer[MAX_DATA_BYTES];
     FirmataMarshaller marshaller;
     FirmataParser parser;
     Stream *FirmataStream;

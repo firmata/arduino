@@ -75,6 +75,8 @@ void FirmataClass::endSysex(void)
  * An instance named "Firmata" is created automatically for the user.
  */
 FirmataClass::FirmataClass()
+:
+  parser(FirmataParser(parserBuffer, MAX_DATA_BYTES))
 {
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;

@@ -22,10 +22,9 @@
   #include <stdint.h>
 #endif
 
-#include "FirmataConstants.h"
-
 extern "C" {
   // callback function types
+  typedef void (*dataBufferOverflowCallbackFunction)(void * context);
   typedef void (*callbackFunction)(uint8_t, int);
   typedef void (*systemCallbackFunction)(void);
   typedef void (*stringCallbackFunction)(char *);
@@ -35,26 +34,34 @@ extern "C" {
 class FirmataParser
 {
   public:
-    FirmataParser();
+    FirmataParser(uint8_t * dataBuffer = (uint8_t *)NULL, size_t dataBufferSize = 0);
     /* serial receive handling */
     void parse(uint8_t value);
     bool isParsingMessage(void) const;
+    int setDataBufferOfSize(uint8_t * dataBuffer, size_t dataBufferSize);
     /* attach & detach callback functions to messages */
     void attach(uint8_t command, callbackFunction newFunction);
     void attach(uint8_t command, systemCallbackFunction newFunction);
     void attach(uint8_t command, stringCallbackFunction newFunction);
     void attach(uint8_t command, sysexCallbackFunction newFunction);
+    void attach(dataBufferOverflowCallbackFunction newFunction, void * context);
     void detach(uint8_t command);
+    void detach(dataBufferOverflowCallbackFunction);
 
   private:
     /* input message handling */
+    bool allowBufferUpdate;
+    uint8_t * dataBuffer; // multi-byte data
+    size_t dataBufferSize;
     uint8_t executeMultiByteCommand; // execute this after getting multi-byte data
     uint8_t multiByteChannel; // channel data for multiByteCommands
-    uint8_t storedInputData[MAX_DATA_BYTES]; // multi-byte data
     size_t waitForData; // this flag says the next serial input will be data
     /* sysex */
     bool parsingSysex;
     size_t sysexBytesRead;
+
+    /* callback context */
+    void * currentDataBufferOverflowCallbackContext;
 
     /* callback functions */
     callbackFunction currentAnalogCallback;
@@ -68,10 +75,12 @@ class FirmataParser
     systemCallbackFunction currentSystemResetCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
+    dataBufferOverflowCallbackFunction currentDataBufferOverflowCallback;
 
     /* private methods ------------------------------ */
     void processSysexMessage(void);
     void systemReset(void);
+    bool bufferDataAtPosition(const uint8_t data, const size_t pos);
 };
 
 #endif /* FirmataParser_h */
