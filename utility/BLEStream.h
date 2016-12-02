@@ -118,7 +118,7 @@ bool BLEStream::poll()
 
 void BLEStream::end()
 {
-  this->_rxCharacteristic.setEventHandler(BLEWritten, NULL);
+  this->_rxCharacteristic.setEventHandler(BLEWritten, (void(*)(BLECentral&, BLECharacteristic&))NULL);
   this->_rxHead = this->_rxTail = 0;
   flush();
   BLEPeripheral::disconnect();
