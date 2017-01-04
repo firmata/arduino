@@ -11,7 +11,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -52,6 +52,8 @@
 // Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 #include "utility/SerialFirmata.h"
 
+#include "utility/SPIFirmata.h"
+
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
 #define I2C_READ_CONTINUOUSLY       B00010000
@@ -74,6 +76,10 @@
 
 #ifdef FIRMATA_SERIAL_FEATURE
 SerialFirmata serialFeature;
+#endif
+
+#ifdef FIRMATA_SPI_FEATURE
+SPIFirmata spiFeature;
 #endif
 
 /* analog inputs */
@@ -685,6 +691,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #ifdef FIRMATA_SERIAL_FEATURE
         serialFeature.handleCapability(pin);
 #endif
+#ifdef FIRMATA_SPI_FEATURE
+        spiFeature.handleCapability(pin);
+#endif
         Firmata.write(127);
       }
       Firmata.write(END_SYSEX);
@@ -718,6 +727,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
       serialFeature.handleSysex(command, argc, argv);
 #endif
       break;
+
+    case SPI_DATA:
+#ifdef FIRMATA_SPI_FEATURE
+      spiFeature.handleSysex(command, argc, argv);
+#endif
+      break;
   }
 }
 
@@ -734,6 +749,10 @@ void systemResetCallback()
 
 #ifdef FIRMATA_SERIAL_FEATURE
   serialFeature.reset();
+#endif
+
+#ifdef FIRMATA_SPI_FEATURE
+  spiFeature.reset();
 #endif
 
   if (isI2CEnabled) {
@@ -759,6 +778,7 @@ void systemResetCallback()
 
     servoPinMap[i] = 255;
   }
+
   // by default, do not report any analog inputs
   analogInputsToReport = 0;
 
