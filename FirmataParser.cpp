@@ -37,19 +37,30 @@ FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
   waitForData(0),
   parsingSysex(false),
   sysexBytesRead(0),
+  currentAnalogCallbackContext((void *)NULL),
+  currentDigitalCallbackContext((void *)NULL),
+  currentReportAnalogCallbackContext((void *)NULL),
+  currentReportDigitalCallbackContext((void *)NULL),
+  currentPinModeCallbackContext((void *)NULL),
+  currentPinValueCallbackContext((void *)NULL),
+  currentReportFirmwareCallbackContext((void *)NULL),
+  currentReportVersionCallbackContext((void *)NULL),
   currentDataBufferOverflowCallbackContext((void *)NULL),
+  currentStringCallbackContext((void *)NULL),
+  currentSysexCallbackContext((void *)NULL),
+  currentSystemResetCallbackContext((void *)NULL),
   currentAnalogCallback((callbackFunction)NULL),
   currentDigitalCallback((callbackFunction)NULL),
   currentReportAnalogCallback((callbackFunction)NULL),
   currentReportDigitalCallback((callbackFunction)NULL),
   currentPinModeCallback((callbackFunction)NULL),
   currentPinValueCallback((callbackFunction)NULL),
-  currentReportFirmwareCallback((systemCallbackFunction)NULL),
-  currentReportVersionCallback((systemCallbackFunction)NULL),
-  currentSystemResetCallback((systemCallbackFunction)NULL),
+  currentDataBufferOverflowCallback((dataBufferOverflowCallbackFunction)NULL),
   currentStringCallback((stringCallbackFunction)NULL),
   currentSysexCallback((sysexCallbackFunction)NULL),
-  currentDataBufferOverflowCallback((dataBufferOverflowCallbackFunction)NULL)
+  currentReportFirmwareCallback((systemCallbackFunction)NULL),
+  currentReportVersionCallback((systemCallbackFunction)NULL),
+  currentSystemResetCallback((systemCallbackFunction)NULL)
 {
     allowBufferUpdate = ((uint8_t *)NULL == dataBuffer);
 }
@@ -87,33 +98,35 @@ void FirmataParser::parse(uint8_t inputData)
       switch (executeMultiByteCommand) {
         case ANALOG_MESSAGE:
           if (currentAnalogCallback) {
-            (*currentAnalogCallback)(multiByteChannel,
+            (*currentAnalogCallback)(this,
+                                     multiByteChannel,
                                      (dataBuffer[0] << 7)
                                      + dataBuffer[1]);
           }
           break;
         case DIGITAL_MESSAGE:
           if (currentDigitalCallback) {
-            (*currentDigitalCallback)(multiByteChannel,
+            (*currentDigitalCallback)(this,
+                                      multiByteChannel,
                                       (dataBuffer[0] << 7)
                                       + dataBuffer[1]);
           }
           break;
         case SET_PIN_MODE:
           if (currentPinModeCallback)
-            (*currentPinModeCallback)(dataBuffer[1], dataBuffer[0]);
+            (*currentPinModeCallback)(this, dataBuffer[1], dataBuffer[0]);
           break;
         case SET_DIGITAL_PIN_VALUE:
           if (currentPinValueCallback)
-            (*currentPinValueCallback)(dataBuffer[1], dataBuffer[0]);
+            (*currentPinValueCallback)(this, dataBuffer[1], dataBuffer[0]);
           break;
         case REPORT_ANALOG:
           if (currentReportAnalogCallback)
-            (*currentReportAnalogCallback)(multiByteChannel, dataBuffer[0]);
+            (*currentReportAnalogCallback)(this, multiByteChannel, dataBuffer[0]);
           break;
         case REPORT_DIGITAL:
           if (currentReportDigitalCallback)
-            (*currentReportDigitalCallback)(multiByteChannel, dataBuffer[0]);
+            (*currentReportDigitalCallback)(this, multiByteChannel, dataBuffer[0]);
           break;
       }
       executeMultiByteCommand = 0;
@@ -149,7 +162,7 @@ void FirmataParser::parse(uint8_t inputData)
         break;
       case REPORT_VERSION:
         if (currentReportVersionCallback)
-          (*currentReportVersionCallback)();
+          (*currentReportVersionCallback)(this);
         break;
     }
   }
@@ -194,16 +207,35 @@ int FirmataParser::setDataBufferOfSize(uint8_t * dataBuffer, size_t dataBufferSi
  * DIGITAL_MESSAGE, REPORT_ANALOG, REPORT DIGITAL, SET_PIN_MODE and SET_DIGITAL_PIN_VALUE).
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
+ * @param context The context for the callback function.
  */
-void FirmataParser::attach(uint8_t command, callbackFunction newFunction)
+void FirmataParser::attach(uint8_t command, callbackFunction newFunction, void * context)
 {
   switch (command) {
-    case ANALOG_MESSAGE: currentAnalogCallback = newFunction; break;
-    case DIGITAL_MESSAGE: currentDigitalCallback = newFunction; break;
-    case REPORT_ANALOG: currentReportAnalogCallback = newFunction; break;
-    case REPORT_DIGITAL: currentReportDigitalCallback = newFunction; break;
-    case SET_PIN_MODE: currentPinModeCallback = newFunction; break;
-    case SET_DIGITAL_PIN_VALUE: currentPinValueCallback = newFunction; break;
+    case ANALOG_MESSAGE:
+      currentAnalogCallback = newFunction;
+      currentAnalogCallbackContext = context;
+      break;
+    case DIGITAL_MESSAGE:
+      currentDigitalCallback = newFunction;
+      currentDigitalCallbackContext = context;
+      break;
+    case REPORT_ANALOG:
+      currentReportAnalogCallback = newFunction;
+      currentReportAnalogCallbackContext = context;
+      break;
+    case REPORT_DIGITAL:
+      currentReportDigitalCallback = newFunction;
+      currentReportDigitalCallbackContext = context;
+      break;
+    case SET_PIN_MODE:
+      currentPinModeCallback = newFunction;
+      currentPinModeCallbackContext = context;
+      break;
+    case SET_DIGITAL_PIN_VALUE:
+      currentPinValueCallback = newFunction;
+      currentPinValueCallbackContext = context;
+      break;
   }
 }
 
@@ -212,13 +244,23 @@ void FirmataParser::attach(uint8_t command, callbackFunction newFunction)
  * and SYSTEM_RESET).
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
+ * @param context The context for the callback function.
  */
-void FirmataParser::attach(uint8_t command, systemCallbackFunction newFunction)
+void FirmataParser::attach(uint8_t command, systemCallbackFunction newFunction, void * context)
 {
   switch (command) {
-    case REPORT_FIRMWARE: currentReportFirmwareCallback = newFunction; break;
-    case REPORT_VERSION: currentReportVersionCallback = newFunction; break;
-    case SYSTEM_RESET: currentSystemResetCallback = newFunction; break;
+    case REPORT_FIRMWARE:
+      currentReportFirmwareCallback = newFunction;
+      currentReportFirmwareCallbackContext = context;
+      break;
+    case REPORT_VERSION:
+      currentReportVersionCallback = newFunction;
+      currentReportVersionCallbackContext = context;
+      break;
+    case SYSTEM_RESET:
+      currentSystemResetCallback = newFunction;
+      currentSystemResetCallbackContext = context;
+      break;
   }
 }
 
@@ -226,11 +268,15 @@ void FirmataParser::attach(uint8_t command, systemCallbackFunction newFunction)
  * Attach a callback function for the STRING_DATA command.
  * @param command Must be set to STRING_DATA or it will be ignored.
  * @param newFunction A reference to the string callback function to attach.
+ * @param context The context for the callback function.
  */
-void FirmataParser::attach(uint8_t command, stringCallbackFunction newFunction)
+void FirmataParser::attach(uint8_t command, stringCallbackFunction newFunction, void * context)
 {
   switch (command) {
-    case STRING_DATA: currentStringCallback = newFunction; break;
+    case STRING_DATA:
+      currentStringCallback = newFunction;
+      currentStringCallbackContext = context;
+      break;
   }
 }
 
@@ -238,11 +284,13 @@ void FirmataParser::attach(uint8_t command, stringCallbackFunction newFunction)
  * Attach a generic sysex callback function to sysex command.
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the sysex callback function to attach.
+ * @param context The context for the callback function.
  */
-void FirmataParser::attach(uint8_t command, sysexCallbackFunction newFunction)
+void FirmataParser::attach(uint8_t command, sysexCallbackFunction newFunction, void * context)
 {
   (void)command;
   currentSysexCallback = newFunction;
+  currentSysexCallbackContext = context;
 }
 
 /**
@@ -267,12 +315,17 @@ void FirmataParser::detach(uint8_t command)
     case REPORT_FIRMWARE:
     case REPORT_VERSION:
     case SYSTEM_RESET:
-      attach(command, (systemCallbackFunction)NULL);
+      attach(command, (systemCallbackFunction)NULL, NULL);
       break;
-    case STRING_DATA: currentStringCallback = (stringCallbackFunction)NULL; break;
-    case START_SYSEX: currentSysexCallback = (sysexCallbackFunction)NULL; break;
+    case STRING_DATA:
+      attach(command, (stringCallbackFunction)NULL, NULL);
+      break;
+    case START_SYSEX:
+      attach(command, (sysexCallbackFunction)NULL, NULL);
+      break;
     default:
-      attach(command, (callbackFunction)NULL);
+      attach(command, (callbackFunction)NULL, NULL);
+      break;
   }
 }
 
@@ -330,7 +383,7 @@ void FirmataParser::processSysexMessage(void)
   switch (dataBuffer[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
       if (currentReportFirmwareCallback)
-        (*currentReportFirmwareCallback)();
+        (*currentReportFirmwareCallback)(this);
       break;
     case STRING_DATA:
       if (currentStringCallback) {
@@ -352,12 +405,12 @@ void FirmataParser::processSysexMessage(void)
         if (dataBuffer[j - 1] != '\0') {
           bufferDataAtPosition('\0', j);
         }
-        (*currentStringCallback)((char *)&dataBuffer[0]);
+        (*currentStringCallback)(this, (char *)&dataBuffer[0]);
       }
       break;
     default:
       if (currentSysexCallback)
-        (*currentSysexCallback)(dataBuffer[0], sysexBytesRead - 1, dataBuffer + 1);
+        (*currentSysexCallback)(this, dataBuffer[0], sysexBytesRead - 1, dataBuffer + 1);
   }
 }
 
@@ -381,5 +434,5 @@ void FirmataParser::systemReset(void)
   sysexBytesRead = 0;
 
   if (currentSystemResetCallback)
-    (*currentSystemResetCallback)();
+    (*currentSystemResetCallback)(this);
 }

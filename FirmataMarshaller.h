@@ -36,18 +36,25 @@ class FirmataMarshaller
     void end();
 
     /* serial send handling */
+    void reportAnalogDisable(uint8_t pin) const;
+    void reportAnalogEnable(uint8_t pin) const;
+    void reportDigitalPortDisable(uint8_t portNumber) const;
+    void reportDigitalPortEnable(uint8_t portNumber) const;
     void sendAnalog(uint8_t pin, uint16_t value) const;
     void sendCapabilityQuery(void) const;
-    void sendDigital(uint8_t pin, uint16_t value) const;
+    void sendDigital(uint8_t pin, uint8_t value) const;
     void sendDigitalPort(uint8_t portNumber, uint16_t portData) const;
+    void sendPinMode(uint8_t pin, uint8_t config) const;
     void sendString(const char *string) const;
     void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev) const;
 
   private:
     /* utility methods */
+    void reportAnalog(uint8_t pin, bool stream_enable) const;
+    void reportDigitalPort(uint8_t portNumber, bool stream_enable) const;
     void sendValueAsTwo7bitBytes(uint16_t value) const;
 
-    Stream *FirmataStream;
+    Stream * FirmataStream;
 };
 
 #endif /* FirmataMarshaller_h */

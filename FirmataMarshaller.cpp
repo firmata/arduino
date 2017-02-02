@@ -30,6 +30,40 @@
 //******************************************************************************
 
 /**
+ * Request or halt a stream of analog readings from the Firmata host application. The range of pins is
+ * limited to [0..15] when using the REPORT_ANALOG. The maximum result of the REPORT_ANALOG is limited to 14 bits
+ * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
+ * message.
+ * @param pin The analog pin for which to request the value (limited to pins 0 - 15).
+ * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
+ * @note The maximum resulting value is 14-bits (16384).
+ */
+void FirmataMarshaller::reportAnalog(uint8_t pin, bool stream_enable)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  // pin can only be 0-15, so chop higher bits
+  FirmataStream->write(REPORT_ANALOG | (pin & 0xF));
+  FirmataStream->write(stream_enable);
+}
+
+/**
+ * Request or halt an 8-bit port stream from the Firmata host application (protocol v2 and later).
+ * Send 14-bits in a single digital message (protocol v1).
+ * @param portNumber The port number for which to request the value. Note that this is not the same as a "port" on the
+ * physical microcontroller. Ports are defined in order per every 8 pins in ascending order
+ * of the Arduino digital pin numbering scheme. Port 0 = pins D0 - D7, port 1 = pins D8 - D15, etc.
+ * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
+ */
+void FirmataMarshaller::reportDigitalPort(uint8_t portNumber, bool stream_enable)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(REPORT_DIGITAL | (portNumber & 0xF));
+  FirmataStream->write(stream_enable);
+}
+
+/**
  * Split a 16-bit integer into two 7-bit values and write each value.
  * @param value The 16-bit value to be split and written separately.
  */
@@ -81,6 +115,62 @@ void FirmataMarshaller::end(void)
 //******************************************************************************
 
 /**
+ * Halt the stream of analog readings from the Firmata host application. The range of pins is
+ * limited to [0..15] when using the REPORT_ANALOG. The maximum result of the REPORT_ANALOG is limited to 14 bits
+ * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
+ * message.
+ * @param pin The analog pin for which to request the value (limited to pins 0 - 15).
+ */
+void FirmataMarshaller::reportAnalogDisable(uint8_t pin)
+const
+{
+    reportAnalog(pin, false);
+}
+
+/**
+ * Request a stream of analog readings from the Firmata host application. The range of pins is
+ * limited to [0..15] when using the REPORT_ANALOG. The maximum result of the REPORT_ANALOG is limited to 14 bits
+ * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
+ * message.
+ * @param pin The analog pin for which to request the value (limited to pins 0 - 15).
+ * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
+ * @note The maximum resulting value is 14-bits (16384).
+ */
+void FirmataMarshaller::reportAnalogEnable(uint8_t pin)
+const
+{
+    reportAnalog(pin, true);
+}
+
+/**
+ * Halt an 8-bit port stream from the Firmata host application (protocol v2 and later).
+ * Send 14-bits in a single digital message (protocol v1).
+ * @param portNumber The port number for which to request the value. Note that this is not the same as a "port" on the
+ * physical microcontroller. Ports are defined in order per every 8 pins in ascending order
+ * of the Arduino digital pin numbering scheme. Port 0 = pins D0 - D7, port 1 = pins D8 - D15, etc.
+ * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
+ */
+void FirmataMarshaller::reportDigitalPortDisable(uint8_t portNumber)
+const
+{
+    reportDigitalPort(portNumber, false);
+}
+
+/**
+ * Request an 8-bit port stream from the Firmata host application (protocol v2 and later).
+ * Send 14-bits in a single digital message (protocol v1).
+ * @param portNumber The port number for which to request the value. Note that this is not the same as a "port" on the
+ * physical microcontroller. Ports are defined in order per every 8 pins in ascending order
+ * of the Arduino digital pin numbering scheme. Port 0 = pins D0 - D7, port 1 = pins D8 - D15, etc.
+ * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
+ */
+void FirmataMarshaller::reportDigitalPortEnable(uint8_t portNumber)
+const
+{
+    reportDigitalPort(portNumber, true);
+}
+
+/**
  * Send an analog message to the Firmata host application. The range of pins is limited to [0..15]
  * when using the ANALOG_MESSAGE. The maximum value of the ANALOG_MESSAGE is limited to 14 bits
  * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
@@ -109,30 +199,18 @@ const
   sendSysex(CAPABILITY_QUERY, 0, NULL);
 }
 
-/* (intentionally left out asterix here)
- * STUB - NOT IMPLEMENTED
+/**
  * Send a single digital pin value to the Firmata host application.
  * @param pin The digital pin to send the value of.
  * @param value The value of the pin.
  */
-void FirmataMarshaller::sendDigital(uint8_t pin, uint16_t value)
+void FirmataMarshaller::sendDigital(uint8_t pin, uint8_t value)
 const
 {
-  /* TODO add single pin digital messages to the protocol, this needs to
-   * track the last digital data sent so that it can be sure to change just
-   * one bit in the packet.  This is complicated by the fact that the
-   * numbering of the pins will probably differ on Arduino, Wiring, and
-   * other boards.
-   */
-
-  // TODO: the digital message should not be sent on the serial port every
-  // time sendDigital() is called.  Instead, it should add it to an int
-  // which will be sent on a schedule.  If a pin changes more than once
-  // before the digital message is sent on the serial port, it should send a
-  // digital message for each change.
-
-  //    if(value == 0)
-  //        sendDigitalPortPair();
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(SET_DIGITAL_PIN_VALUE);
+  FirmataStream->write(pin & 0x7F);
+  FirmataStream->write(value != 0);
 }
 
 
@@ -151,6 +229,22 @@ const
   FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
   FirmataStream->write((uint8_t)portData % 128); // Tx bits 0-6 (protocol v1 and higher)
   FirmataStream->write(portData >> 7);  // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
+}
+
+/**
+ * Send the pin mode/configuration. The pin configuration (or mode) in Firmata represents the
+ * current function of the pin. Examples are digital input or output, analog input, pwm, i2c,
+ * serial (uart), etc.
+ * @param pin The pin to configure.
+ * @param config The configuration value for the specified pin.
+ */
+void FirmataMarshaller::sendPinMode(uint8_t pin, uint8_t config)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(SET_PIN_MODE);
+  FirmataStream->write(pin);
+  FirmataStream->write(config);
 }
 
 /**

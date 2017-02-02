@@ -48,27 +48,40 @@
 #define ENCODER                 0x09 // same as PIN_MODE_ENCODER
 #define IGNORE                  0x7F // same as PIN_MODE_IGNORE
 
+extern "C" {
+  // callback function types
+  typedef void (*callbackFunction)(uint8_t, int);
+  typedef void (*systemCallbackFunction)(void);
+  typedef void (*stringCallbackFunction)(char *);
+  typedef void (*sysexCallbackFunction)(uint8_t command, uint8_t argc, uint8_t *argv);
+}
+
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
 {
   public:
     FirmataClass();
+
     /* Arduino constructors */
     void begin();
     void begin(long);
     void begin(Stream &s);
+
     /* querying functions */
     void printVersion(void);
     void blinkVersion(void);
     void printFirmwareVersion(void);
+
     //void setFirmwareVersion(byte major, byte minor);  // see macro below
     void setFirmwareNameAndVersion(const char *name, byte major, byte minor);
     void disableBlinkVersion();
+
     /* serial receive handling */
     int available(void);
     void processInput(void);
     void parse(unsigned char value);
     boolean isParsingMessage(void);
+
     /* serial send handling */
     void sendAnalog(byte pin, int value);
     void sendDigital(byte pin, int value); // TODO implement this
@@ -77,16 +90,18 @@ class FirmataClass
     void sendString(byte command, const char *string);
     void sendSysex(byte command, byte bytec, byte *bytev);
     void write(byte c);
+
     /* attach & detach callback functions to messages */
-    void attach(uint8_t command, callbackFunction newFunction);
-    void attach(uint8_t command, systemCallbackFunction newFunction);
-    void attach(uint8_t command, stringCallbackFunction newFunction);
-    void attach(uint8_t command, sysexCallbackFunction newFunction);
+    void attach(uint8_t command, ::callbackFunction newFunction);
+    void attach(uint8_t command, ::systemCallbackFunction newFunction);
+    void attach(uint8_t command, ::stringCallbackFunction newFunction);
+    void attach(uint8_t command, ::sysexCallbackFunction newFunction);
     void detach(uint8_t command);
 
     /* access pin state and config */
     byte getPinMode(byte pin);
     void setPinMode(byte pin, byte config);
+
     /* access pin state */
     int getPinState(byte pin);
     void setPinState(byte pin, int state);
@@ -101,9 +116,11 @@ class FirmataClass
     FirmataMarshaller marshaller;
     FirmataParser parser;
     Stream *FirmataStream;
+
     /* firmware name and version */
     byte firmwareVersionCount;
     byte *firmwareVersionVector;
+
     /* pin configuration */
     byte pinConfig[TOTAL_PINS];
     int pinState[TOTAL_PINS];
@@ -113,6 +130,30 @@ class FirmataClass
     /* private methods ------------------------------ */
     void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
     friend void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value) const;
+
+    /* callback functions */
+    static callbackFunction currentAnalogCallback;
+    static callbackFunction currentDigitalCallback;
+    static callbackFunction currentPinModeCallback;
+    static callbackFunction currentPinValueCallback;
+    static callbackFunction currentReportAnalogCallback;
+    static callbackFunction currentReportDigitalCallback;
+    static stringCallbackFunction currentStringCallback;
+    static sysexCallbackFunction currentSysexCallback;
+    static systemCallbackFunction currentSystemResetCallback;
+
+    /* static callbacks */
+    inline static void staticAnalogCallback (void *, uint8_t command, uint16_t value) { if ( currentAnalogCallback ) { currentAnalogCallback(command,(int)value); } }
+    inline static void staticDigitalCallback (void *, uint8_t command, uint16_t value) { if ( currentDigitalCallback ) { currentDigitalCallback(command, (int)value); } }
+    inline static void staticPinModeCallback (void *, uint8_t command, uint16_t value) { if ( currentPinModeCallback ) { currentPinModeCallback(command, (int)value); } }
+    inline static void staticPinValueCallback (void *, uint8_t command, uint16_t value) { if ( currentPinValueCallback ) { currentPinValueCallback(command, (int)value); } }
+    inline static void staticReportAnalogCallback (void *, uint8_t command, uint16_t value) { if ( currentReportAnalogCallback ) { currentReportAnalogCallback(command, (int)value); } }
+    inline static void staticReportDigitalCallback (void *, uint8_t command, uint16_t value) { if ( currentReportDigitalCallback ) { currentReportDigitalCallback(command, (int)value); } }
+    inline static void staticStringCallback (void *, char * c_str) { if ( currentStringCallback ) { currentStringCallback(c_str); } }
+    inline static void staticSysexCallback (void *, uint8_t command, size_t argc, uint8_t *argv) { if ( currentSysexCallback ) { currentSysexCallback(command, (uint8_t)argc, argv); } }
+    inline static void staticReportFirmwareCallback (void * context) { if ( context ) { ((FirmataClass *)context)->printFirmwareVersion(); } }
+    inline static void staticReportVersionCallback (void * context) { if ( context ) { ((FirmataClass *)context)->printVersion(); } }
+    inline static void staticSystemResetCallback (void *) { if ( currentSystemResetCallback ) { currentSystemResetCallback(); } }
 };
 
 extern FirmataClass Firmata;

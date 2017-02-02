@@ -22,29 +22,29 @@
   #include <stdint.h>
 #endif
 
-extern "C" {
-  // callback function types
-  typedef void (*dataBufferOverflowCallbackFunction)(void * context);
-  typedef void (*callbackFunction)(uint8_t, int);
-  typedef void (*systemCallbackFunction)(void);
-  typedef void (*stringCallbackFunction)(char *);
-  typedef void (*sysexCallbackFunction)(uint8_t command, uint8_t argc, uint8_t *argv);
-}
-
 class FirmataParser
 {
   public:
+    /* callback function types */
+    typedef void (*callbackFunction)(void * context, uint8_t command, uint16_t value);
+    typedef void (*dataBufferOverflowCallbackFunction)(void * context);
+    typedef void (*stringCallbackFunction)(void * context, char * c_str);
+    typedef void (*sysexCallbackFunction)(void * context, uint8_t command, size_t argc, uint8_t * argv);
+    typedef void (*systemCallbackFunction)(void * context);
+
     FirmataParser(uint8_t * dataBuffer = (uint8_t *)NULL, size_t dataBufferSize = 0);
+
     /* serial receive handling */
     void parse(uint8_t value);
     bool isParsingMessage(void) const;
     int setDataBufferOfSize(uint8_t * dataBuffer, size_t dataBufferSize);
+
     /* attach & detach callback functions to messages */
-    void attach(uint8_t command, callbackFunction newFunction);
-    void attach(uint8_t command, systemCallbackFunction newFunction);
-    void attach(uint8_t command, stringCallbackFunction newFunction);
-    void attach(uint8_t command, sysexCallbackFunction newFunction);
+    void attach(uint8_t command, callbackFunction newFunction, void * context);
     void attach(dataBufferOverflowCallbackFunction newFunction, void * context);
+    void attach(uint8_t command, stringCallbackFunction newFunction, void * context);
+    void attach(uint8_t command, sysexCallbackFunction newFunction, void * context);
+    void attach(uint8_t command, systemCallbackFunction newFunction, void * context);
     void detach(uint8_t command);
     void detach(dataBufferOverflowCallbackFunction);
 
@@ -56,12 +56,24 @@ class FirmataParser
     uint8_t executeMultiByteCommand; // execute this after getting multi-byte data
     uint8_t multiByteChannel; // channel data for multiByteCommands
     size_t waitForData; // this flag says the next serial input will be data
+
     /* sysex */
     bool parsingSysex;
     size_t sysexBytesRead;
 
     /* callback context */
+    void * currentAnalogCallbackContext;
+    void * currentDigitalCallbackContext;
+    void * currentReportAnalogCallbackContext;
+    void * currentReportDigitalCallbackContext;
+    void * currentPinModeCallbackContext;
+    void * currentPinValueCallbackContext;
+    void * currentReportFirmwareCallbackContext;
+    void * currentReportVersionCallbackContext;
     void * currentDataBufferOverflowCallbackContext;
+    void * currentStringCallbackContext;
+    void * currentSysexCallbackContext;
+    void * currentSystemResetCallbackContext;
 
     /* callback functions */
     callbackFunction currentAnalogCallback;
@@ -70,12 +82,12 @@ class FirmataParser
     callbackFunction currentReportDigitalCallback;
     callbackFunction currentPinModeCallback;
     callbackFunction currentPinValueCallback;
+    dataBufferOverflowCallbackFunction currentDataBufferOverflowCallback;
+    stringCallbackFunction currentStringCallback;
+    sysexCallbackFunction currentSysexCallback;
     systemCallbackFunction currentReportFirmwareCallback;
     systemCallbackFunction currentReportVersionCallback;
     systemCallbackFunction currentSystemResetCallback;
-    stringCallbackFunction currentStringCallback;
-    sysexCallbackFunction currentSysexCallback;
-    dataBufferOverflowCallbackFunction currentDataBufferOverflowCallback;
 
     /* private methods ------------------------------ */
     void processSysexMessage(void);
