@@ -40,11 +40,11 @@ class FirmataParser
     int setDataBufferOfSize(uint8_t * dataBuffer, size_t dataBufferSize);
 
     /* attach & detach callback functions to messages */
-    void attach(uint8_t command, callbackFunction newFunction, void * context);
-    void attach(dataBufferOverflowCallbackFunction newFunction, void * context);
-    void attach(uint8_t command, stringCallbackFunction newFunction, void * context);
-    void attach(uint8_t command, sysexCallbackFunction newFunction, void * context);
-    void attach(uint8_t command, systemCallbackFunction newFunction, void * context);
+    void attach(uint8_t command, callbackFunction newFunction, void * context = NULL);
+    void attach(dataBufferOverflowCallbackFunction newFunction, void * context = NULL);
+    void attach(uint8_t command, stringCallbackFunction newFunction, void * context = NULL);
+    void attach(uint8_t command, sysexCallbackFunction newFunction, void * context = NULL);
+    void attach(uint8_t command, systemCallbackFunction newFunction, void * context = NULL);
     void detach(uint8_t command);
     void detach(dataBufferOverflowCallbackFunction);
 

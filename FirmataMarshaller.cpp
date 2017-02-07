@@ -124,7 +124,7 @@ void FirmataMarshaller::end(void)
 void FirmataMarshaller::reportAnalogDisable(uint8_t pin)
 const
 {
-    reportAnalog(pin, false);
+  reportAnalog(pin, false);
 }
 
 /**
@@ -133,13 +133,11 @@ const
  * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
  * message.
  * @param pin The analog pin for which to request the value (limited to pins 0 - 15).
- * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
- * @note The maximum resulting value is 14-bits (16384).
  */
 void FirmataMarshaller::reportAnalogEnable(uint8_t pin)
 const
 {
-    reportAnalog(pin, true);
+  reportAnalog(pin, true);
 }
 
 /**
@@ -148,12 +146,11 @@ const
  * @param portNumber The port number for which to request the value. Note that this is not the same as a "port" on the
  * physical microcontroller. Ports are defined in order per every 8 pins in ascending order
  * of the Arduino digital pin numbering scheme. Port 0 = pins D0 - D7, port 1 = pins D8 - D15, etc.
- * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
  */
 void FirmataMarshaller::reportDigitalPortDisable(uint8_t portNumber)
 const
 {
-    reportDigitalPort(portNumber, false);
+  reportDigitalPort(portNumber, false);
 }
 
 /**
@@ -162,12 +159,11 @@ const
  * @param portNumber The port number for which to request the value. Note that this is not the same as a "port" on the
  * physical microcontroller. Ports are defined in order per every 8 pins in ascending order
  * of the Arduino digital pin numbering scheme. Port 0 = pins D0 - D7, port 1 = pins D8 - D15, etc.
- * @param stream_enable A zero value will disable the stream, a non-zero will enable the stream
  */
 void FirmataMarshaller::reportDigitalPortEnable(uint8_t portNumber)
 const
 {
-    reportDigitalPort(portNumber, true);
+  reportDigitalPort(portNumber, true);
 }
 
 /**
@@ -189,9 +185,20 @@ const
 }
 
 /**
+ * Send an analog mapping query to the Firmata host application. The resulting sysex message will
+ * have an ANALOG_MAPPING_RESPONSE command byte, followed by a list of pins [0-n]; where each
+ * pin will specify its corresponding analog pin number or 0x7F (127) if not applicable.
+ */
+void FirmataMarshaller::sendAnalogMappingQuery(void)
+const
+{
+  sendSysex(ANALOG_MAPPING_QUERY, 0, NULL);
+}
+
+/**
  * Send a capability query to the Firmata host application. The resulting sysex message will have
  * a CAPABILITY_RESPONSE command byte, followed by a list of byte tuples (mode and mode resolution)
- * for each pin; where each pin list is terminated by 0x7F (128).
+ * for each pin; where each pin list is terminated by 0x7F (127).
  */
 void FirmataMarshaller::sendCapabilityQuery(void)
 const
