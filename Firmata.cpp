@@ -29,13 +29,16 @@ extern "C" {
 // make one instance for the user to use
 FirmataClass Firmata;
 
-void printVersion (void) {
-   Firmata.printVersion();
-}
-
-void printFirmwareVersion (void) {
-   Firmata.printFirmwareVersion();
-}
+/* callback functions */
+callbackFunction FirmataClass::currentAnalogCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentDigitalCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentPinModeCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentPinValueCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentReportAnalogCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentReportDigitalCallback = (callbackFunction)NULL;
+stringCallbackFunction FirmataClass::currentStringCallback = (stringCallbackFunction)NULL;
+sysexCallbackFunction FirmataClass::currentSysexCallback = (sysexCallbackFunction)NULL;
+systemCallbackFunction FirmataClass::currentSystemResetCallback = (systemCallbackFunction)NULL;
 
 //******************************************************************************
 //* Support Functions
@@ -81,8 +84,19 @@ FirmataClass::FirmataClass()
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
   blinkVersionDisabled = false;
-  parser.attach(REPORT_FIRMWARE, ::printFirmwareVersion);
-  parser.attach(REPORT_VERSION, ::printVersion);
+
+  // Establish callback translation to parser callbacks
+  parser.attach(ANALOG_MESSAGE, (FirmataParser::callbackFunction)staticAnalogCallback, (void *)NULL);
+  parser.attach(DIGITAL_MESSAGE, (FirmataParser::callbackFunction)staticDigitalCallback, (void *)NULL);
+  parser.attach(REPORT_ANALOG, (FirmataParser::callbackFunction)staticReportAnalogCallback, (void *)NULL);
+  parser.attach(REPORT_DIGITAL, (FirmataParser::callbackFunction)staticReportDigitalCallback, (void *)NULL);
+  parser.attach(SET_PIN_MODE, (FirmataParser::callbackFunction)staticPinModeCallback, (void *)NULL);
+  parser.attach(SET_DIGITAL_PIN_VALUE, (FirmataParser::callbackFunction)staticPinValueCallback, (void *)NULL);
+  parser.attach(STRING_DATA, (FirmataParser::stringCallbackFunction)staticStringCallback, (void *)NULL);
+  parser.attach(START_SYSEX, (FirmataParser::sysexCallbackFunction)staticSysexCallback, (void *)NULL);
+  parser.attach(REPORT_FIRMWARE, (FirmataParser::systemCallbackFunction)staticReportFirmwareCallback, this);
+  parser.attach(REPORT_VERSION, (FirmataParser::systemCallbackFunction)staticReportVersionCallback, this);
+  parser.attach(SYSTEM_RESET, (FirmataParser::systemCallbackFunction)staticSystemResetCallback, (void *)NULL);
 }
 
 //******************************************************************************
@@ -296,6 +310,8 @@ void FirmataClass::sendAnalog(byte pin, int value)
  */
 void FirmataClass::sendDigital(byte pin, int value)
 {
+  (void)pin;
+  (void)value;
   /* TODO add single pin digital messages to the protocol, this needs to
    * track the last digital data sent so that it can be sure to change just
    * one bit in the packet.  This is complicated by the fact that the
@@ -376,9 +392,28 @@ void FirmataClass::write(byte c)
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
  */
-void FirmataClass::attach(uint8_t command, callbackFunction newFunction)
+void FirmataClass::attach(uint8_t command, ::callbackFunction newFunction)
 {
-    parser.attach(command, (callbackFunction)newFunction);
+  switch (command) {
+    case ANALOG_MESSAGE:
+      currentAnalogCallback = newFunction;
+      break;
+    case DIGITAL_MESSAGE:
+      currentDigitalCallback = newFunction;
+      break;
+    case REPORT_ANALOG:
+      currentReportAnalogCallback = newFunction;
+      break;
+    case REPORT_DIGITAL:
+      currentReportDigitalCallback = newFunction;
+      break;
+    case SET_PIN_MODE:
+      currentPinModeCallback = newFunction;
+      break;
+    case SET_DIGITAL_PIN_VALUE:
+      currentPinValueCallback = newFunction;
+      break;
+  }
 }
 
 /**
@@ -388,7 +423,11 @@ void FirmataClass::attach(uint8_t command, callbackFunction newFunction)
  */
 void FirmataClass::attach(uint8_t command, systemCallbackFunction newFunction)
 {
-    parser.attach(command, (systemCallbackFunction)newFunction);
+  switch (command) {
+    case SYSTEM_RESET:
+      currentSystemResetCallback = newFunction;
+      break;
+  }
 }
 
 /**
@@ -398,7 +437,11 @@ void FirmataClass::attach(uint8_t command, systemCallbackFunction newFunction)
  */
 void FirmataClass::attach(uint8_t command, stringCallbackFunction newFunction)
 {
-    parser.attach(command, (stringCallbackFunction)newFunction);
+  switch (command) {
+    case STRING_DATA:
+      currentStringCallback = newFunction;
+      break;
+  }
 }
 
 /**
@@ -408,7 +451,8 @@ void FirmataClass::attach(uint8_t command, stringCallbackFunction newFunction)
  */
 void FirmataClass::attach(uint8_t command, sysexCallbackFunction newFunction)
 {
-    parser.attach(command, (sysexCallbackFunction)newFunction);
+  (void)command;
+  currentSysexCallback = newFunction;
 }
 
 /**
@@ -418,7 +462,20 @@ void FirmataClass::attach(uint8_t command, sysexCallbackFunction newFunction)
  */
 void FirmataClass::detach(uint8_t command)
 {
-    parser.detach(command);
+  switch (command) {
+    case SYSTEM_RESET:
+      attach(command, (systemCallbackFunction)NULL);
+      break;
+    case STRING_DATA:
+      attach(command, (stringCallbackFunction)NULL);
+      break;
+    case START_SYSEX:
+      attach(command, (sysexCallbackFunction)NULL);
+      break;
+    default:
+      attach(command, (callbackFunction)NULL);
+      break;
+  }
 }
 
 /**
