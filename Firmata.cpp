@@ -18,10 +18,10 @@
 #include "Firmata.h"
 #include "HardwareSerial.h"
 
-extern "C" {
 #include <string.h>
 #include <stdlib.h>
-}
+
+using namespace firmata;
 
 //******************************************************************************
 //* Static Members

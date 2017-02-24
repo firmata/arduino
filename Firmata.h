@@ -15,7 +15,7 @@
 #define Firmata_h
 
 #include "Boards.h"  /* Hardware Abstraction Layer + Wiring/Arduino */
-#include "FirmataConstants.h"
+#include "FirmataDefines.h"
 #include "FirmataMarshaller.h"
 #include "FirmataParser.h"
 
@@ -48,18 +48,17 @@
 #define ENCODER                 0x09 // same as PIN_MODE_ENCODER
 #define IGNORE                  0x7F // same as PIN_MODE_IGNORE
 
-extern "C" {
-  // callback function types
-  typedef void (*callbackFunction)(uint8_t, int);
-  typedef void (*systemCallbackFunction)(void);
-  typedef void (*stringCallbackFunction)(char *);
-  typedef void (*sysexCallbackFunction)(uint8_t command, uint8_t argc, uint8_t *argv);
-}
+namespace firmata {
 
 // TODO make it a subclass of a generic Serial/Stream base class
 class FirmataClass
 {
   public:
+    typedef void (*callbackFunction)(uint8_t, int);
+    typedef void (*systemCallbackFunction)(void);
+    typedef void (*stringCallbackFunction)(char *);
+    typedef void (*sysexCallbackFunction)(uint8_t command, uint8_t argc, uint8_t *argv);
+
     FirmataClass();
 
     /* Arduino constructors */
@@ -92,10 +91,10 @@ class FirmataClass
     void write(byte c);
 
     /* attach & detach callback functions to messages */
-    void attach(uint8_t command, ::callbackFunction newFunction);
-    void attach(uint8_t command, ::systemCallbackFunction newFunction);
-    void attach(uint8_t command, ::stringCallbackFunction newFunction);
-    void attach(uint8_t command, ::sysexCallbackFunction newFunction);
+    void attach(uint8_t command, callbackFunction newFunction);
+    void attach(uint8_t command, systemCallbackFunction newFunction);
+    void attach(uint8_t command, stringCallbackFunction newFunction);
+    void attach(uint8_t command, sysexCallbackFunction newFunction);
     void detach(uint8_t command);
 
     /* access pin state and config */
@@ -156,7 +155,17 @@ class FirmataClass
     inline static void staticSystemResetCallback (void *) { if ( currentSystemResetCallback ) { currentSystemResetCallback(); } }
 };
 
-extern FirmataClass Firmata;
+} // namespace firmata
+
+extern "C" {
+  // callback function types
+  typedef firmata::FirmataClass::callbackFunction callbackFunction;
+  typedef firmata::FirmataClass::systemCallbackFunction systemCallbackFunction;
+  typedef firmata::FirmataClass::stringCallbackFunction stringCallbackFunction;
+  typedef firmata::FirmataClass::sysexCallbackFunction sysexCallbackFunction;
+}
+
+extern firmata::FirmataClass Firmata;
 
 /*==============================================================================
  * MACROS

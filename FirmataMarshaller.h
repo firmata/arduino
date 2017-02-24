@@ -24,9 +24,12 @@
 
 #include <Stream.h>
 
+namespace firmata {
+
 class FirmataMarshaller
 {
-  friend class FirmataClass;
+    friend class FirmataClass;
+
   public:
     /* constructors */
     FirmataMarshaller();
@@ -57,6 +60,8 @@ class FirmataMarshaller
 
     Stream * FirmataStream;
 };
+
+} // namespace firmata
 
 #endif /* FirmataMarshaller_h */
 
