@@ -257,6 +257,19 @@ const
 }
 
 /**
+ * Send a pin state query to the Firmata host application. The resulting sysex message will have
+ * a PIN_STATE_RESPONSE command byte, followed by the pin number, the pin mode and a stream of
+ * bits to indicate any *data* written to the pin (pin state).
+ * @param pin The pin to query
+ * @note The pin state is any data written to the pin (i.e. pin state != pin value)
+ */
+void FirmataMarshaller::sendPinStateQuery(uint8_t pin)
+const
+{
+  sendSysex(PIN_STATE_QUERY, 1, &pin);
+}
+
+/**
  * Send a sysex message where all values after the command byte are packet as 2 7-bit bytes
  * (this is not always the case so this function is not always used to send sysex messages).
  * @param command The sysex command byte.

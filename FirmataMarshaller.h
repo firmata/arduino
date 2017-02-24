@@ -49,6 +49,7 @@ class FirmataMarshaller
     void sendDigital(uint8_t pin, uint8_t value) const;
     void sendDigitalPort(uint8_t portNumber, uint16_t portData) const;
     void sendPinMode(uint8_t pin, uint8_t config) const;
+    void sendPinStateQuery(uint8_t pin) const;
     void sendString(const char *string) const;
     void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev) const;
 
