@@ -20,17 +20,17 @@
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
-#define FIRMATA_FIRMWARE_MAJOR_VERSION  firmata::FIRMATA_FIRMWARE_MAJOR_VERSION
-#define FIRMATA_FIRMWARE_MINOR_VERSION  firmata::FIRMATA_FIRMWARE_MINOR_VERSION
-#define FIRMATA_FIRMWARE_BUGFIX_VERSION firmata::FIRMATA_FIRMWARE_BUGFIX_VERSION
+#define FIRMATA_FIRMWARE_MAJOR_VERSION  firmata::FIRMWARE_MAJOR_VERSION
+#define FIRMATA_FIRMWARE_MINOR_VERSION  firmata::FIRMWARE_MINOR_VERSION
+#define FIRMATA_FIRMWARE_BUGFIX_VERSION firmata::FIRMWARE_BUGFIX_VERSION
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.
  * Query using the REPORT_VERSION message.
  */
-#define FIRMATA_PROTOCOL_MAJOR_VERSION  firmata::FIRMATA_PROTOCOL_MAJOR_VERSION // for non-compatible changes
-#define FIRMATA_PROTOCOL_MINOR_VERSION  firmata::FIRMATA_PROTOCOL_MINOR_VERSION // for backwards compatible changes
-#define FIRMATA_PROTOCOL_BUGFIX_VERSION firmata::FIRMATA_PROTOCOL_BUGFIX_VERSION // for bugfix releases
+#define FIRMATA_PROTOCOL_MAJOR_VERSION  firmata::PROTOCOL_MAJOR_VERSION // for non-compatible changes
+#define FIRMATA_PROTOCOL_MINOR_VERSION  firmata::PROTOCOL_MINOR_VERSION // for backwards compatible changes
+#define FIRMATA_PROTOCOL_BUGFIX_VERSION firmata::PROTOCOL_BUGFIX_VERSION // for bugfix releases
 
 #ifdef MAX_DATA_BYTES
 #undef MAX_DATA_BYTES

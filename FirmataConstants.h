@@ -19,19 +19,19 @@ namespace firmata {
  * The firmware version will not always equal the protocol version going forward.
  * Query using the REPORT_FIRMWARE message.
  */
-static const int FIRMATA_FIRMWARE_MAJOR_VERSION =  2;
-static const int FIRMATA_FIRMWARE_MINOR_VERSION =  5;
-static const int FIRMATA_FIRMWARE_BUGFIX_VERSION = 4;
+static const int FIRMWARE_MAJOR_VERSION =  2;
+static const int FIRMWARE_MINOR_VERSION =  5;
+static const int FIRMWARE_BUGFIX_VERSION = 4;
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.
  * Query using the REPORT_VERSION message.
  */
-static const int FIRMATA_PROTOCOL_MAJOR_VERSION =  2; // for non-compatible changes
-static const int FIRMATA_PROTOCOL_MINOR_VERSION =  5; // for backwards compatible changes
-static const int FIRMATA_PROTOCOL_BUGFIX_VERSION = 1; // for bugfix releases
+static const int PROTOCOL_MAJOR_VERSION =  2; // for non-compatible changes
+static const int PROTOCOL_MINOR_VERSION =  5; // for backwards compatible changes
+static const int PROTOCOL_BUGFIX_VERSION = 1; // for bugfix releases
 
-static const int MAX_DATA_BYTES =                 64; // max number of data bytes in incoming messages
+static const int MAX_DATA_BYTES =          64; // max number of data bytes in incoming messages
 
 // message command bytes (128-255/0x80-0xFF)
 
