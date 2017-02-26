@@ -128,7 +128,7 @@ class FirmataClass
 
     /* private methods ------------------------------ */
     void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
-    friend void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value) const;
+    friend void FirmataMarshaller::transformByteStreamToMessageBytes (size_t bytec, uint8_t * bytev, size_t max_bytes = 0) const;
 
     /* callback functions */
     static callbackFunction currentAnalogCallback;

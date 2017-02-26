@@ -50,7 +50,7 @@ systemCallbackFunction FirmataClass::currentSystemResetCallback = (systemCallbac
  */
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
-  marshaller.sendValueAsTwo7bitBytes(value);
+  marshaller.transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
 }
 
 /**
@@ -196,7 +196,7 @@ void FirmataClass::printFirmwareVersion(void)
     FirmataStream->write(firmwareVersionVector[0]); // major version number
     FirmataStream->write(firmwareVersionVector[1]); // minor version number
     for (i = 2; i < firmwareVersionCount; ++i) {
-      marshaller.sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
+      sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
     }
     endSysex();
   }

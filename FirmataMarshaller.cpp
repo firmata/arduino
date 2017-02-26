@@ -66,14 +66,57 @@ const
 }
 
 /**
- * Split a 16-bit integer into two 7-bit values and write each value.
- * @param value The 16-bit value to be split and written separately.
+ * An alternative to the normal analog message, this extended version allows addressing beyond
+ * pin 15 and supports sending analog values with any number of bits.
+ * @param pin The analog pin to which the value is sent.
+ * @param bytec The size of the storage for the analog value
+ * @param bytev The pointer to the location of the analog value
  */
-void FirmataMarshaller::sendValueAsTwo7bitBytes(uint16_t value)
+void FirmataMarshaller::sendExtendedAnalog(uint8_t pin, size_t bytec, uint8_t * bytev)
 const
 {
-  FirmataStream->write(value & 0x7F); // LSB
-  FirmataStream->write(value >> 7 & 0x7F); // MSB
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(START_SYSEX);
+  FirmataStream->write(EXTENDED_ANALOG);
+  FirmataStream->write(pin);
+  transformByteStreamToMessageBytes(bytec, bytev, bytec);
+  FirmataStream->write(END_SYSEX);
+}
+
+/**
+ * Transform 8-bit stream into 7-bit message
+ * @param bytec The number of data bytes in the message.
+ * @param bytev A pointer to the array of data bytes to send in the message.
+ * @param max_bytes Force message to be n bytes, regardless of data bits.
+ */
+void FirmataMarshaller::transformByteStreamToMessageBytes (size_t bytec, uint8_t * bytev, size_t max_bytes)
+const
+{
+  static const size_t transmit_bits = 7;
+  static const uint8_t transmit_mask = ((1 << transmit_bits) - 1);
+
+  size_t bytes_sent = 0;
+  size_t outstanding_bits = 0;
+  uint8_t outstanding_bit_cache = *bytev;
+
+  if ( !max_bytes ) { max_bytes = static_cast<size_t>(-1); }
+  for (size_t i = 0 ; (i < bytec) && (bytes_sent < max_bytes) ; ++i) {
+    uint8_t transmit_byte = (outstanding_bit_cache|(bytev[i] << outstanding_bits));
+    FirmataStream->write(transmit_mask & transmit_byte);
+    ++bytes_sent;
+    outstanding_bit_cache = (bytev[i] >> (transmit_bits - outstanding_bits));
+    outstanding_bits = (outstanding_bits + (8 - transmit_bits));
+    for ( ; (outstanding_bits >= transmit_bits) && (bytes_sent < max_bytes) ; ) {
+      transmit_byte = outstanding_bit_cache;
+    FirmataStream->write(transmit_mask & transmit_byte);
+      ++bytes_sent;
+      outstanding_bit_cache >>= transmit_bits;
+      outstanding_bits -= transmit_bits;
+    }
+  }
+  if ( outstanding_bits && (bytes_sent < max_bytes) ) {
+    FirmataStream->write(static_cast<uint8_t>((1 << outstanding_bits) - 1) & outstanding_bit_cache);
+  }
 }
 
 //******************************************************************************
@@ -173,17 +216,20 @@ const
  * when using the ANALOG_MESSAGE. The maximum value of the ANALOG_MESSAGE is limited to 14 bits
  * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
  * message.
- * @param pin The analog pin to send the value of (limited to pins 0 - 15).
+ * @param pin The analog pin to which the value is sent.
  * @param value The value of the analog pin (0 - 1024 for 10-bit analog, 0 - 4096 for 12-bit, etc).
- * The maximum value is 14-bits (16384).
  */
 void FirmataMarshaller::sendAnalog(uint8_t pin, uint16_t value)
 const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
-  // pin can only be 0-15, so chop higher bits
-  FirmataStream->write(ANALOG_MESSAGE | (pin & 0xF));
-  sendValueAsTwo7bitBytes(value);
+
+  if ( (0xF >= pin) && (0x3FFF >= value) ) {
+    FirmataStream->write(ANALOG_MESSAGE|pin);
+    transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), 2);
+  } else {
+    sendExtendedAnalog(pin, sizeof(value), reinterpret_cast<uint8_t *>(&value));
+  }
 }
 
 /**
@@ -236,8 +282,9 @@ const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
   FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
-  FirmataStream->write((uint8_t)portData % 128); // Tx bits 0-6 (protocol v1 and higher)
-  FirmataStream->write(portData >> 7);  // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
+  // Tx bits  0-6 (protocol v1 and higher)
+  // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
+  transformByteStreamToMessageBytes(sizeof(portData), reinterpret_cast<uint8_t *>(&portData), 2);
 }
 
 /**
@@ -284,7 +331,7 @@ const
   FirmataStream->write(START_SYSEX);
   FirmataStream->write(command);
   for (i = 0; i < bytec; ++i) {
-    sendValueAsTwo7bitBytes(bytev[i]);
+    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), 2);
   }
   FirmataStream->write(END_SYSEX);
 }
@@ -296,7 +343,7 @@ const
 void FirmataMarshaller::sendString(const char *string)
 const
 {
-  sendSysex(STRING_DATA, strlen(string), (uint8_t *)string);
+  sendSysex(STRING_DATA, strlen(string), reinterpret_cast<uint8_t *>(const_cast<char *>(string)));
 }
 
 /**
@@ -307,5 +354,5 @@ const
 void FirmataMarshaller::setSamplingInterval(uint16_t interval_ms)
 const
 {
-  sendSysex(SAMPLING_INTERVAL, sizeof(interval_ms), &interval_ms);
+  sendSysex(SAMPLING_INTERVAL, sizeof(interval_ms), reinterpret_cast<uint8_t *>(&interval_ms));
 }
