@@ -101,7 +101,7 @@
 #ifdef SERIAL_MESSAGE
 #undef SERIAL_MESSAGE
 #endif
-#define SERIAL_MESSAGE          firmata::SERIAL_MESSAGE // communicate with serial devices, including other boards
+#define SERIAL_MESSAGE          firmata::SERIAL_DATA // communicate with serial devices, including other boards
 
 #ifdef ENCODER_DATA
 #undef ENCODER_DATA

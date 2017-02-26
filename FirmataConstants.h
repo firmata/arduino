@@ -52,7 +52,7 @@ static const int END_SYSEX =               0xF7; // end a MIDI Sysex message
 // extended command set using sysex (0-127/0x00-0x7F)
 /* 0x00-0x0F reserved for user-defined commands */
 
-static const int SERIAL_MESSAGE =          0x60; // communicate with serial devices, including other boards
+static const int SERIAL_DATA =             0x60; // communicate with serial devices, including other boards
 static const int ENCODER_DATA =            0x61; // reply with encoders current positions
 static const int SERVO_CONFIG =            0x70; // set max angle, minPulse, maxPulse, freq
 static const int STRING_DATA =             0x71; // a string message with 14-bits per char
