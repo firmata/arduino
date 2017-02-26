@@ -218,6 +218,7 @@ const
  * message.
  * @param pin The analog pin to which the value is sent.
  * @param value The value of the analog pin (0 - 1024 for 10-bit analog, 0 - 4096 for 12-bit, etc).
+ * @note The maximum value is 14-bits (16384).
  */
 void FirmataMarshaller::sendAnalog(uint8_t pin, uint16_t value)
 const
@@ -226,7 +227,7 @@ const
 
   if ( (0xF >= pin) && (0x3FFF >= value) ) {
     FirmataStream->write(ANALOG_MESSAGE|pin);
-    transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), 2);
+    transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
   } else {
     sendExtendedAnalog(pin, sizeof(value), reinterpret_cast<uint8_t *>(&value));
   }
@@ -313,7 +314,11 @@ const
 void FirmataMarshaller::sendPinStateQuery(uint8_t pin)
 const
 {
-  sendSysex(PIN_STATE_QUERY, sizeof(pin), &pin);
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(START_SYSEX);
+  FirmataStream->write(PIN_STATE_QUERY);
+  FirmataStream->write(pin);
+  FirmataStream->write(END_SYSEX);
 }
 
 /**
