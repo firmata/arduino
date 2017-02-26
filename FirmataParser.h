@@ -22,6 +22,8 @@
   #include <stdint.h>
 #endif
 
+namespace firmata {
+
 class FirmataParser
 {
   public:
@@ -94,5 +96,7 @@ class FirmataParser
     void systemReset(void);
     bool bufferDataAtPosition(const uint8_t data, const size_t pos);
 };
+
+} // firmata
 
 #endif /* FirmataParser_h */
