@@ -266,7 +266,7 @@ const
 void FirmataMarshaller::sendPinStateQuery(uint8_t pin)
 const
 {
-  sendSysex(PIN_STATE_QUERY, 1, &pin);
+  sendSysex(PIN_STATE_QUERY, sizeof(pin), &pin);
 }
 
 /**
@@ -297,4 +297,15 @@ void FirmataMarshaller::sendString(const char *string)
 const
 {
   sendSysex(STRING_DATA, strlen(string), (uint8_t *)string);
+}
+
+/**
+ * The sampling interval sets how often analog data and i2c data is reported to the client.
+ * @param interval_ms The interval (in milliseconds) at which to sample
+ * @note The default sampling interval is 19ms
+ */
+void FirmataMarshaller::setSamplingInterval(uint16_t interval_ms)
+const
+{
+  sendSysex(SAMPLING_INTERVAL, sizeof(interval_ms), &interval_ms);
 }

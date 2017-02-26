@@ -52,6 +52,7 @@ class FirmataMarshaller
     void sendPinStateQuery(uint8_t pin) const;
     void sendString(const char *string) const;
     void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev) const;
+    void setSamplingInterval(uint16_t interval_ms) const;
 
   private:
     /* utility methods */
