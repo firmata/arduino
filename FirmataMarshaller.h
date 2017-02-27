@@ -39,6 +39,8 @@ class FirmataMarshaller
     void end();
 
     /* serial send handling */
+    void queryFirmwareVersion(void) const;
+    void queryVersion(void) const;
     void reportAnalogDisable(uint8_t pin) const;
     void reportAnalogEnable(uint8_t pin) const;
     void reportDigitalPortDisable(uint8_t portNumber) const;
@@ -48,11 +50,14 @@ class FirmataMarshaller
     void sendCapabilityQuery(void) const;
     void sendDigital(uint8_t pin, uint8_t value) const;
     void sendDigitalPort(uint8_t portNumber, uint16_t portData) const;
+    void sendFirmwareVersion(uint8_t major, uint8_t minor, size_t bytec, uint8_t *bytev) const;
+    void sendVersion(uint8_t major, uint8_t minor) const;
     void sendPinMode(uint8_t pin, uint8_t config) const;
     void sendPinStateQuery(uint8_t pin) const;
     void sendString(const char *string) const;
     void sendSysex(uint8_t command, size_t bytec, uint8_t *bytev) const;
     void setSamplingInterval(uint16_t interval_ms) const;
+    void systemReset(void) const;
 
   private:
     /* utility methods */

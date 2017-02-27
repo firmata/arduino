@@ -160,6 +160,28 @@ void FirmataMarshaller::end(void)
 //******************************************************************************
 
 /**
+ * Query the target's firmware name and version
+ */
+void FirmataMarshaller::queryFirmwareVersion(void)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(START_SYSEX);
+  FirmataStream->write(REPORT_FIRMWARE);
+  FirmataStream->write(END_SYSEX);
+}
+
+/**
+ * Query the target's Firmata protocol version
+ */
+void FirmataMarshaller::queryVersion(void)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(REPORT_VERSION);
+}
+
+/**
  * Halt the stream of analog readings from the Firmata host application. The range of pins is
  * limited to [0..15] when using the REPORT_ANALOG. The maximum result of the REPORT_ANALOG is limited to 14 bits
  * (16384). To increase the pin range or value, see the documentation for the EXTENDED_ANALOG
@@ -224,7 +246,6 @@ void FirmataMarshaller::sendAnalog(uint8_t pin, uint16_t value)
 const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
-
   if ( (0xF >= pin) && (0x3FFF >= value) ) {
     FirmataStream->write(ANALOG_MESSAGE|pin);
     transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
@@ -285,7 +306,43 @@ const
   FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
   // Tx bits  0-6 (protocol v1 and higher)
   // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
-  transformByteStreamToMessageBytes(sizeof(portData), reinterpret_cast<uint8_t *>(&portData), 2);
+  transformByteStreamToMessageBytes(sizeof(portData), reinterpret_cast<uint8_t *>(&portData), sizeof(portData));
+}
+
+/**
+ * Sends the firmware name and version to the Firmata host application.
+ * @param major The major verison number
+ * @param minor The minor version number
+ * @param bytec The length of the firmware name
+ * @param bytev The firmware name array
+ */
+void FirmataMarshaller::sendFirmwareVersion(uint8_t major, uint8_t minor, size_t bytec, uint8_t *bytev)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  size_t i;
+  FirmataStream->write(START_SYSEX);
+  FirmataStream->write(REPORT_FIRMWARE);
+  FirmataStream->write(major);
+  FirmataStream->write(minor);
+  for (i = 0; i < bytec; ++i) {
+    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), sizeof(bytev[i]));
+  }
+  FirmataStream->write(END_SYSEX);
+}
+
+/**
+ * Send the Firmata protocol version to the Firmata host application.
+ * @param major The major verison number
+ * @param minor The minor version number
+ */
+void FirmataMarshaller::sendVersion(uint8_t major, uint8_t minor)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(REPORT_VERSION);
+  FirmataStream->write(major);
+  FirmataStream->write(minor);
 }
 
 /**
@@ -336,7 +393,7 @@ const
   FirmataStream->write(START_SYSEX);
   FirmataStream->write(command);
   for (i = 0; i < bytec; ++i) {
-    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), 2);
+    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), sizeof(bytev[i]));
   }
   FirmataStream->write(END_SYSEX);
 }
@@ -360,4 +417,15 @@ void FirmataMarshaller::setSamplingInterval(uint16_t interval_ms)
 const
 {
   sendSysex(SAMPLING_INTERVAL, sizeof(interval_ms), reinterpret_cast<uint8_t *>(&interval_ms));
+}
+
+/**
+ * Perform a software reset on the target. For example, StandardFirmata.ino will initialize
+ * everything to a known state and reset the parsing buffer.
+ */
+void FirmataMarshaller::systemReset(void)
+const
+{
+  if ( (Stream *)NULL == FirmataStream ) { return; }
+  FirmataStream->write(SYSTEM_RESET);
 }

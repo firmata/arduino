@@ -146,9 +146,7 @@ void FirmataClass::begin(Stream &s)
  */
 void FirmataClass::printVersion(void)
 {
-  FirmataStream->write(REPORT_VERSION);
-  FirmataStream->write(FIRMATA_PROTOCOL_MAJOR_VERSION);
-  FirmataStream->write(FIRMATA_PROTOCOL_MINOR_VERSION);
+  marshaller.sendVersion(FIRMATA_PROTOCOL_MAJOR_VERSION, FIRMATA_PROTOCOL_MINOR_VERSION);
 }
 
 /**
@@ -188,17 +186,8 @@ void FirmataClass::disableBlinkVersion()
  */
 void FirmataClass::printFirmwareVersion(void)
 {
-  byte i;
-
   if (firmwareVersionCount) { // make sure that the name has been set before reporting
-    startSysex();
-    FirmataStream->write(REPORT_FIRMWARE);
-    FirmataStream->write(firmwareVersionVector[0]); // major version number
-    FirmataStream->write(firmwareVersionVector[1]); // minor version number
-    for (i = 2; i < firmwareVersionCount; ++i) {
-      sendValueAsTwo7bitBytes(firmwareVersionVector[i]);
-    }
-    endSysex();
+    marshaller.sendFirmwareVersion(static_cast<uint8_t>(firmwareVersionVector[0]), static_cast<uint8_t>(firmwareVersionVector[1]), (firmwareVersionCount - 2), reinterpret_cast<uint8_t *>(&firmwareVersionVector[2]));
   }
 }
 
