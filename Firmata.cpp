@@ -1,5 +1,5 @@
 /*
-  Firmata.cpp - Firmata library v2.5.4 - 2016-10-23
+  Firmata.cpp - Firmata library v2.5.5 - 2017-03-06
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 

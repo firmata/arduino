@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.5.4 - 2016-10-23
+  FirmataConstants.h
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
@@ -21,7 +21,7 @@ namespace firmata {
  */
 static const int FIRMWARE_MAJOR_VERSION =  2;
 static const int FIRMWARE_MINOR_VERSION =  5;
-static const int FIRMWARE_BUGFIX_VERSION = 4;
+static const int FIRMWARE_BUGFIX_VERSION = 5;
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.
