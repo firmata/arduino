@@ -61,7 +61,7 @@ FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
   currentStringCallback((stringCallbackFunction)NULL),
   currentSysexCallback((sysexCallbackFunction)NULL),
   currentReportFirmwareCallback((versionCallbackFunction)NULL),
-  currentReportVersionCallback((systemCallbackFunction)NULL),
+  currentReportVersionCallback((versionCallbackFunction)NULL),
   currentSystemResetCallback((systemCallbackFunction)NULL)
 {
     allowBufferUpdate = ((uint8_t *)NULL == dataBuffer);
@@ -130,6 +130,9 @@ void FirmataParser::parse(uint8_t inputData)
           if (currentReportDigitalCallback)
             (*currentReportDigitalCallback)(currentReportDigitalCallbackContext, multiByteChannel, dataBuffer[0]);
           break;
+        case REPORT_VERSION:
+          if (currentReportVersionCallback)
+            (*currentReportVersionCallback)(currentReportVersionCallbackContext, dataBuffer[0], dataBuffer[1], (const char *)NULL);
       }
       executeMultiByteCommand = 0;
     }
@@ -163,8 +166,8 @@ void FirmataParser::parse(uint8_t inputData)
         systemReset();
         break;
       case REPORT_VERSION:
-        if (currentReportVersionCallback)
-          (*currentReportVersionCallback)(currentReportVersionCallbackContext);
+        waitForData = 2; // two data bytes needed
+        executeMultiByteCommand = command;
         break;
     }
   }
@@ -244,12 +247,13 @@ void FirmataParser::attach(uint8_t command, callbackFunction newFunction, void *
 }
 
 /**
- * Attach a version callback function (supported option: REPORT_FIRMWARE).
+ * Attach a version callback function (supported options are: REPORT_FIRMWARE, REPORT_VERSION).
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
  * @param context An optional context to be provided to the callback function (NULL by default).
  * @note The context parameter is provided so you can pass a parameter, by reference, to
  *       your callback function.
+ * @note The description value in the REPORT_VERSION callback will always be NULL
  */
 void FirmataParser::attach(uint8_t command, versionCallbackFunction newFunction, void * context)
 {
@@ -258,11 +262,15 @@ void FirmataParser::attach(uint8_t command, versionCallbackFunction newFunction,
       currentReportFirmwareCallback = newFunction;
       currentReportFirmwareCallbackContext = context;
       break;
+    case REPORT_VERSION:
+      currentReportVersionCallback = newFunction;
+      currentReportVersionCallbackContext = context;
+      break;
   }
 }
 
 /**
- * Attach a system callback function (supported options are: SYSTEM_RESET, REPORT_VERSION).
+ * Attach a system callback function (supported option: SYSTEM_RESET).
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
  * @param context An optional context to be provided to the callback function (NULL by default).
@@ -272,10 +280,6 @@ void FirmataParser::attach(uint8_t command, versionCallbackFunction newFunction,
 void FirmataParser::attach(uint8_t command, systemCallbackFunction newFunction, void * context)
 {
   switch (command) {
-    case REPORT_VERSION:
-      currentReportVersionCallback = newFunction;
-      currentReportVersionCallbackContext = context;
-      break;
     case SYSTEM_RESET:
       currentSystemResetCallback = newFunction;
       currentSystemResetCallbackContext = context;
@@ -341,6 +345,8 @@ void FirmataParser::detach(uint8_t command)
       attach(command, (versionCallbackFunction)NULL, NULL);
       break;
     case REPORT_VERSION:
+      attach(command, (versionCallbackFunction)NULL, NULL);
+      break;
     case SYSTEM_RESET:
       attach(command, (systemCallbackFunction)NULL, NULL);
       break;

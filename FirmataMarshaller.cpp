@@ -179,6 +179,8 @@ const
 {
   if ( (Stream *)NULL == FirmataStream ) { return; }
   FirmataStream->write(REPORT_VERSION);
+  FirmataStream->write(PROTOCOL_MAJOR_VERSION);
+  FirmataStream->write(PROTOCOL_MINOR_VERSION);
 }
 
 /**

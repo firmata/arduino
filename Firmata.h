@@ -151,7 +151,7 @@ class FirmataClass
     inline static void staticStringCallback (void *, const char * c_str) { if ( currentStringCallback ) { currentStringCallback((char *)c_str); } }
     inline static void staticSysexCallback (void *, uint8_t command, size_t argc, uint8_t *argv) { if ( currentSysexCallback ) { currentSysexCallback(command, (uint8_t)argc, argv); } }
     inline static void staticReportFirmwareCallback (void * context, size_t, size_t, const char *) { if ( context ) { ((FirmataClass *)context)->printFirmwareVersion(); } }
-    inline static void staticReportVersionCallback (void * context) { if ( context ) { ((FirmataClass *)context)->printVersion(); } }
+    inline static void staticReportVersionCallback (void * context, size_t, size_t, const char *) { if ( context ) { ((FirmataClass *)context)->printVersion(); } }
     inline static void staticSystemResetCallback (void *) { if ( currentSystemResetCallback ) { currentSystemResetCallback(); } }
 };
 
