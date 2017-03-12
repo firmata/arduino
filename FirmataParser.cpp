@@ -417,7 +417,7 @@ void FirmataParser::processSysexMessage(void)
         if (dataBuffer[j - 1] != '\0') {
           bufferDataAtPosition('\0', j);
         }
-        (*currentStringCallback)(currentStringCallbackContext, (char *)&dataBuffer[0]);
+        (*currentStringCallback)(currentStringCallbackContext, (char *)&dataBuffer[1]);
       }
       break;
     default:
