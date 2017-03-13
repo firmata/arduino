@@ -94,7 +94,7 @@ FirmataClass::FirmataClass()
   parser.attach(SET_DIGITAL_PIN_VALUE, (FirmataParser::callbackFunction)staticPinValueCallback, (void *)NULL);
   parser.attach(STRING_DATA, (FirmataParser::stringCallbackFunction)staticStringCallback, (void *)NULL);
   parser.attach(START_SYSEX, (FirmataParser::sysexCallbackFunction)staticSysexCallback, (void *)NULL);
-  parser.attach(REPORT_FIRMWARE, (FirmataParser::systemCallbackFunction)staticReportFirmwareCallback, this);
+  parser.attach(REPORT_FIRMWARE, (FirmataParser::versionCallbackFunction)staticReportFirmwareCallback, this);
   parser.attach(REPORT_VERSION, (FirmataParser::systemCallbackFunction)staticReportVersionCallback, this);
   parser.attach(SYSTEM_RESET, (FirmataParser::systemCallbackFunction)staticSystemResetCallback, (void *)NULL);
 }
