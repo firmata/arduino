@@ -30,9 +30,10 @@ class FirmataParser
     /* callback function types */
     typedef void (*callbackFunction)(void * context, uint8_t command, uint16_t value);
     typedef void (*dataBufferOverflowCallbackFunction)(void * context);
-    typedef void (*stringCallbackFunction)(void * context, char * c_str);
+    typedef void (*stringCallbackFunction)(void * context, const char * c_str);
     typedef void (*sysexCallbackFunction)(void * context, uint8_t command, size_t argc, uint8_t * argv);
     typedef void (*systemCallbackFunction)(void * context);
+    typedef void (*versionCallbackFunction)(void * context, size_t sv_major, size_t sv_minor, const char * firmware);
 
     FirmataParser(uint8_t * dataBuffer = (uint8_t *)NULL, size_t dataBufferSize = 0);
 
@@ -47,6 +48,7 @@ class FirmataParser
     void attach(uint8_t command, stringCallbackFunction newFunction, void * context = NULL);
     void attach(uint8_t command, sysexCallbackFunction newFunction, void * context = NULL);
     void attach(uint8_t command, systemCallbackFunction newFunction, void * context = NULL);
+    void attach(uint8_t command, versionCallbackFunction newFunction, void * context = NULL);
     void detach(uint8_t command);
     void detach(dataBufferOverflowCallbackFunction);
 
@@ -87,14 +89,14 @@ class FirmataParser
     dataBufferOverflowCallbackFunction currentDataBufferOverflowCallback;
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
-    systemCallbackFunction currentReportFirmwareCallback;
+    versionCallbackFunction currentReportFirmwareCallback;
     systemCallbackFunction currentReportVersionCallback;
     systemCallbackFunction currentSystemResetCallback;
 
     /* private methods ------------------------------ */
+    bool bufferDataAtPosition(const uint8_t data, const size_t pos);
     void processSysexMessage(void);
     void systemReset(void);
-    bool bufferDataAtPosition(const uint8_t data, const size_t pos);
 };
 
 } // firmata

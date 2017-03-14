@@ -60,7 +60,7 @@ FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
   currentDataBufferOverflowCallback((dataBufferOverflowCallbackFunction)NULL),
   currentStringCallback((stringCallbackFunction)NULL),
   currentSysexCallback((sysexCallbackFunction)NULL),
-  currentReportFirmwareCallback((systemCallbackFunction)NULL),
+  currentReportFirmwareCallback((versionCallbackFunction)NULL),
   currentReportVersionCallback((systemCallbackFunction)NULL),
   currentSystemResetCallback((systemCallbackFunction)NULL)
 {
@@ -244,8 +244,25 @@ void FirmataParser::attach(uint8_t command, callbackFunction newFunction, void *
 }
 
 /**
- * Attach a system callback function (options are: REPORT_FIRMWARE, REPORT_VERSION
- * and SYSTEM_RESET).
+ * Attach a version callback function (supported option: REPORT_FIRMWARE).
+ * @param command The ID of the command to attach a callback function to.
+ * @param newFunction A reference to the callback function to attach.
+ * @param context An optional context to be provided to the callback function (NULL by default).
+ * @note The context parameter is provided so you can pass a parameter, by reference, to
+ *       your callback function.
+ */
+void FirmataParser::attach(uint8_t command, versionCallbackFunction newFunction, void * context)
+{
+  switch (command) {
+    case REPORT_FIRMWARE:
+      currentReportFirmwareCallback = newFunction;
+      currentReportFirmwareCallbackContext = context;
+      break;
+  }
+}
+
+/**
+ * Attach a system callback function (supported options are: SYSTEM_RESET, REPORT_VERSION).
  * @param command The ID of the command to attach a callback function to.
  * @param newFunction A reference to the callback function to attach.
  * @param context An optional context to be provided to the callback function (NULL by default).
@@ -255,10 +272,6 @@ void FirmataParser::attach(uint8_t command, callbackFunction newFunction, void *
 void FirmataParser::attach(uint8_t command, systemCallbackFunction newFunction, void * context)
 {
   switch (command) {
-    case REPORT_FIRMWARE:
-      currentReportFirmwareCallback = newFunction;
-      currentReportFirmwareCallbackContext = context;
-      break;
     case REPORT_VERSION:
       currentReportVersionCallback = newFunction;
       currentReportVersionCallbackContext = context;
@@ -325,6 +338,8 @@ void FirmataParser::detach(uint8_t command)
 {
   switch (command) {
     case REPORT_FIRMWARE:
+      attach(command, (versionCallbackFunction)NULL, NULL);
+      break;
     case REPORT_VERSION:
     case SYSTEM_RESET:
       attach(command, (systemCallbackFunction)NULL, NULL);
@@ -394,14 +409,24 @@ void FirmataParser::processSysexMessage(void)
 {
   switch (dataBuffer[0]) { //first byte in buffer is command
     case REPORT_FIRMWARE:
-      if (currentReportFirmwareCallback)
-        (*currentReportFirmwareCallback)(currentReportFirmwareCallbackContext);
+      if (currentReportFirmwareCallback) {
+        size_t sv_major = dataBuffer[1], sv_minor = dataBuffer[2];
+        size_t i = 0, j = 3;
+        while (j < sysexBytesRead) {
+          // The string length will only be at most half the size of the
+          // stored input buffer so we can decode the string within the buffer.
+          bufferDataAtPosition(dataBuffer[j], i);
+          ++i;
+          ++j;
+        }
+        bufferDataAtPosition('\0', i); // Terminate the string
+        (*currentReportFirmwareCallback)(currentReportFirmwareCallbackContext, sv_major, sv_minor, (const char *)&dataBuffer[0]);
+      }
       break;
     case STRING_DATA:
       if (currentStringCallback) {
         size_t bufferLength = (sysexBytesRead - 1) / 2;
-        size_t i = 1;
-        size_t j = 0;
+        size_t i = 1, j = 0;
         while (j < bufferLength) {
           // The string length will only be at most half the size of the
           // stored input buffer so we can decode the string within the buffer.
@@ -417,7 +442,7 @@ void FirmataParser::processSysexMessage(void)
         if (dataBuffer[j - 1] != '\0') {
           bufferDataAtPosition('\0', j);
         }
-        (*currentStringCallback)(currentStringCallbackContext, (char *)&dataBuffer[0]);
+        (*currentStringCallback)(currentStringCallbackContext, (const char *)&dataBuffer[0]);
       }
       break;
     default:
