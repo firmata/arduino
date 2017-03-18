@@ -79,7 +79,7 @@ const
   FirmataStream->write(START_SYSEX);
   FirmataStream->write(EXTENDED_ANALOG);
   FirmataStream->write(pin);
-  transformByteStreamToMessageBytes(bytec, bytev, bytec);
+  encodeByteStream(bytec, bytev, bytec);
   FirmataStream->write(END_SYSEX);
 }
 
@@ -89,7 +89,7 @@ const
  * @param bytev A pointer to the array of data bytes to send in the message.
  * @param max_bytes Force message to be n bytes, regardless of data bits.
  */
-void FirmataMarshaller::transformByteStreamToMessageBytes (size_t bytec, uint8_t * bytev, size_t max_bytes)
+void FirmataMarshaller::encodeByteStream (size_t bytec, uint8_t * bytev, size_t max_bytes)
 const
 {
   static const size_t transmit_bits = 7;
@@ -248,7 +248,7 @@ const
   if ( (Stream *)NULL == FirmataStream ) { return; }
   if ( (0xF >= pin) && (0x3FFF >= value) ) {
     FirmataStream->write(ANALOG_MESSAGE|pin);
-    transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
+    encodeByteStream(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
   } else {
     sendExtendedAnalog(pin, sizeof(value), reinterpret_cast<uint8_t *>(&value));
   }
@@ -306,7 +306,7 @@ const
   FirmataStream->write(DIGITAL_MESSAGE | (portNumber & 0xF));
   // Tx bits  0-6 (protocol v1 and higher)
   // Tx bits 7-13 (bit 7 only for protocol v2 and higher)
-  transformByteStreamToMessageBytes(sizeof(portData), reinterpret_cast<uint8_t *>(&portData), sizeof(portData));
+  encodeByteStream(sizeof(portData), reinterpret_cast<uint8_t *>(&portData), sizeof(portData));
 }
 
 /**
@@ -326,7 +326,7 @@ const
   FirmataStream->write(major);
   FirmataStream->write(minor);
   for (i = 0; i < bytec; ++i) {
-    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), sizeof(bytev[i]));
+    encodeByteStream(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]));
   }
   FirmataStream->write(END_SYSEX);
 }
@@ -393,7 +393,7 @@ const
   FirmataStream->write(START_SYSEX);
   FirmataStream->write(command);
   for (i = 0; i < bytec; ++i) {
-    transformByteStreamToMessageBytes(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]), sizeof(bytev[i]));
+    encodeByteStream(sizeof(bytev[i]), reinterpret_cast<uint8_t *>(&bytev[i]));
   }
   FirmataStream->write(END_SYSEX);
 }

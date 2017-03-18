@@ -50,7 +50,7 @@ systemCallbackFunction FirmataClass::currentSystemResetCallback = (systemCallbac
  */
 void FirmataClass::sendValueAsTwo7bitBytes(int value)
 {
-  marshaller.transformByteStreamToMessageBytes(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
+  marshaller.encodeByteStream(sizeof(value), reinterpret_cast<uint8_t *>(&value), sizeof(value));
 }
 
 /**
