@@ -95,6 +95,7 @@ class FirmataParser
 
     /* private methods ------------------------------ */
     bool bufferDataAtPosition(const uint8_t data, const size_t pos);
+    size_t decodeByteStream(size_t bytec, uint8_t * bytev);
     void processSysexMessage(void);
     void systemReset(void);
 };
