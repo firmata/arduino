@@ -1,3 +1,10 @@
+FIRMATA 2.5.6 - Mar 18, 2017
+
+[core library]
+* Fixed string encoder/decoder bug that also affected I2C (Zak Fields)
+* Added support for Arduino Primo (chiararuggeri)
+* Added unit tests for Firmata string message encoding/decoding
+
 FIRMATA 2.5.5 - Mar 6, 2017
 
 [core library]
