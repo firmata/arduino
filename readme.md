@@ -8,11 +8,14 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 - [Usage](#usage)
 - [Firmata Client Libraries](#firmata-client-libraries)
-- [Updating Firmata in the Arduino IDE - Arduino 1.6.4 and higher](#updating-firmata-in-the-arduino-ide---arduino-1.6.4-and-higher)
-        - [Mac OSX:](#mac-osx:)
-        - [Windows](#windows:)
-        - [Linux](#linux:)
-- [Using the Source code rather than release archive (only for versions older than Arduino 1.6.3)](#using-the-source-code-rather-than-release-archive-only-for-versions-older-than-arduino-1.6.3)
+- [Updating Firmata in the Arduino IDE - Arduino 1.6.4 and higher](#updating-firmata-in-the-arduino-ide---arduino-164-and-higher)
+- [Cloning Firmata](#cloning-firmata)
+- [Updating Firmata in the Arduino IDE - older versions (<= 1.6.3 or 1.0.x)](#updating-firmata-in-the-arduino-ide---older-versions---163-or-10x)
+        - [Mac OSX:](#mac-osx)
+        - [Windows](#windows)
+        - [Linux](#linux)
+- [Using the Source code rather than release archive (only for versions older than Arduino 1.6.3)](#using-the-source-code-rather-than-release-archive-only-for-versions-older-than-arduino-163)
+- [Contributing](#contributing)
 
 ## Usage
 
