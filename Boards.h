@@ -247,7 +247,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ARDUINO_SAMD_MKR1000)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              22 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog
-#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21) && !IS_PIN_SERIAL(p))
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 21)
 #define IS_PIN_ANALOG(p)        ((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
@@ -264,7 +264,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ARDUINO_SAMD_MKRZERO)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              34 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 led + 1 battery adc
-#define IS_PIN_DIGITAL(p)       ((((p) >= 0 && (p) <= 21) || (p) == 32) && !IS_PIN_SERIAL(p))
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21) || (p) == 32)
 #define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 33)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
@@ -280,7 +280,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #elif defined(ARDUINO_SAMD_MKRFox1200)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              33 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 battery adc
-#define IS_PIN_DIGITAL(p)       ((((p) >= 0 && (p) <= 21)) && !IS_PIN_SERIAL(p))
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21))
 #define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 32)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
