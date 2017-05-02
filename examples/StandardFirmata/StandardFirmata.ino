@@ -805,6 +805,8 @@ void loop()
       if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
         analogPin = PIN_TO_ANALOG(pin);
         if (analogInputsToReport & (1 << analogPin)) {
+          // Extra analogRead() to cover ADC cooling-off period for higher accuracy
+          analogRead(analogPin);
           Firmata.sendAnalog(analogPin, analogRead(analogPin));
         }
       }
