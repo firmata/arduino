@@ -995,6 +995,9 @@ void initFirmata()
 void setup()
 {
   DEBUG_BEGIN(9600);
+#ifdef ESP8266
+  analogWriteRange(255);
+#endif
 
   initTransport();
 
