@@ -3,8 +3,8 @@
  *
  * You must configure your particular hardware. Follow the steps below.
  *
- * Currently StandardFirmataEthernet is configured as a TCP client. An
- * option to configure as a server may be added in the future.
+ * By default, StandardFirmataEthernet is configured as a TCP client.
+ * To configure as a TCP server, see STEP 2
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
@@ -46,16 +46,20 @@ EthernetClient client;
 YunClient client;
 #endif
 
-// STEP 2[REQUIRED for all boards and shields]
-// replace with IP of the server you want to connect to, comment out if using 'remote_host'
+// STEP 2 [REQUIRED for all boards and shields]
+// TCP Client configuration:
+// To configure your board as a TCP client, set the IP address of the server you want to connect to.
+// TCP Server configuration:
+// To configure your board as a TCP server, comment out the following line and also ensure that
+// remote_host is also commented out.
 #define remote_ip IPAddress(10, 0, 0, 3)
 // *** REMOTE HOST IS NOT YET WORKING ***
 // replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 // #define remote_host "server.local"
 
 // STEP 3 [REQUIRED]
-// Replace with the port that your server is listening on
-#define remote_port 3030
+// Replace with the port that your client or server is listening on.
+#define network_port 3030
 
 // STEP 4 [REQUIRED unless using DHCP]
 // Replace with your board or ethernet shield's IP address
