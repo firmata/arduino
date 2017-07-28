@@ -127,7 +127,6 @@ void FirmataParser::parse(uint8_t inputData)
             (*currentPinValueCallback)(currentPinValueCallbackContext, dataBuffer[1], dataBuffer[0]);
           break;
         case REPORT_ANALOG:
-          digitalWrite(13,1);
           if (currentReportAnalogCallback)
             (*currentReportAnalogCallback)(currentReportAnalogCallbackContext, multiByteChannel, dataBuffer[0]);
           break;
