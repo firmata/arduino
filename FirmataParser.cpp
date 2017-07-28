@@ -16,7 +16,7 @@
 //******************************************************************************
 
 #include "FirmataParser.h"
-#include <Arduino.h>
+
 #include "FirmataConstants.h"
 
 using namespace firmata;
