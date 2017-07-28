@@ -36,6 +36,8 @@ callbackFunction FirmataClass::currentPinModeCallback = (callbackFunction)NULL;
 callbackFunction FirmataClass::currentPinValueCallback = (callbackFunction)NULL;
 callbackFunction FirmataClass::currentReportAnalogCallback = (callbackFunction)NULL;
 callbackFunction FirmataClass::currentReportDigitalCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentReadAnalogCallback = (callbackFunction)NULL;
+callbackFunction FirmataClass::currentReadDigitalCallback = (callbackFunction)NULL;
 stringCallbackFunction FirmataClass::currentStringCallback = (stringCallbackFunction)NULL;
 sysexCallbackFunction FirmataClass::currentSysexCallback = (sysexCallbackFunction)NULL;
 systemCallbackFunction FirmataClass::currentSystemResetCallback = (systemCallbackFunction)NULL;
@@ -90,6 +92,8 @@ FirmataClass::FirmataClass()
   parser.attach(DIGITAL_MESSAGE, (FirmataParser::callbackFunction)staticDigitalCallback, (void *)NULL);
   parser.attach(REPORT_ANALOG, (FirmataParser::callbackFunction)staticReportAnalogCallback, (void *)NULL);
   parser.attach(REPORT_DIGITAL, (FirmataParser::callbackFunction)staticReportDigitalCallback, (void *)NULL);
+  parser.attach(READ_ANALOG, (FirmataParser::callbackFunction)staticReadAnalogCallback, (void *)NULL);
+  parser.attach(READ_DIGITAL, (FirmataParser::callbackFunction)staticReadDigitalCallback, (void *)NULL);
   parser.attach(SET_PIN_MODE, (FirmataParser::callbackFunction)staticPinModeCallback, (void *)NULL);
   parser.attach(SET_DIGITAL_PIN_VALUE, (FirmataParser::callbackFunction)staticPinValueCallback, (void *)NULL);
   parser.attach(STRING_DATA, (FirmataParser::stringCallbackFunction)staticStringCallback, (void *)NULL);
@@ -395,6 +399,12 @@ void FirmataClass::attach(uint8_t command, ::callbackFunction newFunction)
       break;
     case REPORT_DIGITAL:
       currentReportDigitalCallback = newFunction;
+      break;
+    case READ_ANALOG:
+      currentReadAnalogCallback = newFunction;
+      break;
+    case READ_DIGITAL:
+      currentReadDigitalCallback = newFunction;
       break;
     case SET_PIN_MODE:
       currentPinModeCallback = newFunction;

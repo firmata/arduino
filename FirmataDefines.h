@@ -49,6 +49,16 @@
 #endif
 #define ANALOG_MESSAGE          firmata::ANALOG_MESSAGE // send data for an analog pin (or PWM)
 
+#ifdef READ_ANALOG
+#undef READ_ANALOG
+#endif
+#define READ_ANALOG             firmata::READ_ANALOG // single read of analog input by pin #
+
+#ifdef READ_DIGITAL 
+#undef READ_DIGITAL
+#endif
+#define READ_DIGITAL            firmata::READ_DIGITAL // single read of digital input by port pair
+
 #ifdef REPORT_ANALOG
 #undef REPORT_ANALOG
 #endif

@@ -45,6 +45,8 @@ class FirmataMarshaller
     void reportAnalogEnable(uint8_t pin) const;
     void reportDigitalPortDisable(uint8_t portNumber) const;
     void reportDigitalPortEnable(uint8_t portNumber) const;
+    void readAnalog(uint8_t pin) const;
+    void readDigitalPort(uint8_t portNumber)const;
     void sendAnalog(uint8_t pin, uint16_t value) const;
     void sendAnalogMappingQuery(void) const;
     void sendCapabilityQuery(void) const;
