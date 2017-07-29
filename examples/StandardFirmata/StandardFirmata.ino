@@ -478,8 +478,6 @@ void reportDigitalCallback(byte port, int value)
 
 void readAnalogCallback(byte analogPin, int value)
 {
-  //#include <Arduino.h>
-  //digitalWrite(13,1);
   if (analogPin < TOTAL_ANALOG_PINS) {
     Firmata.sendAnalog(analogPin, analogRead(analogPin));
   }
@@ -490,15 +488,6 @@ void readDigitalCallback(byte port, int value)
   if (port < TOTAL_PORTS) {
     outputPort(port, readPort(port, portConfigInputs[port]), true);
   }
-  /*
-  if (port < TOTAL_PORTS) {
-    reportPINs[port] = (byte)value;
-    // Send port value immediately. This is helpful when connected via
-    // ethernet, wi-fi or bluetooth so pin states can be known upon
-    // reconnecting.
-    if (value) outputPort(port, readPort(port, portConfigInputs[port]), true);
-  }
-  */
 }
 
 /*==============================================================================
