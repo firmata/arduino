@@ -43,6 +43,8 @@ FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
   currentDigitalCallbackContext((void *)NULL),
   currentReportAnalogCallbackContext((void *)NULL),
   currentReportDigitalCallbackContext((void *)NULL),
+  currentReadAnalogCallbackContext((void *)NULL),
+  currentReadDigitalCallbackContext((void *)NULL),
   currentPinModeCallbackContext((void *)NULL),
   currentPinValueCallbackContext((void *)NULL),
   currentReportFirmwareCallbackContext((void *)NULL),
@@ -55,6 +57,8 @@ FirmataParser::FirmataParser(uint8_t * const dataBuffer, size_t dataBufferSize)
   currentDigitalCallback((callbackFunction)NULL),
   currentReportAnalogCallback((callbackFunction)NULL),
   currentReportDigitalCallback((callbackFunction)NULL),
+  currentReadAnalogCallback((callbackFunction)NULL),
+  currentReadDigitalCallback((callbackFunction)NULL),
   currentPinModeCallback((callbackFunction)NULL),
   currentPinValueCallback((callbackFunction)NULL),
   currentDataBufferOverflowCallback((dataBufferOverflowCallbackFunction)NULL),
@@ -130,6 +134,14 @@ void FirmataParser::parse(uint8_t inputData)
           if (currentReportDigitalCallback)
             (*currentReportDigitalCallback)(currentReportDigitalCallbackContext, multiByteChannel, dataBuffer[0]);
           break;
+        case READ_ANALOG:
+          if (currentReadAnalogCallback)
+            (*currentReadAnalogCallback)(currentReadAnalogCallbackContext, multiByteChannel, dataBuffer[0]);
+          break;
+        case READ_DIGITAL:
+          if (currentReadDigitalCallback)
+            (*currentReadDigitalCallback)(currentReadDigitalCallbackContext, multiByteChannel, dataBuffer[0]);
+          break;
       }
       executeMultiByteCommand = 0;
     }
@@ -152,6 +164,11 @@ void FirmataParser::parse(uint8_t inputData)
         break;
       case REPORT_ANALOG:
       case REPORT_DIGITAL:
+        waitForData = 1; // one data byte needed
+        executeMultiByteCommand = command;
+        break;
+      case READ_ANALOG:
+      case READ_DIGITAL:
         waitForData = 1; // one data byte needed
         executeMultiByteCommand = command;
         break;
@@ -231,6 +248,14 @@ void FirmataParser::attach(uint8_t command, callbackFunction newFunction, void *
     case REPORT_DIGITAL:
       currentReportDigitalCallback = newFunction;
       currentReportDigitalCallbackContext = context;
+      break;
+    case READ_ANALOG:
+      currentReadAnalogCallback = newFunction;
+      currentReadAnalogCallbackContext = context;
+      break;
+    case READ_DIGITAL:
+      currentReadDigitalCallback = newFunction;
+      currentReadDigitalCallbackContext = context;
       break;
     case SET_PIN_MODE:
       currentPinModeCallback = newFunction;

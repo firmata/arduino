@@ -472,6 +472,24 @@ void reportDigitalCallback(byte port, int value)
   // pins configured as analog
 }
 
+// -----------------------------------------------------------------------------
+/* reads the value of an analog pin, then sends the value. Does not enable reporting.
+ */
+
+void readAnalogCallback(byte analogPin, int value)
+{
+  if (analogPin < TOTAL_ANALOG_PINS) {
+    Firmata.sendAnalog(analogPin, analogRead(analogPin));
+  }
+}
+
+void readDigitalCallback(byte port, int value)
+{
+  if (port < TOTAL_PORTS) {
+    outputPort(port, readPort(port, portConfigInputs[port]), true);
+  }
+}
+
 /*==============================================================================
  * SYSEX-BASED commands
  *============================================================================*/
@@ -760,6 +778,8 @@ void setup()
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
   Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
   Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+  Firmata.attach(READ_ANALOG, readAnalogCallback);
+  Firmata.attach(READ_DIGITAL, readDigitalCallback);
   Firmata.attach(SET_PIN_MODE, setPinModeCallback);
   Firmata.attach(SET_DIGITAL_PIN_VALUE, setPinValueCallback);
   Firmata.attach(START_SYSEX, sysexCallback);

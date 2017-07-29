@@ -20,8 +20,8 @@ namespace firmata {
  * Query using the REPORT_FIRMWARE message.
  */
 static const int FIRMWARE_MAJOR_VERSION =  2;
-static const int FIRMWARE_MINOR_VERSION =  5;
-static const int FIRMWARE_BUGFIX_VERSION = 6;
+static const int FIRMWARE_MINOR_VERSION =  6;
+static const int FIRMWARE_BUGFIX_VERSION = 0;
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.
@@ -37,6 +37,8 @@ static const int MAX_DATA_BYTES =          64; // max number of data bytes in in
 
 static const int DIGITAL_MESSAGE =         0x90; // send data for a digital port (collection of 8 pins)
 static const int ANALOG_MESSAGE =          0xE0; // send data for an analog pin (or PWM)
+static const int READ_ANALOG =             0xA0; // single read of analog input by pin #
+static const int READ_DIGITAL =            0xB0; // single read of digital input by port pair
 static const int REPORT_ANALOG =           0xC0; // enable analog input by pin #
 static const int REPORT_DIGITAL =          0xD0; // enable digital input by port pair
 //
