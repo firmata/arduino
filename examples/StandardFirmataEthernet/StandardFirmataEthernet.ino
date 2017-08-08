@@ -26,8 +26,8 @@
 /*
   README
 
-  StandardFirmataEthernet is a TCP client implementation. You will need a Firmata client library
-  with a network transport that can act as a TCP server in order to establish a connection between
+  StandardFirmataEthernet is a TCP client/server implementation. You will need a Firmata client library
+  with a network transport that can act as a TCP server or client in order to establish a connection between
   StandardFirmataEthernet and the Firmata client application.
 
   To use StandardFirmataEthernet you will need to have one of the following
@@ -68,6 +68,7 @@
 // follow the instructions in ethernetConfig.h to configure your particular hardware
 #include "ethernetConfig.h"
 #include "utility/EthernetClientStream.h"
+#include "utility/EthernetServerStream.h"
 
 /*
  * Uncomment the following include to enable interfacing with Serial devices via hardware or
@@ -103,17 +104,25 @@
 
 #if defined remote_ip && !defined remote_host
 #ifdef local_ip
-EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
+EthernetClientStream stream(client, local_ip, remote_ip, NULL, network_port);
 #else
-EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, remote_port);
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, network_port);
 #endif
 #endif
 
 #if !defined remote_ip && defined remote_host
 #ifdef local_ip
-EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, remote_port);
+EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, network_port );
 #else
-EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), remote_host, remote_port);
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), remote_host, network_port);
+#endif
+#endif
+
+#if !defined remote_ip && !defined remote_host
+#ifdef local_ip
+EthernetServerStream stream(local_ip, network_port);
+#else
+EthernetServerStream stream(IPAddress(0, 0, 0, 0), network_port);
 #endif
 #endif
 
@@ -864,6 +873,10 @@ void initTransport()
 #endif
 
   DEBUG_PRINTLN("connecting...");
+
+  DEBUG_PRINT("IP Address: ");
+  IPAddress ip = Ethernet.localIP();
+  DEBUG_PRINTLN(ip);
 }
 
 void initFirmata()
