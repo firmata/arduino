@@ -11,7 +11,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated October 16th, 2016
+  Last updated August 13th, 2017
 */
 
 /*
@@ -832,6 +832,17 @@ void systemResetCallback()
   isResetting = false;
 }
 
+void printEthernetStatus()
+{
+  DEBUG_PRINT("Local IP Address: ");
+  IPAddress ip = Ethernet.localIP();
+  DEBUG_PRINTLN(ip);
+#ifdef remote_ip
+  DEBUG_PRINT("Connecting to server at: ");
+  DEBUG_PRINTLN(remote_ip);
+#endif
+}
+
 /*
  * StandardFirmataEthernet communicates with Ethernet shields over SPI. Therefore all
  * SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
@@ -868,15 +879,14 @@ void initTransport()
 #ifdef local_ip
   Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
 #else
-  Ethernet.begin((uint8_t *)mac);           //start ethernet using dhcp
+  DEBUG_PRINTLN("Local IP will be requested from DHCP...");
+  //start ethernet using dhcp
+  if (Ethernet.begin((uint8_t *)mac) == 0) {
+    DEBUG_PRINTLN("Failed to configure Ethernet using DHCP");
+  }
 #endif
 #endif
-
-  DEBUG_PRINTLN("connecting...");
-
-  DEBUG_PRINT("IP Address: ");
-  IPAddress ip = Ethernet.localIP();
-  DEBUG_PRINTLN(ip);
+  printEthernetStatus();
 }
 
 void initFirmata()
@@ -895,7 +905,7 @@ void initFirmata()
 
   // start up Network Firmata:
   Firmata.begin(stream);
-  systemResetCallback();  // reset to default config
+  systemResetCallback();  // Initialize default configuration
 }
 
 void setup()
