@@ -73,6 +73,7 @@ bool EthernetServerStream::connect_client()
     if ( !newClient ) return false;
     client = newClient;
     connected = true;
+    DEBUG_PRINTLN("Connected");
     return true;
   }
 
