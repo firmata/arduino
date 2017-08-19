@@ -603,7 +603,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
     case I2C_CONFIG:
       delayTime = (argv[0] + (argv[1] << 7));
 
-      if (delayTime > 0) {
+      if (argc > 1 && delayTime > 0) {
         i2cReadDelayTime = delayTime;
       }
 
