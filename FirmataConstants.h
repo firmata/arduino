@@ -21,7 +21,7 @@ namespace firmata {
  */
 static const int FIRMWARE_MAJOR_VERSION =  2;
 static const int FIRMWARE_MINOR_VERSION =  5;
-static const int FIRMWARE_BUGFIX_VERSION = 6;
+static const int FIRMWARE_BUGFIX_VERSION = 7;
 
 /* Version numbers for the protocol.  The protocol is still changing, so these
  * version numbers are important.

@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated August 13th, 2017
+  Last updated August 17th, 2017
 */
 
 /*

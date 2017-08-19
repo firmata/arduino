@@ -1,3 +1,15 @@
+FIRMATA 2.5.7 - Aug 19, 2017
+
+[core library]
+* Added support for Adafruit nrf52 boards (hathach)
+* Added TCP server option to StandardFirmataEthernet (MJPees)
+* Added support for STM32-based boards (fpistm)
+* Added support for MKRFox1200 (sandeepmistry)
+
+[StandardFirmata & variants]
+* Fixed I2C config parameter interpretation (zfields)
+* Improve debug output in StandardFirmataEthernet
+
 FIRMATA 2.5.6 - Mar 18, 2017
 
 [core library]
