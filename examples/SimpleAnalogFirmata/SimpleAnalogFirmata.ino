@@ -4,9 +4,9 @@
  * any host computer software package.
  *
  * To download a host software package, please click on the following link
- * to open the download page in your default browser.
+ * to open the list of Firmata client libraries in your default browser.
  *
- * http://firmata.org/wiki/Download
+ * https://github.com/firmata/arduino#firmata-client-libraries
  */
 
 /* Supports as many analog inputs and analog PWM outputs as possible.
