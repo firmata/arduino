@@ -46,7 +46,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/nakkaya/clodiuno](https://github.com/nakkaya/clodiuno)
   * [https://github.com/peterschwarz/clj-firmata](https://github.com/peterschwarz/clj-firmata)
 * javascript
-  * [https://github.com/jgautier/firmata](https://github.com/jgautier/firmata)
+  * [https://github.com/firmata/firmata.js](https://github.com/firmata/firmata.js)
   * [https://github.com/rwldrn/johnny-five](https://github.com/rwldrn/johnny-five)
   * [http://breakoutjs.com](http://breakoutjs.com)
 * java
