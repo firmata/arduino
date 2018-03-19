@@ -56,10 +56,6 @@
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-// min cannot be < 0x0006. Adjust max if necessary
-#define FIRMATA_BLE_MIN_INTERVAL    0x0006 // 7.5ms (7.5 / 1.25)
-#define FIRMATA_BLE_MAX_INTERVAL    0x0018 // 30ms (30 / 1.25)
-
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
@@ -771,13 +767,6 @@ void setup()
   Firmata.attach(SET_DIGITAL_PIN_VALUE, setPinValueCallback);
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
-
-  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
-
-  // set the BLE connection interval - this is the fastest interval you can read inputs
-  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
-  // set how often the BLE TX buffer is flushed (if not full)
-  stream.setFlushInterval(FIRMATA_BLE_MAX_INTERVAL);
 
 #ifdef BLE_REQ
   for (byte i = 0; i < TOTAL_PINS; i++) {

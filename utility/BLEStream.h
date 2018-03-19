@@ -19,9 +19,6 @@
 #define _MAX_ATTR_DATA_LEN_ BLE_ATTRIBUTE_MAX_VALUE_LENGTH
 #endif
 
-#define BLESTREAM_TXBUFFER_FLUSH_INTERVAL 80
-#define BLESTREAM_MIN_FLUSH_INTERVAL 8 // minimum interval for flushing the TX buffer
-
 // #define BLE_SERIAL_DEBUG
 
 class BLEStream : public BLEPeripheral, public Stream
@@ -32,7 +29,6 @@ class BLEStream : public BLEPeripheral, public Stream
     void begin(...);
     bool poll();
     void end();
-    void setFlushInterval(int);
 
     virtual int available(void);
     virtual int peek(void);
@@ -45,7 +41,6 @@ class BLEStream : public BLEPeripheral, public Stream
   private:
     bool _connected;
     unsigned long _flushed;
-    int _flushInterval;
     static BLEStream* _instance;
 
     size_t _rxHead;
@@ -85,7 +80,6 @@ BLEStream::BLEStream(unsigned char req, unsigned char rdy, unsigned char rst) :
   this->_txCount = 0;
   this->_rxHead = this->_rxTail = 0;
   this->_flushed = 0;
-  this->_flushInterval = BLESTREAM_TXBUFFER_FLUSH_INTERVAL;
   BLEStream::_instance = this;
 
   addAttribute(this->_uartService);
@@ -100,6 +94,8 @@ BLEStream::BLEStream(unsigned char req, unsigned char rdy, unsigned char rst) :
 
 void BLEStream::begin(...)
 {
+  BLEPeripheral::setLocalName(FIRMATA_BLE_LOCAL_NAME);
+  BLEPeripheral::setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
   BLEPeripheral::begin();
 #ifdef BLE_SERIAL_DEBUG
   Serial.println(F("BLEStream::begin()"));
@@ -110,7 +106,7 @@ bool BLEStream::poll()
 {
   // BLEPeripheral::poll is called each time connected() is called
   this->_connected = BLEPeripheral::connected();
-  if (millis() > this->_flushed + this->_flushInterval) {
+  if (millis() > this->_flushed + FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL) {
     flush();
   }
   return this->_connected;
@@ -212,13 +208,6 @@ BLEStream::operator bool()
   Serial.println(retval);
 #endif
   return retval;
-}
-
-void BLEStream::setFlushInterval(int interval)
-{
-  if (interval > BLESTREAM_MIN_FLUSH_INTERVAL) {
-    this->_flushInterval = interval;
-  }
 }
 
 void BLEStream::_received(const unsigned char* data, size_t size)

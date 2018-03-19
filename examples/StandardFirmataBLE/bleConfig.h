@@ -5,7 +5,7 @@
  * need a unique ble local name (see below). If you are using another supported BLE board or shield,
  * follow the instructions for the specific board or shield below.
  *
- * Make sure you have the Intel Curie Boards package v1.0.6 or higher installed via the Arduino
+ * Make sure you have the Intel Curie Boards package v2.0.2 or higher installed via the Arduino
  * Boards Manager.
  *
  * Supported boards and shields:
@@ -18,6 +18,22 @@
 // change this to a unique name per board if running StandardFirmataBLE on multiple boards
 // within the same physical space
 #define FIRMATA_BLE_LOCAL_NAME "FIRMATA"
+
+/*
+ * Arduino 101
+ *
+ * Make sure you have the Intel Curie Boards package v2.0.2 or higher installed via the Arduino
+ * Boards Manager.
+ *
+ * Test script: https://gist.github.com/soundanalogous/927360b797574ed50e27
+ */
+#ifdef _VARIANT_ARDUINO_101_X_
+// After conversion to units of 1.25ms, both values must be between
+// 0x0006 (7.5ms) and 0x0c80 (4s)
+#define FIRMATA_BLE_MIN_INTERVAL 8  // ( 8 * 1000) / 1250 == 0x06 -> 7.5ms
+#define FIRMATA_BLE_MAX_INTERVAL 30 // (30 * 1000) / 1250 == 0x18 -> 30ms
+#endif
+
 
 /*
  * RedBearLab BLE Shield
@@ -36,15 +52,27 @@
 //#define REDBEAR_BLE_SHIELD
 
 #ifdef REDBEAR_BLE_SHIELD
-#include <SPI.h>
-#include <BLEPeripheral.h>
-#include "utility/BLEStream.h"
-
 #define BLE_REQ  9
 #define BLE_RDY  8
 #define BLE_RST  4 // 4 or 7 via jumper on shield
+#endif
 
-BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
+
+/*
+ * Generic settings
+ */
+#if !defined(FIRMATA_BLE_MIN_INTERVAL) && !defined(FIRMATA_BLE_MAX_INTERVAL)
+// BLE connection interval - this is the fastest interval you can read inputs.
+// These values apply to all devices using the Arduino BLEPeripheral library
+// with a Nordic nRF8001 or nRF51822.  Both values must be between
+// 0x0006 (7.5ms) and 0x0c80 (4s).
+#define FIRMATA_BLE_MIN_INTERVAL 0x0006 // 7.5ms (7.5 / 1.25)
+#define FIRMATA_BLE_MAX_INTERVAL 0x0018 // 30ms (30 / 1.25)
+#endif
+
+#if !defined(FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL)
+// How often the BLE TX buffer is flushed (if not full)
+#define FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL 30 // 30ms
 #endif
 
 
@@ -52,18 +80,16 @@ BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
  * END BLE CONFIGURATION - you should not need to change anything below this line
  *================================================================================================*/
 
-/*
- * Arduino 101
- *
- * Make sure you have the Intel Curie Boards package v1.0.6 or higher installed via the Arduino
- * Boards Manager.
- *
- * Test script: https://gist.github.com/soundanalogous/927360b797574ed50e27
- */
 #ifdef _VARIANT_ARDUINO_101_X_
-#include <CurieBLE.h>
 #include "utility/BLEStream.h"
 BLEStream stream;
+#endif
+
+
+#ifdef REDBEAR_BLE_SHIELD
+#include <SPI.h>
+#include "utility/BLEStream.h"
+BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
 #endif
 
 
@@ -81,7 +107,6 @@ BLEStream stream;
  * the pins are currently mapped in Firmata only for the default (factory) jumper settings.
  */
 // #ifdef BLE_NANO
-// #include <BLEPeripheral.h>
 // #include "utility/BLEStream.h"
 // BLEStream stream;
 // #endif
@@ -96,7 +121,6 @@ BLEStream stream;
  */
 // #if defined(BLEND_MICRO) || defined(BLEND)
 // #include <SPI.h>
-// #include <BLEPeripheral.h>
 // #include "utility/BLEStream.h"
 
 // #define BLE_REQ  6
