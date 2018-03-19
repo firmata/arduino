@@ -12,6 +12,7 @@
  * - Arduino 101 (recommended)
  * - RedBearLab BLE Shield (v2)  ** to be verified **
  * - RedBearLab BLE Nano ** works with modifications **
+ * - Adafruit Feather M0 Bluefruit LE
  *
  *================================================================================================*/
 
@@ -59,6 +60,31 @@
 
 
 /*
+ * Adafruit Feather M0 Bluefruit LE
+ *
+ * If you are using an Adafruit Feather M0 Bluefruit LE, uncomment the define below.
+ * This configuration should also work with other Bluefruit LE boards/modules that communicate
+ * with the nRF51822 via SPI (e.g. Bluefruit LE SPI Friend, Bluefruit LE Shield), although
+ * you may need to change the values of BLE_SPI_CS, BLE_SPI_IRQ, and/or BLE_SPI_RST below.
+ *
+ * You will need to install a lightly-modified version of the Adafruit BluefruitLE nRF51
+ * package, available at:
+ * https://github.com/cstawarz/Adafruit_BluefruitLE_nRF51/archive/firmata_fixes.zip
+ */
+//#define BLUEFRUIT_LE_SPI
+
+#ifdef BLUEFRUIT_LE_SPI
+// Both values must be between 10ms and 4s
+#define FIRMATA_BLE_MIN_INTERVAL 10 // 10ms
+#define FIRMATA_BLE_MAX_INTERVAL 20 // 20ms
+
+#define BLE_SPI_CS   8
+#define BLE_SPI_IRQ  7
+#define BLE_SPI_RST  4
+#endif
+
+
+/*
  * Generic settings
  */
 #if !defined(FIRMATA_BLE_MIN_INTERVAL) && !defined(FIRMATA_BLE_MAX_INTERVAL)
@@ -90,6 +116,12 @@ BLEStream stream;
 #include <SPI.h>
 #include "utility/BLEStream.h"
 BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
+#endif
+
+
+#ifdef BLUEFRUIT_LE_SPI
+#include "utility/BluefruitLE_SPI_Stream.h"
+BluefruitLE_SPI_Stream stream(BLE_SPI_CS, BLE_SPI_IRQ, BLE_SPI_RST);
 #endif
 
 
@@ -133,4 +165,6 @@ BLEStream stream(BLE_REQ, BLE_RDY, BLE_RST);
 
 #if defined(BLE_REQ) && defined(BLE_RDY) && defined(BLE_RST)
 #define IS_IGNORE_BLE_PINS(p) ((p) == BLE_REQ || (p) == BLE_RDY || (p) == BLE_RST)
+#elif defined(BLE_SPI_CS) && defined(BLE_SPI_IRQ) && defined(BLE_SPI_RST)
+#define IS_IGNORE_BLE_PINS(p) ((p) == BLE_SPI_CS || (p) == BLE_SPI_IRQ || (p) == BLE_SPI_RST)
 #endif

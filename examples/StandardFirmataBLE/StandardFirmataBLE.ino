@@ -768,7 +768,7 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-#ifdef BLE_REQ
+#ifdef IS_IGNORE_BLE_PINS
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_IGNORE_BLE_PINS(i)) {
       Firmata.setPinMode(i, PIN_MODE_IGNORE);
