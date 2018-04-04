@@ -16,6 +16,10 @@ class BluefruitLE_SPI_Stream : public Stream
   public:
     BluefruitLE_SPI_Stream(int8_t csPin, int8_t irqPin, int8_t rstPin);
 
+    void setLocalName(const char *localName);
+    void setConnectionInterval(unsigned short minConnInterval, unsigned short maxConnInterval);
+    void setFlushInterval(int flushInterval);
+
     void begin();
     bool poll();
     void end();
@@ -33,6 +37,10 @@ class BluefruitLE_SPI_Stream : public Stream
   private:
     Adafruit_BluefruitLE_SPI ble;
 
+    String localName;
+    unsigned short minConnInterval;
+    unsigned short maxConnInterval;
+
     uint8_t txBuffer[SDEP_MAX_PACKETSIZE];
     size_t txCount;
 };
@@ -40,8 +48,26 @@ class BluefruitLE_SPI_Stream : public Stream
 
 BluefruitLE_SPI_Stream::BluefruitLE_SPI_Stream(int8_t csPin, int8_t irqPin, int8_t rstPin) :
   ble(csPin, irqPin, rstPin),
+  minConnInterval(0),
+  maxConnInterval(0),
   txCount(0)
 { }
+
+void BluefruitLE_SPI_Stream::setLocalName(const char *localName)
+{
+  this->localName = localName;
+}
+
+void BluefruitLE_SPI_Stream::setConnectionInterval(unsigned short minConnInterval, unsigned short maxConnInterval)
+{
+  this->minConnInterval = minConnInterval;
+  this->maxConnInterval = maxConnInterval;
+}
+
+void BluefruitLE_SPI_Stream::setFlushInterval(int flushInterval)
+{
+  // Not used
+}
 
 void BluefruitLE_SPI_Stream::begin()
 {
@@ -58,15 +84,19 @@ void BluefruitLE_SPI_Stream::begin()
   ble.println("AT+HWMODELED=BLEUART");
 
   // Set local name
-  ble.print("AT+GAPDEVNAME=");
-  ble.println(FIRMATA_BLE_LOCAL_NAME);
+  if (localName.length() > 0) {
+    ble.print("AT+GAPDEVNAME=");
+    ble.println(localName);
+  }
 
   // Set connection interval
-  ble.print("AT+GAPINTERVALS=");
-  ble.print(FIRMATA_BLE_MIN_INTERVAL);
-  ble.print(",");
-  ble.print(FIRMATA_BLE_MAX_INTERVAL);
-  ble.println(",,,");
+  if (minConnInterval > 0 && maxConnInterval > 0) {
+    ble.print("AT+GAPINTERVALS=");
+    ble.print(minConnInterval);
+    ble.print(",");
+    ble.print(maxConnInterval);
+    ble.println(",,,");
+  }
 
   // Disable real and simulated mode switch (i.e. "+++") command
   ble.println("AT+MODESWITCHEN=local,0");

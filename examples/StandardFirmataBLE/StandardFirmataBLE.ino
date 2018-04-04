@@ -768,6 +768,13 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
+  stream.setLocalName(FIRMATA_BLE_LOCAL_NAME);
+
+  // set the BLE connection interval - this is the fastest interval you can read inputs
+  stream.setConnectionInterval(FIRMATA_BLE_MIN_INTERVAL, FIRMATA_BLE_MAX_INTERVAL);
+  // set how often the BLE TX buffer is flushed (if not full)
+  stream.setFlushInterval(FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL);
+
 #ifdef IS_IGNORE_BLE_PINS
   for (byte i = 0; i < TOTAL_PINS; i++) {
     if (IS_IGNORE_BLE_PINS(i)) {

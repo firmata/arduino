@@ -88,7 +88,6 @@
  * Generic settings
  */
 #if !defined(FIRMATA_BLE_MIN_INTERVAL) && !defined(FIRMATA_BLE_MAX_INTERVAL)
-// BLE connection interval - this is the fastest interval you can read inputs.
 // These values apply to all devices using the Arduino BLEPeripheral library
 // with a Nordic nRF8001 or nRF51822.  Both values must be between
 // 0x0006 (7.5ms) and 0x0c80 (4s).
@@ -97,7 +96,6 @@
 #endif
 
 #if !defined(FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL)
-// How often the BLE TX buffer is flushed (if not full)
 #define FIRMATA_BLE_TXBUFFER_FLUSH_INTERVAL 30 // 30ms
 #endif
 
