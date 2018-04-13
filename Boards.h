@@ -403,11 +403,12 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_SERIAL2_TX          10
 #define PIN_SERIAL3_RX          7
 #define PIN_SERIAL3_TX          8
-// The following 2 UARTs are not yet available via SerialFirmata
 #define PIN_SERIAL4_RX          31
-#define PIN_SERIAL5_TX          32
-#define PIN_SERIAL6_RX          34
-#define PIN_SERIAL6_TX          33
+#define PIN_SERIAL4_TX          32
+#define PIN_SERIAL5_RX          34
+#define PIN_SERIAL5_TX          33
+#define PIN_SERIAL6_RX          47
+#define PIN_SERIAL6_TX          48
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 63)
 #define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 23) || ((p) >= 31 && (p) <= 39) || ((p) >= 49 && (p) <= 50) || ((p) >= 64 && (p) <= 69))
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
