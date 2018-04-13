@@ -252,6 +252,18 @@ Stream* SerialFirmata::getPortFromId(byte portId)
     case HW_SERIAL3:
       return &Serial3;
 #endif
+#if defined(PIN_SERIAL4_RX)
+    case HW_SERIAL4:
+      return &Serial4;
+#endif
+#if defined(PIN_SERIAL5_RX)
+    case HW_SERIAL5:
+      return &Serial5;
+#endif
+#if defined(PIN_SERIAL6_RX)
+    case HW_SERIAL6:
+      return &Serial6;
+#endif
 #if defined(SoftwareSerial_h)
     case SW_SERIAL0:
       if (swSerial0 != NULL) {
