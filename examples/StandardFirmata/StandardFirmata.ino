@@ -687,7 +687,53 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       Firmata.write(END_SYSEX);
       break;
-
+    case PULSE_IN:{
+      byte pulseDurationArray[4] = {
+        (argv[2] & 0x7F) | ((argv[3] & 0x7F) << 7)
+       ,(argv[4] & 0x7F) | ((argv[5] & 0x7F) << 7)
+       ,(argv[6] & 0x7F) | ((argv[7] & 0x7F) << 7)
+       ,(argv[8] & 0x7F) | ((argv[9] & 0x7F) << 7)
+      };
+      unsigned long pulseDuration = ((unsigned long)pulseDurationArray[0] << 24)
+              + ((unsigned long)pulseDurationArray[1] << 16)
+              + ((unsigned long)pulseDurationArray[2] << 8)
+              + ((unsigned long)pulseDurationArray[3]);
+      if(argv[1] == HIGH){
+        pinMode(argv[0],OUTPUT);
+        digitalWrite(argv[0],LOW);
+        delayMicroseconds(2);
+        digitalWrite(argv[0],HIGH);
+        delayMicroseconds(pulseDuration);
+        digitalWrite(argv[0],LOW);
+      } else {
+        digitalWrite(argv[0],HIGH);
+        delayMicroseconds(2);
+        digitalWrite(argv[0],LOW);
+        delayMicroseconds(pulseDuration);
+        digitalWrite(argv[0],HIGH);
+      }
+      unsigned long duration;
+      byte responseArray[5];
+      byte timeoutArray[4] = {
+          (argv[10] & 0x7F) | ((argv[11] & 0x7F) << 7)
+         ,(argv[12] & 0x7F) | ((argv[13] & 0x7F) << 7)
+         ,(argv[14] & 0x7F) | ((argv[15] & 0x7F) << 7)
+         ,(argv[16] & 0x7F) | ((argv[17] & 0x7F) << 7)
+      };
+      unsigned long timeout = ((unsigned long)timeoutArray[0] << 24)
+                + ((unsigned long)timeoutArray[1] << 16)
+                + ((unsigned long)timeoutArray[2] << 8)
+                + ((unsigned long)timeoutArray[3]);
+      pinMode(argv[0],INPUT);
+      duration = pulseIn(argv[0], argv[1],timeout);
+      responseArray[0] = argv[0];
+      responseArray[1] = (((unsigned long)duration >> 24) & 0xFF) ;
+      responseArray[2] = (((unsigned long)duration >> 16) & 0xFF) ;
+      responseArray[3] = (((unsigned long)duration >> 8) & 0xFF);
+      responseArray[4] = (((unsigned long)duration & 0xFF));
+      Firmata.sendSysex(PULSE_IN,5,responseArray);
+      break;
+    }
     case SERIAL_MESSAGE:
 #ifdef FIRMATA_SERIAL_FEATURE
       serialFeature.handleSysex(command, argc, argv);

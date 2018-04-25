@@ -33,6 +33,7 @@
 #define SYSEX_I2C_REQUEST       0x76 // same as I2C_REQUEST
 #define SYSEX_I2C_REPLY         0x77 // same as I2C_REPLY
 #define SYSEX_SAMPLING_INTERVAL 0x7A // same as SAMPLING_INTERVAL
+#define PULSE_IN                0x74 // send a pulse in command
 
 // pin modes
 //#define INPUT                 0x00 // defined in Arduino.h
