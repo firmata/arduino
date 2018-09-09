@@ -7,10 +7,10 @@
 #######################################
 
 Firmata	KEYWORD1	Firmata
-callbackFunction	KEYWORD1	callbackFunction
-systemResetCallbackFunction	KEYWORD1	systemResetCallbackFunction
-stringCallbackFunction	KEYWORD1	stringCallbackFunction
-sysexCallbackFunction	KEYWORD1	sysexCallbackFunction
+callbackFunction	KEYWORD1
+systemResetCallbackFunction	KEYWORD1
+stringCallbackFunction	KEYWORD1
+sysexCallbackFunction	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
