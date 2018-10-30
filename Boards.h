@@ -219,6 +219,24 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// Arduino UNO WiFi rev2 (ATMega 4809)
+#elif defined(__AVR_ATmega4809__)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              20 // 14 digital + 6 analog + /* 3 SPI (unexported, on ISP header) */
+#define VERSION_BLINK_PIN       25
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (p)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p) - 14
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
 
 // Arduino DUE
 #elif defined(__SAM3X8E__)
