@@ -873,7 +873,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // Adafruit Bluefruit nRF52 boards
 #elif defined(ARDUINO_NRF52_ADAFRUIT)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
-#define TOTAL_PINS              32
+#define TOTAL_PINS              NUM_DIGITAL_PINS
 #define VERSION_BLINK_PIN       LED_BUILTIN
 #define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
 #define IS_PIN_ANALOG(p)        ((p) == PIN_A0 || (p) == PIN_A1 || (p) == PIN_A2  || (p) == PIN_A3 || \
