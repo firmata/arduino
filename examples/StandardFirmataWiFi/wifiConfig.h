@@ -102,6 +102,41 @@
  * For HUZZAH with ESP8266 use ESP8266_WIFI.
  */
 
+/*
+ * OPTION E: Configure for Arduino MKR WiFi 1010 and maybe other WiFiNINA boards.
+ *
+ * This will configure StandardFirmataWiFi to use the WiFiNINA library, which works with the
+ * boards that have the U-Blox NINA chip built in (such as the MKR1010).
+ * It is compatible with 802.11 2.4GHz B/G/N networks.
+ *
+ * If you are using the MKR1010 board, continue on to STEP 2. If you are using WiFiNINA add-on
+ * boards, follow the instructions below.
+ *
+ * To enable for WiFiNINA add-on boards, uncomment the #define WIFI_NINA below.
+ * TBD: Adafruit AirLyft boards are based on the WiFiNINA firmware so may work here.
+ *
+ * IMPORTANT: You must have the WiFI NINA library installed. To easily install this library, open
+ * the library manager via: Arduino IDE Menus: Sketch > Include Library > Manage Libraries > filter
+ * search for "WiFiNINA" > Select the result and click 'install'
+ */
+//#define WIFI_NINA
+
+//do not modify the following 15 lines
+#if defined(ARDUINO_SAMD_MKRWIFI1010) && !defined(WIFI_NINA)
+// automatically include if compiling for MRKWIFI1010
+#define WIFI_NINA
+#endif
+#ifdef WIFI_NINA
+#include <WiFiNINA.h>
+#include "utility/WiFiClientStream.h"
+#include "utility/WiFiServerStream.h"
+  #ifdef WIFI_LIB_INCLUDED
+  #define MULTIPLE_WIFI_LIB_INCLUDES
+  #else
+  #define WIFI_LIB_INCLUDED
+  #endif
+#endif
+
 //------------------------------
 // TODO
 //------------------------------

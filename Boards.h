@@ -261,8 +261,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
-// Arduino/Genuino MKR1000
-#elif defined(ARDUINO_SAMD_MKR1000)
+// Arduino/Genuino MKR1000 or MKR1010
+#elif defined(ARDUINO_SAMD_MKR1000)	|| defined(ARDUINO_SAMD_MKRWIFI1010)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              22 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 21)
