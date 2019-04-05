@@ -37,6 +37,7 @@
   - Arduino WiFi Shield (or clone)
   - Arduino WiFi Shield 101
   - Arduino MKR1000 board
+  - Arduino MKRWIFI1010 board
   - ESP8266 WiFi board compatible with ESP8266 Arduino core
 
   Follow the instructions in the wifiConfig.h file (wifiConfig.h tab in Arduino IDE) to
@@ -929,6 +930,8 @@ void initTransport()
   DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
 #elif defined(HUZZAH_WIFI)
   DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
+#elif defined(WIFI_NINA)
+  DEBUG_PRINTLN( "using the WiFi NINA library." );
   //else should never happen here as error-checking in wifiConfig.h will catch this
 #endif  //defined(WIFI_101)
 
