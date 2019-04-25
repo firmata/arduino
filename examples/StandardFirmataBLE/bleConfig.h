@@ -67,16 +67,16 @@
  * with the nRF51822 via SPI (e.g. Bluefruit LE SPI Friend, Bluefruit LE Shield), although
  * you may need to change the values of BLE_SPI_CS, BLE_SPI_IRQ, and/or BLE_SPI_RST below.
  *
- * You will need to install a lightly-modified version of the Adafruit BluefruitLE nRF51
- * package, available at:
- * https://github.com/cstawarz/Adafruit_BluefruitLE_nRF51/archive/firmata_fixes.zip
+ * You will need to install the latest version of the Adafruit BluefruitLE nRF51 package,
+ * available at:
+ * https://github.com/adafruit/Adafruit_BluefruitLE_nRF51/archive/master.zip
  */
 //#define BLUEFRUIT_LE_SPI
 
 #ifdef BLUEFRUIT_LE_SPI
 // Both values must be between 10ms and 4s
-#define FIRMATA_BLE_MIN_INTERVAL 10 // 10ms
-#define FIRMATA_BLE_MAX_INTERVAL 20 // 20ms
+#define FIRMATA_BLE_MIN_INTERVAL 15 // 15ms
+#define FIRMATA_BLE_MAX_INTERVAL 30 // 30ms
 
 #define BLE_SPI_CS   8
 #define BLE_SPI_IRQ  7
