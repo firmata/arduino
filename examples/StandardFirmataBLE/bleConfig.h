@@ -74,6 +74,9 @@
 //#define BLUEFRUIT_LE_SPI
 
 #ifdef BLUEFRUIT_LE_SPI
+// Value must be between 20ms and 10.24s
+#define FIRMATA_BLE_ADVERTISING_INTERVAL 20 // 20ms
+
 // Both values must be between 10ms and 4s
 #define FIRMATA_BLE_MIN_INTERVAL 15 // 15ms
 #define FIRMATA_BLE_MAX_INTERVAL 30 // 30ms
