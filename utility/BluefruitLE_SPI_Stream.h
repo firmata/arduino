@@ -17,6 +17,7 @@ class BluefruitLE_SPI_Stream : public Stream
     BluefruitLE_SPI_Stream(int8_t csPin, int8_t irqPin, int8_t rstPin);
 
     void setLocalName(const char *localName);
+    void setAdvertisingInterval(unsigned short advertisingInterval);
     void setConnectionInterval(unsigned short minConnInterval, unsigned short maxConnInterval);
     void setFlushInterval(int flushInterval);
 
@@ -38,6 +39,7 @@ class BluefruitLE_SPI_Stream : public Stream
     Adafruit_BluefruitLE_SPI ble;
 
     String localName;
+    unsigned short advertisingInterval;
     unsigned short minConnInterval;
     unsigned short maxConnInterval;
 
@@ -48,6 +50,7 @@ class BluefruitLE_SPI_Stream : public Stream
 
 BluefruitLE_SPI_Stream::BluefruitLE_SPI_Stream(int8_t csPin, int8_t irqPin, int8_t rstPin) :
   ble(csPin, irqPin, rstPin),
+  advertisingInterval(0),
   minConnInterval(0),
   maxConnInterval(0),
   txCount(0)
@@ -56,6 +59,11 @@ BluefruitLE_SPI_Stream::BluefruitLE_SPI_Stream(int8_t csPin, int8_t irqPin, int8
 void BluefruitLE_SPI_Stream::setLocalName(const char *localName)
 {
   this->localName = localName;
+}
+
+void BluefruitLE_SPI_Stream::setAdvertisingInterval(unsigned short advertisingInterval)
+{
+  this->advertisingInterval = advertisingInterval;
 }
 
 void BluefruitLE_SPI_Stream::setConnectionInterval(unsigned short minConnInterval, unsigned short maxConnInterval)
@@ -89,14 +97,16 @@ void BluefruitLE_SPI_Stream::begin()
     ble.println(localName);
   }
 
-  // Set connection interval
-  if (minConnInterval > 0 && maxConnInterval > 0) {
-    ble.print("AT+GAPINTERVALS=");
-    ble.print(minConnInterval);
-    ble.print(",");
-    ble.print(maxConnInterval);
-    ble.println(",,,");
-  }
+  // Set connection and advertising intervals
+  ble.print("AT+GAPINTERVALS=");
+  if (minConnInterval > 0) ble.print(minConnInterval);
+  ble.print(",");
+  if (maxConnInterval > 0) ble.print(maxConnInterval);
+  ble.print(",");
+  if (advertisingInterval > 0) ble.print(advertisingInterval);
+  ble.print(",,");  // Always omit fast advertising timeout, hence two commas
+  if (advertisingInterval > 0) ble.print(advertisingInterval);
+  ble.println();
 
   // Disable real and simulated mode switch (i.e. "+++") command
   ble.println("AT+MODESWITCHEN=local,0");
