@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.16"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Firmata firmware for Arduino: Firmata</title>
+<title>Firmata library reference: Firmata</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -13,6 +13,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="firmata-docs.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -21,9 +22,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Firmata firmware for Arduino
+   <div id="projectname">Firmata library reference
    </div>
-   <div id="projectbrief">Firmata is a protocol for communicating with microcontrollers from software on a host computer</div>
   </td>
  </tr>
  </tbody>
@@ -86,7 +86,7 @@ Contents</h1>
 </ul>
 <h2><a class="anchor" id="autotoc_md2"></a>
 Usage</h2>
-<p>There are two main models of usage of Firmata. In one model, the author of the Arduino sketch uses the various methods provided by the Firmata library to selectively send and receive data between the Arduino device and the software running on the host computer. For example, a user can send analog data to the host using <code>Firmata.sendAnalog(analogPin, analogRead(analogPin))</code> or send data packed in a string using <code>Firmata.sendString(stringToSend)</code>. See File -&gt; Examples -&gt; Firmata -&gt; AnalogFirmata &amp; EchoString respectively for examples.</p>
+<p>There are two main models of usage of Firmata. In one model, the author of the Arduino sketch uses the various methods provided by the Firmata library to selectively send and receive data between the Arduino device and the software running on the host computer. For example, a user can send analog data to the host using <code>Firmata.sendAnalog(analogPin, analogRead(analogPin))</code> or send data packed in a string using <code>Firmata.sendString(stringToSend)</code>. See File -&gt; Examples -&gt; Firmata -&gt; AnalogFirmata &amp; EchoString respectively for examples. Browse the API documentation <a href="https://firmata.github.io/arduino/html/index.html">here</a>.</p>
 <p>The second and more common model is to load a general purpose sketch called StandardFirmata (or one of the variants such as StandardFirmataPlus or StandardFirmataEthernet depending on your needs) on the Arduino board and then use the host computer exclusively to interact with the Arduino board. StandardFirmata is located in the Arduino IDE in File -&gt; Examples -&gt; Firmata.</p>
 <h2><a class="anchor" id="autotoc_md3"></a>
 Firmata Client Libraries</h2>

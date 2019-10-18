@@ -1,0 +1,72 @@
+/***************************************************
+ * Custom styles for Firmata library docs
+ ***************************************************/
+
+:root {
+  --color-primary: #4CAF50;
+  --color-primary-dark: #388E3C;
+  --color-primary-light: #C8E6C9;
+  --color-accent: #00BCD4;
+  --color-text-primary: #212121;
+  --color-text-secondary: #757575;
+  --color-divider: #BDBDBD;
+}
+
+/***************************************************
+ * Overrides for styles defined in doxygen.css
+ ***************************************************/
+
+#titlearea {
+  background-color: var(--color-primary-dark);
+  /* background-color: #212121; */
+  border-bottom: none;
+  padding: 4px 16px 4px 16px;
+  color: #ffffff;
+}
+
+#projectname {
+  font: 300 32px Roboto, sans-serif;
+}
+
+.navpath ul {
+  background-image: none;
+  background-repeat: no-repeat;
+}
+
+/***************************************************
+ * Overrides for styles defined in search.css
+ ***************************************************/
+
+#MSearchField, #MSearchBox .left, #MSearchBox .right {
+  background: none;
+  background-color: white;
+}
+#MSearchBox .left {
+  border-radius: 5px 0 0 5px;
+}
+#MSearchBox .right {
+  border-radius: 0 5px 5px 0;
+}
+
+/***************************************************
+ * Overrides for styles defined in tabs.css
+ ***************************************************/
+
+.sm-dox {
+  background-image: none;
+  background-color: var(--color-primary);
+}
+
+.sm-dox a {
+  text-shadow: none;
+  color: var(--color-text-primary);
+}
+
+.sm-dox a:hover,
+.sm-dox ul a:hover {
+  background-image: none;
+  background-repeat: no-repeat;
+  background-color: var(--color-primary-light);;
+  text-shadow: none;
+  color: var(--color-text-primary);
+}
