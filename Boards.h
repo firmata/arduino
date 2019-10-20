@@ -888,6 +888,23 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
 
+// SPRESENSE
+#elif defined(ARDUINO_ARCH_SPRESENSE)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS + 4 + NUM_ANALOG_INPUTS // + 4 built-in led
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < (NUM_DIGITAL_PINS + 4))
+#define IS_PIN_ANALOG(p)        ((p) >= (TOTAL_PINS - NUM_ANALOG_INPUTS) && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           ((p) == 6 || (p) == 5 || (p) == 9 || (p) == 3)
+#define IS_PIN_SERVO(p)         ((p) < NUM_DIGITAL_PINS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == 10 || (p) == 11 || (p) == 12 || (p) == 13)
+#define PIN_TO_DIGITAL(p)       (((p) < NUM_DIGITAL_PINS) ? (p) : (_LED_PIN((p) - NUM_DIGITAL_PINS)))
+#define PIN_TO_ANALOG(p)        ((p) - (TOTAL_PINS - NUM_ANALOG_INPUTS))
+#define PIN_TO_PWM(p)           (p)
+#define PIN_TO_SERVO(p)         (p)
+#define analogRead(p)           analogRead(_ANALOG_PIN(p)) // wrap function for analogRead()
+
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
