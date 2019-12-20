@@ -854,18 +854,28 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
 #define TOTAL_PINS              NUM_DIGITAL_PINS
 #define TOTAL_PORTS             MAX_NB_PORT
+#ifdef LED_BUILTIN
 #define VERSION_BLINK_PIN       LED_BUILTIN
+#endif
 // PIN_SERIALY_RX/TX defined in the variant.h
 #define IS_PIN_DIGITAL(p)       (digitalPinIsValid(p) && !pinIsSerial(p))
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01080000)
 #define IS_PIN_ANALOG(p)        ((p >= A0) && (p < (A0 + TOTAL_ANALOG_PINS)) && !pinIsSerial(p))
+#else
+#define IS_PIN_ANALOG(p)        (pinIsAnalogInput(p) && !pinIsSerial(p))
+#endif
 #define IS_PIN_PWM(p)           (IS_PIN_DIGITAL(p) && digitalPinHasPWM(p))
-#define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p))
 #define IS_PIN_I2C(p)           (IS_PIN_DIGITAL(p) && digitalPinHasI2C(p))
 #define IS_PIN_SPI(p)           (IS_PIN_DIGITAL(p) && digitalPinHasSPI(p))
 #define IS_PIN_INTERRUPT(p)     (IS_PIN_DIGITAL(p) && (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)))
 #define IS_PIN_SERIAL(p)        (digitalPinHasSerial(p) && !pinIsSerial(p))
 #define PIN_TO_DIGITAL(p)       (p)
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01080000)
 #define PIN_TO_ANALOG(p)        (p-A0)
+#else
+#define PIN_TO_ANALOG(p)        (digitalPinToAnalogInput(p))
+#endif
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  PWM_RESOLUTION
