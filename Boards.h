@@ -859,7 +859,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #endif
 // PIN_SERIALY_RX/TX defined in the variant.h
 #define IS_PIN_DIGITAL(p)       (digitalPinIsValid(p) && !pinIsSerial(p))
-#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01080000)
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  < 0x01080000)
 #define IS_PIN_ANALOG(p)        ((p >= A0) && (p < (A0 + TOTAL_ANALOG_PINS)) && !pinIsSerial(p))
 #else
 #define IS_PIN_ANALOG(p)        (pinIsAnalogInput(p) && !pinIsSerial(p))
@@ -871,7 +871,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_INTERRUPT(p)     (IS_PIN_DIGITAL(p) && (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)))
 #define IS_PIN_SERIAL(p)        (digitalPinHasSerial(p) && !pinIsSerial(p))
 #define PIN_TO_DIGITAL(p)       (p)
-#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01080000)
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  < 0x01080000)
 #define PIN_TO_ANALOG(p)        (p-A0)
 #else
 #define PIN_TO_ANALOG(p)        (digitalPinToAnalogInput(p))
