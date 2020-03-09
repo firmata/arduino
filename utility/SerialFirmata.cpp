@@ -14,17 +14,19 @@
 
   - handlePinMode calls Firmata::setPinMode
 
-  Last updated by Jeff Hoefs: January 10th, 2016
+  Last updated October 16th, 2016
 */
 
 #include "SerialFirmata.h"
 
 SerialFirmata::SerialFirmata()
 {
+#if defined(SoftwareSerial_h)
   swSerial0 = NULL;
   swSerial1 = NULL;
   swSerial2 = NULL;
   swSerial3 = NULL;
+#endif
 
   serialIndex = -1;
 }
@@ -249,6 +251,18 @@ Stream* SerialFirmata::getPortFromId(byte portId)
 #if defined(PIN_SERIAL3_RX)
     case HW_SERIAL3:
       return &Serial3;
+#endif
+#if defined(PIN_SERIAL4_RX)
+    case HW_SERIAL4:
+      return &Serial4;
+#endif
+#if defined(PIN_SERIAL5_RX)
+    case HW_SERIAL5:
+      return &Serial5;
+#endif
+#if defined(PIN_SERIAL6_RX)
+    case HW_SERIAL6:
+      return &Serial6;
 #endif
 #if defined(SoftwareSerial_h)
     case SW_SERIAL0:

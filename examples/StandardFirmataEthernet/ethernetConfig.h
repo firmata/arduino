@@ -3,8 +3,8 @@
  *
  * You must configure your particular hardware. Follow the steps below.
  *
- * Currently StandardFirmataEthernet is configured as a client. An option to
- * configure as a server may be added in the future.
+ * By default, StandardFirmataEthernet is configured as a TCP client.
+ * To configure as a TCP server, see STEP 2
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
@@ -35,6 +35,8 @@ EthernetClient client;
  *
  * On Yun there's no need to configure local_ip and mac address as this is automatically
  * configured on the linux-side of Yun.
+ *
+ * Note that it may take several seconds to establish a connection with the Yun.
  */
 //#define YUN_ETHERNET
 
@@ -44,24 +46,27 @@ EthernetClient client;
 YunClient client;
 #endif
 
-
 // STEP 2 [REQUIRED for all boards and shields]
-// replace with IP of the server you want to connect to, comment out if using 'remote_host'
+// TCP Client configuration:
+// To configure your board as a TCP client, set the IP address of the server you want to connect to.
+// TCP Server configuration:
+// To configure your board as a TCP server, comment out the following line and also ensure that
+// remote_host is also commented out.
 #define remote_ip IPAddress(10, 0, 0, 3)
 // *** REMOTE HOST IS NOT YET WORKING ***
 // replace with hostname of server you want to connect to, comment out if using 'remote_ip'
 // #define remote_host "server.local"
 
-// STEP 3 [REQUIRED unless using Arduin Yun]
-// Replace with the port that your server is listening on
-#define remote_port 3030
+// STEP 3 [REQUIRED]
+// Replace with the port that your client or server is listening on.
+#define network_port 3030
 
-// STEP 4 [REQUIRED unless using Arduino Yun OR if not using DHCP]
+// STEP 4 [REQUIRED unless using DHCP]
 // Replace with your board or ethernet shield's IP address
 // Comment out if you want to use DHCP
 #define local_ip IPAddress(10, 0, 0, 15)
 
-// STEP 5 [REQUIRED unless using Arduino Yun]
+// STEP 5 [REQUIRED]
 // replace with ethernet shield mac. Must be unique for your network
 const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
 
@@ -81,5 +86,9 @@ const byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0x53, 0xE5};
  * PIN IGNORE MACROS (don't change anything here)
  *============================================================================*/
 
+#if defined(WIZ5100_ETHERNET)
+
 // ignore SPI pins, pin 10 (Ethernet SS) and pin 4 (SS for SD-Card on Ethernet shield)
-#define IS_IGNORE_ETHERNET_SHIELD(p) ((IS_PIN_SPI(p) || (p) == 4) || (p) == 10)
+#define IS_IGNORE_PIN(p) ((IS_PIN_SPI(p) || (p) == 4) || (p) == 10)
+
+#endif

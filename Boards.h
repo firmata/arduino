@@ -1,7 +1,7 @@
 /*
   Boards.h - Hardware Abstraction Layer for Firmata library
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -10,7 +10,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated December 19th, 2015
+  Last updated April 15th, 2018
 */
 
 #ifndef Firmata_Boards_h
@@ -219,6 +219,24 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// Arduino UNO WiFi rev2 (ATMega 4809)
+#elif defined(__AVR_ATmega4809__)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              20 // 14 digital + 6 analog + /* 3 SPI (unexported, on ISP header) */
+#define VERSION_BLINK_PIN       25
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (p)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p) - 14
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
 
 // Arduino DUE
 #elif defined(__SAM3X8E__)
@@ -243,11 +261,11 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
-// Arduino/Genuino MKR1000
-#elif defined(ARDUINO_SAMD_MKR1000)
+// Arduino/Genuino MKR1000 or MKR1010
+#elif defined(ARDUINO_SAMD_MKR1000)	|| defined(ARDUINO_SAMD_MKRWIFI1010)
 #define TOTAL_ANALOG_PINS       7
 #define TOTAL_PINS              22 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog
-#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21) && !IS_PIN_SERIAL(p))
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 21)
 #define IS_PIN_ANALOG(p)        ((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS)
 #define IS_PIN_PWM(p)           digitalPinHasPWM(p)
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
@@ -259,6 +277,70 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
+
+// Arduino MKRZero
+#elif defined(ARDUINO_SAMD_MKRZERO)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              34 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 led + 1 battery adc
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21) || (p) == 32)
+#define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 33)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 11 || (p) == 12) // SDA = 11, SCL = 12
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL1_RX || (p) == PIN_SERIAL1_TX) //defined in variant.h  RX = 13, TX = 14
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 15)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+// Arduino MKRFox1200
+#elif defined(ARDUINO_SAMD_MKRFox1200)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              33 // 8 digital + 3 spi + 2 i2c + 2 uart + 7 analog + 3 usb + 1 aref + 5 sd + 1 bottom pad + 1 battery adc
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21))
+#define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 32)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 11 || (p) == 12) // SDA = 11, SCL = 12
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL1_RX || (p) == PIN_SERIAL1_TX) //defined in variant.h  RX = 13, TX = 14
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 15)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+// Arduino MKR WAN 1300
+#elif defined(ARDUINO_SAMD_MKRWAN1300)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              33
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21))
+#define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 32)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 11 || (p) == 12) // SDA = 11, SCL = 12
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL1_RX || (p) == PIN_SERIAL1_TX) //defined in variant.h  RX = 13, TX = 14
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 15)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+// Arduino MKR GSM 1400
+#elif defined(ARDUINO_SAMD_MKRGSM1400)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              33
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 21))
+#define IS_PIN_ANALOG(p)        (((p) >= 15 && (p) < 15 + TOTAL_ANALOG_PINS) || (p) == 32)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 11 || (p) == 12) // SDA = 11, SCL = 12
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL1_RX || (p) == PIN_SERIAL1_TX) //defined in variant.h  RX = 13, TX = 14
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 15)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
 // Arduino Zero
 // Note this will work with an Arduino Zero Pro, but not with an Arduino M0 Pro
@@ -282,6 +364,21 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
 
+// Arduino Primo
+#elif defined(ARDUINO_PRIMO)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              22 //14 digital + 6 analog + 2 i2c
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < 20)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 20)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS+2)
+#define IS_PIN_I2C(p)           ((p) == PIN_WIRE_SDA || (p) == PIN_WIRE_SCL) // SDA = 20, SCL = 21
+#define IS_PIN_SPI(p)           ((p) == SS || (p)== MOSI || (p) == MISO || (p == SCK)) // 10, 11, 12, 13
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
 
 // Arduino 101
 #elif defined(_VARIANT_ARDUINO_101_X_)
@@ -339,6 +436,37 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERIAL(p)        ((p) == 7 || (p) == 8)
 #define PIN_TO_DIGITAL(p)       (p)
 #define PIN_TO_ANALOG(p)        (((p) < 22) ? 21 - (p) : 11)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+
+// Teensy 3.5 and 3.6
+// reference: https://github.com/PaulStoffregen/cores/blob/master/teensy3/pins_arduino.h
+#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define TOTAL_ANALOG_PINS       27 // 3.5 has 27 and 3.6 has 25
+#define TOTAL_PINS              70 // 43 digital + 21 analog-digital + 6 analog (64-69)
+#define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          9
+#define PIN_SERIAL2_TX          10
+#define PIN_SERIAL3_RX          7
+#define PIN_SERIAL3_TX          8
+#define PIN_SERIAL4_RX          31
+#define PIN_SERIAL4_TX          32
+#define PIN_SERIAL5_RX          34
+#define PIN_SERIAL5_TX          33
+#define PIN_SERIAL6_RX          47
+#define PIN_SERIAL6_TX          48
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 63)
+#define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 23) || ((p) >= 31 && (p) <= 39) || ((p) >= 49 && (p) <= 50) || ((p) >= 64 && (p) <= 69))
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
+#define IS_PIN_SERIAL(p)        (((p) > 6 && (p) < 11) || ((p) == 0 || (p) == 1) || ((p) > 30 && (p) < 35) || ((p) == 47 || (p) == 48))
+#define PIN_TO_DIGITAL(p)       (p)
+// A0-A9 = D14-D23; A12-A20 = D31-D39; A23-A24 = D49-D50; A10-A11 = D64-D65; A21-A22 = D66-D67; A25-A26 = D68-D69
+#define PIN_TO_ANALOG(p)        (((p) <= 23) ? (p) - 14 : (((p) <= 39) ? (p) - 19 : (((p) <= 50) ? (p) - 26 : (((p) <= 65) ? (p) - 55 : (((p) <= 67) ? (p) - 45 : (p) - 43)))))
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 
@@ -449,6 +577,22 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
 
+// RedBearLab BLE Nano with factory switch settings (S1 - S10)
+#elif defined(BLE_NANO)
+#define TOTAL_ANALOG_PINS       6
+#define TOTAL_PINS              15 // 9 digital + 3 analog
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) <= 14)
+#define IS_PIN_ANALOG(p)        ((p) == 8 || (p) == 9 || (p) == 10 || (p) == 11 || (p) == 12 || (p) == 14) //A0~A5
+#define IS_PIN_PWM(p)           ((p) == 3 || (p) == 5 || (p) == 6)
+#define IS_PIN_SERVO(p)         ((p) >= 2 && (p) <= 7)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == CS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 8)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
+
 // Sanguino
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
 #define TOTAL_ANALOG_PINS       8
@@ -463,6 +607,25 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 24)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
+
+// Sanguino/Melzi, e.g. Creality Ender-3
+#elif defined(__AVR_ATmega1284P__)
+#define TOTAL_ANALOG_PINS       8
+#define TOTAL_PINS              32 
+#define VERSION_BLINK_PIN       13
+#define PIN_SERIAL1_RX          8 //PD0
+#define PIN_SERIAL1_TX          9 //PD1
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 24 && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           ((p) == 3 || (p) == 4 || (p) == 6 || (p) == 7 || (p) == 12 || (p) == 13 || (p) == 14 || (p) == 15)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 16 || (p) == 17)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 8 || (p) == 9)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        (p) - 24
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
 
 
 // Illuminato
@@ -665,6 +828,93 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         ((p) - 2)
 
+// ESP8266
+// note: boot mode GPIOs 0, 2 and 15 can be used as outputs, GPIOs 6-11 are in use for flash IO
+#elif defined(ESP8266)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              A0 + NUM_ANALOG_INPUTS
+#define PIN_SERIAL_RX           3
+#define PIN_SERIAL_TX           1
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) <= 5) || ((p) >= 12 && (p) < A0))
+#define IS_PIN_ANALOG(p)        ((p) >= A0 && (p) < A0 + NUM_ANALOG_INPUTS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL_RX || (p) == PIN_SERIAL_TX)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - A0)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+#define DEFAULT_PWM_RESOLUTION  10
+
+// STM32 based boards
+#elif defined(ARDUINO_ARCH_STM32)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS
+#define TOTAL_PORTS             MAX_NB_PORT
+#ifdef LED_BUILTIN
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#endif
+// PIN_SERIALY_RX/TX defined in the variant.h
+#define IS_PIN_DIGITAL(p)       (digitalPinIsValid(p) && !pinIsSerial(p))
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  < 0x01080000)
+#define IS_PIN_ANALOG(p)        ((p >= A0) && (p < (A0 + TOTAL_ANALOG_PINS)) && !pinIsSerial(p))
+#else
+#define IS_PIN_ANALOG(p)        (pinIsAnalogInput(p) && !pinIsSerial(p))
+#endif
+#define IS_PIN_PWM(p)           (IS_PIN_DIGITAL(p) && digitalPinHasPWM(p))
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p))
+#define IS_PIN_I2C(p)           (IS_PIN_DIGITAL(p) && digitalPinHasI2C(p))
+#define IS_PIN_SPI(p)           (IS_PIN_DIGITAL(p) && digitalPinHasSPI(p))
+#define IS_PIN_INTERRUPT(p)     (IS_PIN_DIGITAL(p) && (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)))
+#define IS_PIN_SERIAL(p)        (digitalPinHasSerial(p) && !pinIsSerial(p))
+#define PIN_TO_DIGITAL(p)       (p)
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  < 0x01080000)
+#define PIN_TO_ANALOG(p)        (p-A0)
+#else
+#define PIN_TO_ANALOG(p)        (digitalPinToAnalogInput(p))
+#endif
+#define PIN_TO_PWM(p)           (p)
+#define PIN_TO_SERVO(p)         (p)
+#define DEFAULT_PWM_RESOLUTION  PWM_RESOLUTION
+
+// Adafruit Bluefruit nRF52 boards
+#elif defined(ARDUINO_NRF52_ADAFRUIT)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define IS_PIN_DIGITAL(p)       ((p) >= 2 && (p) < TOTAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) == PIN_A0 || (p) == PIN_A1 || (p) == PIN_A2  || (p) == PIN_A3 || \
+                                 (p) == PIN_A4 || (p) == PIN_A5 || (p) == PIN_A6  || (p) == PIN_A7)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         IS_PIN_DIGITAL(p)
+#define IS_PIN_I2C(p)           ((p) == PIN_WIRE_SDA || (p) == PIN_WIRE_SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p)== MOSI || (p) == MISO || (p == SCK))
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ( ((p) == PIN_A0) ? 0 : ((p) == PIN_A1) ? 1 : ((p) == PIN_A2) ? 2 : ((p) == PIN_A3) ? 3 : \
+                                  ((p) == PIN_A4) ? 4 : ((p) == PIN_A5) ? 5 : ((p) == PIN_A6) ? 6 : ((p) == PIN_A7) ? 7 : (127))
+#define PIN_TO_PWM(p)           (p)
+#define PIN_TO_SERVO(p)         (p)
+
+// SPRESENSE
+#elif defined(ARDUINO_ARCH_SPRESENSE)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
+#define TOTAL_PINS              NUM_DIGITAL_PINS + 4 + NUM_ANALOG_INPUTS // + 4 built-in led
+#define VERSION_BLINK_PIN       LED_BUILTIN
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < (NUM_DIGITAL_PINS + 4))
+#define IS_PIN_ANALOG(p)        ((p) >= (TOTAL_PINS - NUM_ANALOG_INPUTS) && (p) < TOTAL_PINS)
+#define IS_PIN_PWM(p)           ((p) == 6 || (p) == 5 || (p) == 9 || (p) == 3)
+#define IS_PIN_SERVO(p)         ((p) < NUM_DIGITAL_PINS)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == 10 || (p) == 11 || (p) == 12 || (p) == 13)
+#define PIN_TO_DIGITAL(p)       (((p) < NUM_DIGITAL_PINS) ? (p) : (_LED_PIN((p) - NUM_DIGITAL_PINS)))
+#define PIN_TO_ANALOG(p)        ((p) - (TOTAL_PINS - NUM_ANALOG_INPUTS))
+#define PIN_TO_PWM(p)           (p)
+#define PIN_TO_SERVO(p)         (p)
+#define analogRead(p)           analogRead(_ANALOG_PIN(p)) // wrap function for analogRead()
+
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
@@ -679,6 +929,9 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SERIAL(p)        0
 #endif
 
+#ifndef DEFAULT_PWM_RESOLUTION
+#define DEFAULT_PWM_RESOLUTION  8
+#endif
 
 /*==============================================================================
  * readPort() - Read an 8 bit port
