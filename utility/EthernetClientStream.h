@@ -14,7 +14,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated June 18th, 2016
+  Last updated March 10th, 2020
  */
 
 #ifndef ETHERNETCLIENTSTREAM_H
@@ -27,6 +27,17 @@
 #include "firmataDebug.h"
 
 #define MILLIS_RECONNECT 5000
+
+// If defined and set to a value higher than 1 all single bytes writes
+// will be buffered until one of the following conditions is met:
+// 1) write buffer full
+// 2) any call to read(), available(), maintain(), peek() or flush()
+// By combining the buffered bytes into a single TCP frame this feature will significantly 
+// reduce the network and receiver load by the factor 1/(1/20 + 1/bufferedSize).
+// Buffer sizes up to 80 have been tested successfully. Note that higher buffer values 
+// may cause slight delays between an event and the network transmission.
+#define WRITE_BUFFER_SIZE 40
+
 
 class EthernetClientStream : public Stream
 {
@@ -47,6 +58,10 @@ class EthernetClientStream : public Stream
     uint16_t port;
     bool connected;
     uint32_t time_connect;
+#ifdef WRITE_BUFFER_SIZE
+    uint8_t writeBuffer[WRITE_BUFFER_SIZE];
+    uint8_t writeBufferLength;
+#endif
     bool maintain();
     void stop();
 };
@@ -64,6 +79,9 @@ EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IP
     host(host),
     port(port),
     connected(false)
+#ifdef WRITE_BUFFER_SIZE
+    , writeBufferLength(0)
+#endif
 {
 }
 
@@ -94,7 +112,20 @@ void EthernetClientStream::flush()
 size_t
 EthernetClientStream::write(uint8_t c)
 {
+#ifdef WRITE_BUFFER_SIZE
+  if (connected) {
+    // buffer new byte and send buffer when full
+    writeBuffer[writeBufferLength++] = c;
+    if (writeBufferLength >= WRITE_BUFFER_SIZE) {
+      return maintain()? 1 : 0;
+    }
+    return 1;
+  } else {
+    return 0;
+  }
+#else
   return maintain() ? client.write(c) : 0;
+#endif
 }
 
 void
@@ -113,14 +144,25 @@ EthernetClientStream::stop()
 {
   client.stop();
   connected = false;
+#ifdef WRITE_BUFFER_SIZE
+  writeBufferLength = 0;
+#endif
   time_connect = millis();
 }
 
 bool
 EthernetClientStream::maintain()
 {
-  if (client && client.connected())
+  if (client && client.connected()) {
+#ifdef WRITE_BUFFER_SIZE
+    // send buffered bytes
+    if (writeBufferLength) {
+      client.write(writeBuffer, writeBufferLength);
+      writeBufferLength = 0;
+    }
+#endif
     return true;
+  }
 
   if (connected) {
     stop();
@@ -132,6 +174,9 @@ EthernetClientStream::maintain()
       time_connect = millis();
       DEBUG_PRINTLN("Connection failed. Attempting to reconnect...");
     } else {
+#ifdef WRITE_BUFFER_SIZE
+      writeBufferLength = 0;
+#endif
       DEBUG_PRINTLN("Connected");
     }
   }
