@@ -14,7 +14,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated June 18th, 2016
+  Last updated March 10th, 2020
  */
 
 #ifndef ETHERNETCLIENTSTREAM_H
@@ -28,6 +28,14 @@
 
 #define MILLIS_RECONNECT 5000
 
+#define HOST_CONNECTION_DISCONNECTED 0
+#define HOST_CONNECTION_CONNECTED    1
+
+extern "C" {
+  // callback function types
+  typedef void (*hostConnectionCallbackFunction)(byte);
+}
+
 class EthernetClientStream : public Stream
 {
   public:
@@ -38,6 +46,7 @@ class EthernetClientStream : public Stream
     void flush();
     size_t write(uint8_t);
     void maintain(IPAddress localip);
+    void attach(hostConnectionCallbackFunction newFunction);
 
   private:
     Client &client;
@@ -47,6 +56,7 @@ class EthernetClientStream : public Stream
     uint16_t port;
     bool connected;
     uint32_t time_connect;
+    hostConnectionCallbackFunction currentHostConnectionCallback;
     bool maintain();
     void stop();
 };
@@ -64,6 +74,7 @@ EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IP
     host(host),
     port(port),
     connected(false)
+    , currentHostConnectionCallback(nullptr)
 {
 }
 
@@ -112,8 +123,18 @@ void
 EthernetClientStream::stop()
 {
   client.stop();
+  if (currentHostConnectionCallback)
+  {
+    (*currentHostConnectionCallback)(HOST_CONNECTION_DISCONNECTED);
+  }
   connected = false;
   time_connect = millis();
+}
+
+void
+EthernetClientStream::attach(hostConnectionCallbackFunction newFunction)
+{
+  currentHostConnectionCallback = newFunction;
 }
 
 bool
@@ -133,6 +154,10 @@ EthernetClientStream::maintain()
       DEBUG_PRINTLN("Connection failed. Attempting to reconnect...");
     } else {
       DEBUG_PRINTLN("Connected");
+      if (currentHostConnectionCallback)
+      {
+        (*currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
+      }
     }
   }
   return connected;

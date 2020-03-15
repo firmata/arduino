@@ -20,7 +20,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated August 17th, 2017
+  Last updated March 10th, 2020
 */
 
 /*
@@ -832,6 +832,26 @@ void systemResetCallback()
   isResetting = false;
 }
 
+#ifdef ETHERNETCLIENTSTREAM_H
+/*
+ * Called when a TCP connection is either connected or disconnected.
+ * TODO:
+ * - report connected or reconnected state to host (to be added to protocol)
+ * - report current state to host (to be added to protocol)
+ */
+void hostConnectionCallback(byte state)
+{
+  switch (state) {
+    case HOST_CONNECTION_CONNECTED:
+      DEBUG_PRINTLN( "TCP connection established" );
+      break;
+    case HOST_CONNECTION_DISCONNECTED:
+      DEBUG_PRINTLN( "TCP connection disconnected" );
+      break;
+  }
+}
+#endif
+
 void printEthernetStatus()
 {
   DEBUG_PRINT("Local IP Address: ");
@@ -873,6 +893,10 @@ void ignorePins()
 
 void initTransport()
 {
+#ifdef ETHERNETCLIENTSTREAM_H
+  stream.attach(hostConnectionCallback);
+#endif
+
 #ifdef YUN_ETHERNET
   Bridge.begin();
 #else
