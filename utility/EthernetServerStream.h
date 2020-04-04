@@ -10,7 +10,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated July 10th, 2017
+  Last updated March 21st 2020
  */
 
 #ifndef ETHERNETSERVERSTREAM_H
@@ -22,6 +22,17 @@
 
 //#define SERIAL_DEBUG
 #include "firmataDebug.h"
+
+// If defined and set to a value higher than 1 all single bytes writes
+// will be buffered until one of the following conditions is met:
+// 1) write buffer full
+// 2) any call to read(), available(), maintain(), peek() or flush()
+// By combining the buffered bytes into a single TCP frame this feature will significantly 
+// reduce the network and receiver load by the factor 1/(1/20 + 1/bufferedSize).
+// Buffer sizes up to 80 have been tested successfully. Note that higher buffer values 
+// may cause slight delays between an event and the network transmission.
+#define WRITE_BUFFER_SIZE 40
+
 
 class EthernetServerStream : public Stream
 {
@@ -39,6 +50,10 @@ class EthernetServerStream : public Stream
     IPAddress localip;
     uint16_t port;
     bool connected;
+#ifdef WRITE_BUFFER_SIZE
+    uint8_t writeBuffer[WRITE_BUFFER_SIZE];
+    uint8_t writeBufferLength;
+#endif    
     bool maintain();
     void stop();
     
@@ -58,6 +73,9 @@ EthernetServerStream::EthernetServerStream(IPAddress localip, uint16_t port)
   : localip(localip),
     port(port),
     connected(false)
+#ifdef WRITE_BUFFER_SIZE
+    , writeBufferLength(0)
+#endif    
 {
 }
 
@@ -65,7 +83,17 @@ bool EthernetServerStream::connect_client()
   {
     if ( connected )
     {
-      if ( client && client.connected() ) return true;
+      if ( client && client.connected() )
+      {
+#ifdef WRITE_BUFFER_SIZE
+        // send buffered bytes
+        if (writeBufferLength) {
+          client.write(writeBuffer, writeBufferLength);
+          writeBufferLength = 0;
+        }
+#endif  
+        return true;
+      }
       stop();
     }
 
@@ -73,6 +101,9 @@ bool EthernetServerStream::connect_client()
     if ( !newClient ) return false;
     client = newClient;
     connected = true;
+#ifdef WRITE_BUFFER_SIZE
+    writeBufferLength = 0;
+#endif  
     DEBUG_PRINTLN("Connected");
     return true;
   }
@@ -126,6 +157,9 @@ EthernetServerStream::stop()
     client.stop();
   }
   connected = false;
+#ifdef WRITE_BUFFER_SIZE
+  writeBufferLength = 0;
+#endif  
 }
 
 bool
