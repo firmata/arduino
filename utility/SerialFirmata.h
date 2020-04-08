@@ -15,7 +15,7 @@
   - Defines FIRMATA_SERIAL_FEATURE (could add to Configurable version as well)
   - Imports Firmata.h rather than ConfigurableFirmata.h
 
-  Last updated October 16th, 2016
+  Last updated March 11th, 2020
 */
 
 #ifndef SerialFirmata_h
@@ -29,6 +29,32 @@
 #if (ARDUINO > 10605) && (defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ARC32) || defined(ESP8266))
 #include <SoftwareSerial.h>
 #endif
+
+// If defined and set to a value between 0 and 255 milliseconds the received bytes
+// will be not be read until until one of the following conditions are met:
+// 1) the expected number of bytes have been received
+// 2) the serial receive buffer is filled to 50 % (default size is 64 bytes)
+// 3) the delay since the last received byte exceeds the configured FIRMATA_SERIAL_RX_DELAY
+//    hints: 5 bytes at 9600 baud take 5 ms, human perception of a delay starts at 50 ms
+// This feature can significantly reduce the load on the transport layer when
+// the byte receive rate is equal or lower than the average Firmata main loop execution
+// duration by preventing single byte transmits if the underlying Firmata stream supports
+// transmit buffering (currently only available with EthernetClientStream). The effect
+// can be increased with higher values of FIRMATA_SERIAL_RX_DELAY.
+// Notes
+// 1) Enabling this feature will delay the received data and may concatenate
+//    bytes into one transmit that would otherwise be transmitted separately.
+// 2) The usefulness and configuration of this feature depends on the baud rate and the serial message type:
+//    a) continuous streaming at higher baud rates: enable but set to 0 (receive buffer store & forward)
+//    b) messages: set to a value below min. inter message delay (message store & forward)
+//    c) continuous streaming at lower baud rates or random characters: undefine or set to -1 (disable)
+// 3) Smaller delays may not have the desired effect, especially with less powerful CPUs, 
+//    if set to a value near or below the average Firmata main loop duration.
+// 4) The Firmata stream write buffer size must be equal or greater than the max. 
+//    serial buffer/message size and the Firmata frame size (4 bytes) to prevent fragmentation
+//    on the transport layer.
+//#define FIRMATA_SERIAL_RX_DELAY 50 // [ms]
+#define FIRMATA_SERIAL_RX_DELAY 50
 
 #define FIRMATA_SERIAL_FEATURE
 
@@ -193,6 +219,12 @@ class SerialFirmata: public FirmataFeature
     byte reportSerial[MAX_SERIAL_PORTS];
     int serialBytesToRead[SERIAL_READ_ARR_LEN];
     signed char serialIndex;
+
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+    byte maxRxDelay[SERIAL_READ_ARR_LEN];
+    int lastBytesAvailable[SERIAL_READ_ARR_LEN];
+    unsigned long lastBytesReceived[SERIAL_READ_ARR_LEN];
+#endif
 
 #if defined(SoftwareSerial_h)
     Stream *swSerial0;
