@@ -14,10 +14,18 @@
 
   - handlePinMode calls Firmata::setPinMode
 
-  Last updated October 16th, 2016
+  Last updated March 16th, 2020
 */
 
 #include "SerialFirmata.h"
+
+// The RX and TX hardware FIFOs of the ESP8266 hold 128 bytes that can be 
+// extended using interrupt handlers. The Arduino constants are not available
+// for the ESP8266 platform.
+#if !defined(SERIAL_RX_BUFFER_SIZE) && defined(UART_TX_FIFO_SIZE)
+#define SERIAL_RX_BUFFER_SIZE UART_TX_FIFO_SIZE
+#endif
+
 
 SerialFirmata::SerialFirmata()
 {
@@ -29,6 +37,12 @@ SerialFirmata::SerialFirmata()
 #endif
 
   serialIndex = -1;
+  
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+  for (byte i = 0; i < SERIAL_READ_ARR_LEN; i++) {
+    maxRxDelay[i] = FIRMATA_SERIAL_RX_DELAY; // @todo provide setter
+  }
+#endif
 }
 
 boolean SerialFirmata::handlePinMode(byte pin, int mode)
@@ -56,13 +70,17 @@ boolean SerialFirmata::handleSysex(byte command, byte argc, byte *argv)
     Stream *serialPort;
     byte mode = argv[0] & SERIAL_MODE_MASK;
     byte portId = argv[0] & SERIAL_PORT_ID_MASK;
+    if (portId >= SERIAL_READ_ARR_LEN) return false;
 
     switch (mode) {
       case SERIAL_CONFIG:
         {
           long baud = (long)argv[1] | ((long)argv[2] << 7) | ((long)argv[3] << 14);
           serial_pins pins;
-
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+          lastBytesAvailable[portId] = 0;
+          lastBytesReceived[portId] = 0;
+#endif
           if (portId < 8) {
             serialPort = getPortFromId(portId);
             if (serialPort != NULL) {
@@ -229,6 +247,10 @@ void SerialFirmata::reset()
   serialIndex = -1;
   for (byte i = 0; i < SERIAL_READ_ARR_LEN; i++) {
     serialBytesToRead[i] = 0;
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+    lastBytesAvailable[i] = 0;
+    lastBytesReceived[i] = 0;    
+#endif
   }
 }
 
@@ -302,6 +324,10 @@ void SerialFirmata::checkSerial()
 
   if (serialIndex > -1) {
 
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+    unsigned long currentMillis = millis();
+#endif
+
     // loop through all reporting (READ_CONTINUOUS) serial ports
     for (byte i = 0; i < serialIndex + 1; i++) {
       portId = reportSerial[i];
@@ -316,27 +342,53 @@ void SerialFirmata::checkSerial()
         continue;
       }
 #endif
-      if (serialPort->available() > 0) {
-        Firmata.write(START_SYSEX);
-        Firmata.write(SERIAL_MESSAGE);
-        Firmata.write(SERIAL_REPLY | portId);
-
-        if (bytesToRead == 0 || (serialPort->available() <= bytesToRead)) {
-          numBytesToRead = serialPort->available();
+      int bytesAvailable = serialPort->available();
+      if (bytesAvailable > 0) {
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+        if (bytesAvailable > lastBytesAvailable[portId]) {
+          lastBytesReceived[portId] = currentMillis;
+        }
+        lastBytesAvailable[portId] = bytesAvailable;
+#endif
+        if (bytesToRead <= 0 || (bytesAvailable <= bytesToRead)) {
+          numBytesToRead = bytesAvailable;
         } else {
           numBytesToRead = bytesToRead;
         }
-
-        // relay serial data to the serial device
-        while (numBytesToRead > 0) {
-          serialData = serialPort->read();
-          Firmata.write(serialData & 0x7F);
-          Firmata.write((serialData >> 7) & 0x7F);
-          numBytesToRead--;
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+        if (maxRxDelay[portId] >= 0 && numBytesToRead > 0) {
+          // read and send immediately only if
+          // - expected bytes are unknown and the receive buffer has reached 50 %
+          // - expected bytes are available
+          // - maxRxDelay has expired since last receive (or time counter wrap)
+          if (!((bytesToRead <= 0 && bytesAvailable >= SERIAL_RX_BUFFER_SIZE/2)
+             || (bytesToRead > 0 && bytesAvailable >= bytesToRead)
+             || (maxRxDelay[portId] > 0 && (currentMillis < lastBytesReceived[portId] || (currentMillis - lastBytesReceived[portId]) >= maxRxDelay[portId])))) {
+            // delay
+            numBytesToRead = 0;
+          }
         }
-        Firmata.write(END_SYSEX);
-      }
+#endif
+        // relay serial data to the serial device
+        if (numBytesToRead > 0) {
+#if defined(FIRMATA_SERIAL_RX_DELAY)
+          lastBytesAvailable[portId] -= numBytesToRead;
+#endif
+          Firmata.write(START_SYSEX);
+          Firmata.write(SERIAL_MESSAGE);
+          Firmata.write(SERIAL_REPLY | portId);
 
+          // relay serial data to the serial device
+          while (numBytesToRead > 0) {
+            serialData = serialPort->read();
+            Firmata.write(serialData & 0x7F);
+            Firmata.write((serialData >> 7) & 0x7F);
+            numBytesToRead--;
+          }
+
+          Firmata.write(END_SYSEX);
+        }
+      }
     }
   }
 }

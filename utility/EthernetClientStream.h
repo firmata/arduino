@@ -28,6 +28,9 @@
 
 #define MILLIS_RECONNECT 5000
 
+#define HOST_CONNECTION_DISCONNECTED 0
+#define HOST_CONNECTION_CONNECTED    1
+
 // If defined and set to a value higher than 1 all single bytes writes
 // will be buffered until one of the following conditions is met:
 // 1) write buffer full
@@ -39,6 +42,11 @@
 #define WRITE_BUFFER_SIZE 40
 
 
+extern "C" {
+  // callback function types
+  typedef void (*hostConnectionCallbackFunction)(byte);
+}
+
 class EthernetClientStream : public Stream
 {
   public:
@@ -49,6 +57,7 @@ class EthernetClientStream : public Stream
     void flush();
     size_t write(uint8_t);
     void maintain(IPAddress localip);
+    void attach(hostConnectionCallbackFunction newFunction);
 
   private:
     Client &client;
@@ -61,7 +70,8 @@ class EthernetClientStream : public Stream
 #ifdef WRITE_BUFFER_SIZE
     uint8_t writeBuffer[WRITE_BUFFER_SIZE];
     uint8_t writeBufferLength;
-#endif
+#endif    
+    hostConnectionCallbackFunction currentHostConnectionCallback;
     bool maintain();
     void stop();
 };
@@ -78,10 +88,11 @@ EthernetClientStream::EthernetClientStream(Client &client, IPAddress localip, IP
     ip(ip),
     host(host),
     port(port),
-    connected(false)
+    connected(false),
 #ifdef WRITE_BUFFER_SIZE
-    , writeBufferLength(0)
+    writeBufferLength(0),
 #endif
+    currentHostConnectionCallback(nullptr)
 {
 }
 
@@ -143,11 +154,21 @@ void
 EthernetClientStream::stop()
 {
   client.stop();
+  if (currentHostConnectionCallback)
+  {
+    (*currentHostConnectionCallback)(HOST_CONNECTION_DISCONNECTED);
+  }
   connected = false;
 #ifdef WRITE_BUFFER_SIZE
   writeBufferLength = 0;
 #endif
   time_connect = millis();
+}
+
+void
+EthernetClientStream::attach(hostConnectionCallbackFunction newFunction)
+{
+  currentHostConnectionCallback = newFunction;
 }
 
 bool
@@ -178,6 +199,10 @@ EthernetClientStream::maintain()
       writeBufferLength = 0;
 #endif
       DEBUG_PRINTLN("Connected");
+      if (currentHostConnectionCallback)
+      {
+        (*currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
+      }
     }
   }
   return connected;
