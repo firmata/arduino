@@ -31,7 +31,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [http://funnel.cc](http://funnel.cc)
 * python
   * [https://github.com/MrYsLab/pymata-aio](https://github.com/MrYsLab/pymata-aio)
-  * [https://github.com/MrYsLab/PyMata]([https://github.com/MrYsLab/PyMata)
+  * [https://github.com/MrYsLab/PyMata](https://github.com/MrYsLab/PyMata)
   * [https://github.com/tino/pyFirmata](https://github.com/tino/pyFirmata)
   * [https://github.com/lupeke/python-firmata](https://github.com/lupeke/python-firmata)
   * [https://github.com/firmata/pyduino](https://github.com/firmata/pyduino)
@@ -49,7 +49,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/firmata/firmata.js](https://github.com/firmata/firmata.js)
   * [https://github.com/rwldrn/johnny-five](https://github.com/rwldrn/johnny-five)
   * [http://breakoutjs.com](http://breakoutjs.com)
-  * [https://nodered.org/docs/faq/interacting-with-arduino#firmata](Node-RED)
+  * [https://nodered.org/docs/faq/interacting-with-arduino#firmata](https://nodered.org/docs/faq/interacting-with-arduino#firmata)
 * java
   * [https://github.com/kurbatov/firmata4j](https://github.com/kurbatov/firmata4j)
   * [https://github.com/4ntoine/Firmata](https://github.com/4ntoine/Firmata)
