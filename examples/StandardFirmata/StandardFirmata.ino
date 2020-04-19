@@ -206,6 +206,7 @@ void readAndReportData(byte address, int theRegister, byte numBytes, byte stopTX
     Firmata.sendString("I2C: Too many bytes received");
   } else if (numBytes > Wire.available()) {
     Firmata.sendString("I2C: Too few bytes received");
+    numBytes = Wire.available();
   }
 
   i2cRxData[0] = address;
