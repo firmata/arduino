@@ -915,6 +915,26 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 #define analogRead(p)           analogRead(_ANALOG_PIN(p)) // wrap function for analogRead()
 
+// Robo HAT MM1
+#elif defined(ROBOTICSMASTERS_ROBOHATMM1_M4)
+#define TOTAL_ANALOG_PINS       7
+#define TOTAL_PINS              46 // 14 digital + 7 analog + 4 i2c + 6 spi + 4 serial
+#define TOTAL_PORTS             3  // set when TOTAL_PINS > num digitial I/O pins
+#define VERSION_BLINK_PIN       LED_BUILTIN
+//#define PIN_SERIAL1_RX          0 // already defined in zero core variant.h
+//#define PIN_SERIAL1_TX          1 // already defined in zero core variant.h
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) <= 13)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 14 + TOTAL_ANALOG_PINS)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && (p) < MAX_SERVOS) // deprecated since v2.4
+#define IS_PIN_I2C(p)           ((p) == 21 || (p) == 22) // SDA = 21, SCL = 21
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK) // SS = A2
+#define IS_PIN_SERIAL(p)        ((p) == 0 || (p) == 1)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
 // anything else
 #else
 #error "Please edit Boards.h with a hardware abstraction for this board"
