@@ -23,7 +23,7 @@
   Last updated August 17th, 2017
 */
 
-#include <Firmata.h>
+//#include <Firmata.h> <-- sketch must include this file
 
 #ifndef SERVO
 #define SERVO Servo

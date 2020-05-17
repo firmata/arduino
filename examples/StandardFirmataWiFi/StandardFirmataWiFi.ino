@@ -27,7 +27,8 @@
 
 #include <Servo.h>
 #include <Wire.h>
-#include "utility/ExampleStandardFirmataCommon.h"
+#include <Firmata.h>
+#include <utility/ExampleStandardFirmataCommon.h>
 
 /*
   README

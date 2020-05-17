@@ -40,7 +40,8 @@ void servoWrite(byte pwmpin, int value)
 #define ANALOGWRITE_PIN_MODE_PWM servoWrite
 #undef FIRMATA_SERIAL_FEATURE
 
-#include "utility/ExampleStandardFirmataCommon.h"
+#include <Firmata.h>
+#include <utility/ExampleStandardFirmataCommon.h>
 
 void setup()
 {
