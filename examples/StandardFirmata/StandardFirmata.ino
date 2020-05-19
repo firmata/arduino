@@ -46,8 +46,4 @@ void setup()
 void loop()
 {
   loopFirmataCommon();
-
-#ifdef FIRMATA_SERIAL_FEATURE
-  serialFeature.update();
-#endif
 }
