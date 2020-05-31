@@ -9,18 +9,25 @@
 
 #include <utility/ExampleStandardFirmataCommon.h>
 
-#define DEBUG_ENABLED   0 // 0 or 1
+#define LOG_ENABLED     1 // 0 or 1
+#define DEBUG_ENABLED   1 // 0 or 1
 
-#if DEBUG_ENABLED
-#define DEBUG(x...) do { x; } while (0)
+#if LOG_ENABLED
+#define LOG(x...) do { x; } while (0)
 #define IS_IGNORE_PIN(i) ((i) == 1) // 1 == Serial TX
+#else
+#define LOG(x...) do { (void)0; } while (0)
+#endif
+
+#if LOG_ENABLED && DEBUG_ENABLED
+#define DEBUG(x...) do { x; } while (0)
 #else
 #define DEBUG(x...) do { (void)0; } while (0)
 #endif
 
 PipedStreamPair pipe; // streamify data coming from websocket
-PipedStream& StreamFirmataInternal = pipe.first;
-PipedStream& StreamAsFirmata = pipe.second;
+PipedStream& firmataInternalStream = pipe.first;
+PipedStream& firmataStream = pipe.second;
 WebSocketsServer webSocket(3031);
 
 /*
@@ -42,22 +49,23 @@ void ignorePins()
 
 void initTransport()
 {
+    WiFi.persistent(false);
     WiFi.mode(WIFI_STA);
     WiFi.begin(STASSID, STAPSK);
-    DEBUG(Serial.printf("Connecting to SSID '%s'...\n", STASSID));
+    LOG(Serial.printf("Connecting to SSID '%s'...\n", STASSID));
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(1000);
-        DEBUG(Serial.print('.'));
+        LOG(Serial.print('.'));
     }    
-    DEBUG(Serial.printf("Connected, IP address: %s\n", WiFi.localIP().toString().c_str()));
+    LOG(Serial.printf("Connected, IP address: %s\n", WiFi.localIP().toString().c_str()));
 }
 
 int clients = 0;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length)
 {
-  DEBUG(Serial.printf("[ws:%u,t:%d,l:%z]: ", num, (int)type, length));
+  DEBUG(Serial.printf("[ws:%u,t:%d,l:%zd]: ", num, (int)type, length));
 
   switch(type) {
 
@@ -81,22 +89,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_BIN:
       DEBUG(Serial.printf("binary from WebSocket\n"));
 #if 1
-      // !! there is a Print::write(ptr,size_t) !?
-      //DEBUG(Serial.print("before: ");
-      //DEBUG(Serial.println(StreamFirmataInternal.available());
+      // !! there _is_StreamFirmataInternal a Print::write(ptr,size_t) !?
       for (size_t i = 0; i < length; i++)
       {
-        //Serial.printf("0x%02x ", (int)payload[i]);
-        if (StreamAsFirmata.write(payload[i]) != 1) {
-          DEBUG(Serial.println("stream error writing to StreamAsFirmata"));
+        if (firmataStream.write(payload[i]) != 1) {
+          LOG(Serial.println("stream error writing to firmataStream"));
         }
       }
-      //DEBUG(Serial.println();
-      //DEBUG(Serial.print("after: ");
-      //DEBUG(Serial.println(StreamFirmataInternal.available());
 #else
-      if (StreamAsFirmata.write(payload, length) != length) {
-        DEBUG(Serial.println("stream error writing to StreamAsFirmata"));
+      if (firmataStream.write(payload, length) != length) {
+        LOG(Serial.println("stream error writing to firmataStream"));
       }
 #endif
       break;
@@ -110,7 +112,7 @@ void initWebSocket()
 {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-  DEBUG(Serial.println("WS: initialized"));
+  LOG(Serial.println("WS: initialized"));
 }
 
 void initFirmata()
@@ -118,17 +120,14 @@ void initFirmata()
   initFirmataCommonBegin();
   ignorePins();
 
-  // Using the pipes stream
-  // it is written to by the websocket event function
-  // it is read from by the main loop
-  Firmata.begin(StreamFirmataInternal);
+  Firmata.begin(firmataInternalStream);
 
   initFirmataCommonEnd();
 }
 
 void setup()
 {
-  DEBUG(Serial.begin(115200));
+  LOG(Serial.begin(115200));
 
   initTransport();
   initWebSocket();
@@ -145,34 +144,34 @@ void loop()
   webSocket.loop();
   MDNS.update();
 
-  size_t StreamAsFirmataLen = StreamAsFirmata.available();
+  size_t firmataStreamLen = firmataStream.available();
 
-#if DEBUG_ENABLED
+#if 0 && DEBUG_ENABLED
   static unsigned long last = 0;
-  if (millis() - last > 1000)
+  if (millis() - last > 5000)
   {
     last += 1000;
-    DEBUG(Serial.printf("Firmata to WS: available=%zd --- WS to Firmata: available=%zd\n",
-        StreamAsFirmataLen, 
-        StreamFirmataInternal.available()));
+    Serial.printf("Firmata to WS: available=%zd --- WS to Firmata: available=%zd\n",
+        firmataStreamLen, 
+        firmataInternalStream.available());
   }
 #endif
 
-  if (clients && StreamAsFirmataLen)
+  if (clients && firmataStreamLen)
   {
-    DEBUG(Serial.printf("Firmata -> WS: %zd bytes", StreamAsFirmataLen));
+    DEBUG(Serial.printf("Firmata -> WS: %zd bytes\n", firmataStreamLen));
 
     static byte tempBuffer [MAX_DATA_BYTES];
-    if (StreamAsFirmataLen > sizeof(tempBuffer))
-      StreamAsFirmataLen = sizeof(tempBuffer);
-    if (   StreamAsFirmata.readBytes(tempBuffer, StreamAsFirmataLen) == StreamAsFirmataLen
-        && webSocket.broadcastBIN(tempBuffer, StreamAsFirmataLen))
+    if (firmataStreamLen > sizeof(tempBuffer))
+      firmataStreamLen = sizeof(tempBuffer);
+    if (   firmataStream.readBytes(tempBuffer, firmataStreamLen) == firmataStreamLen
+        && webSocket.broadcastBIN(tempBuffer, firmataStreamLen))
     {
-      DEBUG(Serial.printf("Successfully broadcasted-to-websocket a binary message of %zd bytes\n", StreamAsFirmataLen));
+      DEBUG(Serial.printf("Successfully broadcasted-to-websocket a binary message of %zd bytes\n", firmataStreamLen));
     }
     else
     {
-      DEBUG(Serial.printf("Error broadcasting-to-websocket a binary message of %zd bytes", StreamAsFirmataLen));
+      LOG(Serial.printf("Error broadcasting-to-websocket a binary message of %zd bytes\n", firmataStreamLen));
     }
   }
 }
