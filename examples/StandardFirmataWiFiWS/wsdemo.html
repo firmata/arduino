@@ -111,8 +111,8 @@ function digitalRead(n)
     if (ws)
     {
         b = new Uint8Array(2);
-        b[0] = REPORT_DIGITAL + port;
-        b[1] = 1; // enable
+        b[0] = PIN_STATE_QUERY;
+        b[1] = n;
         ws.send(b);
         console.log("ask for reporting digital");
     }
@@ -120,10 +120,24 @@ function digitalRead(n)
         notConnected();
 }
 
+function firmataReceived(a)
+{
+    switch (a[0])
+    {
+    case REPORT_VERSION:
+        console.log('reported device protocol version = ' + a[1] + '.' + a[2]);
+        break;
+    default:
+        m = "Unhandled from firmata: len=" + a.byteLength + ": "
+        for (var i = 0; i < a.byteLength; i++)
+          m += ' 0x' + a[i].toString(16);
+        console.log(m);
+    }
+}
 
 function connect()
 {
-    console.log('connect: ' + document.getElementById('hostname').value);
+    console.log('connecting tp: ' + document.getElementById('hostname').value);
     ws = new WebSocket(document.getElementById('hostname').value);
     if (!ws)
     {
@@ -136,24 +150,30 @@ function connect()
         console.log('connected to server\n');
         // firmata-websocket makes a difference between command and text, if that matters
         ws.send("hello from ws");
+
+        // request firmata version
+        b = new Uint8Array(1);
+        b[0] = REPORT_VERSION;
+        ws.send(b);
     };
 
-    ws.onmessage = function(evt)
+    ws.onmessage = async function(evt)
     {
         var len = evt.data.length;
         console.log('type=' + typeof(evt.data));
-        if (evt.data instanceof ArrayBuffer)
-        {
-            console.log('receive binary event, len=' + evt.data.length + '\n');
-            for (var i = 0; i < evt.data.length; i++)
-                console.log(' 0x' + evt.data[i].toString(16));
-            console.log('\n');
-        }
-        else
+        if (typeof(evt.data) == 'string') // ?? (evt.data instanceof String)
         {
             console.log('receive text event len=' + evt.data.length + ': "' + evt.data + '"\n');
         }
-        //ws.send(evt.data);
+        else if (evt.data instanceof Blob)
+        {
+            firmataReceived(new Uint8Array(await evt.data.arrayBuffer()));
+        }
+        else
+        {
+            console.log('receive unknown event ? (type=' + typeof(evt.data) + ')');
+        }
+        //ws.send(evt.data); // echo
     };
 
     ws.onclose = function()
@@ -179,16 +199,18 @@ function disconnect()
 
 <body onload="start()">
 
-<textarea id="hostname" rows="1" cols="64">ws://firmata.local:3031/this-text-is/parsable</textarea>
+<textarea id="hostname" rows="1" cols="64">ws://firmata.local:3031/this-text-is/parsable-in-sketch</textarea>
 <br>
 <button onclick="connect()">Connect</button>
 <button onclick="disconnect()">Disconnect</button>
 <br>
 <button onclick="digitalWrite(0,0)">digitalWrite(0,0)</button>
 <button onclick="digitalWrite(0,1)">digitalWrite(0,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(0)</button>
 <br>
 <button onclick="digitalWrite(1,0)">digitalWrite(1,0)</button>
 <button onclick="digitalWrite(1,1)">digitalWrite(1,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(1)</button>
 <br>
 <button onclick="digitalWrite(2,0)">digitalWrite(2,0)</button>
 <button onclick="digitalWrite(2,1)">digitalWrite(2,1)</button>
@@ -196,9 +218,39 @@ function disconnect()
 <br>
 <button onclick="digitalWrite(3,0)">digitalWrite(3,0)</button>
 <button onclick="digitalWrite(3,1)">digitalWrite(3,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(3)</button>
 <br>
 <button onclick="digitalWrite(4,0)">digitalWrite(4,0)</button>
 <button onclick="digitalWrite(4,1)">digitalWrite(4,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(4)</button>
+<br>
+<button onclick="digitalWrite(5,0)">digitalWrite(5,0)</button>
+<button onclick="digitalWrite(5,1)">digitalWrite(5,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(5)</button>
+<br>
+<button onclick="digitalWrite(6,0)">digitalWrite(6,0)</button>
+<button onclick="digitalWrite(6,1)">digitalWrite(6,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(6)</button>
+<br>
+<button onclick="digitalWrite(7,0)">digitalWrite(7,0)</button>
+<button onclick="digitalWrite(7,1)">digitalWrite(7,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(7)</button>
+<br>
+<button onclick="digitalWrite(8,0)">digitalWrite(8,0)</button>
+<button onclick="digitalWrite(8,1)">digitalWrite(8,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(8)</button>
+<br>
+<button onclick="digitalWrite(9,0)">digitalWrite(9,0)</button>
+<button onclick="digitalWrite(9,1)">digitalWrite(9,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(9)</button>
+<br>
+<button onclick="digitalWrite(10,0)">digitalWrite(10,0)</button>
+<button onclick="digitalWrite(10,1)">digitalWrite(10,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(10)</button>
+<br>
+<button onclick="digitalWrite(11,0)">digitalWrite(11,0)</button>
+<button onclick="digitalWrite(11,1)">digitalWrite(11,1)</button>
+<button id="dr2" onclick="digitalRead(2)">digitalRead(11)</button>
 
 </body>
 </html>
