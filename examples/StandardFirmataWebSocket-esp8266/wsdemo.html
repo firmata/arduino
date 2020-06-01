@@ -67,9 +67,9 @@ var server = "ws://firmata.local:3031";
 var ws = undefined;
 
 function WebSocketTest() {
-   
+
    console.log("hello");
-   document.body.addEventListener('click', clickEvent, true); 
+   document.body.addEventListener('click', clickEvent, true);
 
    if (!("WebSocket" in window))
    {
@@ -84,13 +84,13 @@ function WebSocketTest() {
      alert("Cannot open WebSocket " + server);
      return;
    }
-    
+
    ws.onopen = function() {
       console.log('connected to server\n');
       ws.send("hello from ws");
    };
-    
-   ws.onmessage = function (evt) { 
+
+   ws.onmessage = function (evt) {
       var len = evt.data.length;
       console.log('type=' + typeof(evt.data));
       if (evt.data instanceof ArrayBuffer)
@@ -106,8 +106,8 @@ function WebSocketTest() {
       }
       //ws.send(evt.data);
    };
-    
-   ws.onclose = function() { 
+
+   ws.onclose = function() {
       console.log('ws closed\n');
       ws = undefined;
    };
