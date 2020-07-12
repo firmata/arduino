@@ -54,7 +54,6 @@
 //    serial buffer/message size and the Firmata frame size (4 bytes) to prevent fragmentation
 //    on the transport layer.
 //#define FIRMATA_SERIAL_RX_DELAY 50 // [ms]
-#define FIRMATA_SERIAL_RX_DELAY 50
 
 #define FIRMATA_SERIAL_FEATURE
 
