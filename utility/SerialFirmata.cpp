@@ -26,6 +26,7 @@
 #define SERIAL_RX_BUFFER_SIZE UART_TX_FIFO_SIZE
 #endif
 
+// For SAMD and nRF5x core
 #if !defined(SERIAL_RX_BUFFER_SIZE) && defined(SERIAL_BUFFER_SIZE)
 #define SERIAL_RX_BUFFER_SIZE SERIAL_BUFFER_SIZE
 #endif
