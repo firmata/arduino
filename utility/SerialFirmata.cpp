@@ -19,16 +19,16 @@
 
 #include "SerialFirmata.h"
 
-// The RX and TX hardware FIFOs of the ESP8266 hold 128 bytes that can be 
-// extended using interrupt handlers. The Arduino constants are not available
-// for the ESP8266 platform.
-#if !defined(SERIAL_RX_BUFFER_SIZE) && defined(UART_TX_FIFO_SIZE)
-#define SERIAL_RX_BUFFER_SIZE UART_TX_FIFO_SIZE
-#endif
-
-// For SAMD and nRF5x core
-#if !defined(SERIAL_RX_BUFFER_SIZE) && defined(SERIAL_BUFFER_SIZE)
-#define SERIAL_RX_BUFFER_SIZE SERIAL_BUFFER_SIZE
+#if !defined(SERIAL_RX_BUFFER_SIZE)
+  #if defined(UART_TX_FIFO_SIZE)
+    // The RX and TX hardware FIFOs of the ESP8266 hold 128 bytes that can be
+    // extended using interrupt handlers. The Arduino constants are not available
+    // for the ESP8266 platform.
+    #define SERIAL_RX_BUFFER_SIZE UART_TX_FIFO_SIZE
+  #elif defined(SERIAL_BUFFER_SIZE)
+    // For SAMD and nRF5x core
+    #define SERIAL_RX_BUFFER_SIZE SERIAL_BUFFER_SIZE
+  #endif
 #endif
 
 
