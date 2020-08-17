@@ -6,16 +6,18 @@ Firmata is a protocol for communicating with microcontrollers from software on a
 
 # Contents
 
-- [Usage](#usage)
-- [Firmata Client Libraries](#firmata-client-libraries)
-- [Updating Firmata in the Arduino IDE - Arduino 1.6.4 and higher](#updating-firmata-in-the-arduino-ide---arduino-164-and-higher)
-- [Cloning Firmata](#cloning-firmata)
-- [Updating Firmata in the Arduino IDE - older versions (<= 1.6.3 or 1.0.x)](#updating-firmata-in-the-arduino-ide---older-versions--163-or-10x)
-  - [Mac OSX:](#mac-osx)
-  - [Windows](#windows)
-  - [Linux](#linux)
-- [Using the Source code rather than release archive (only for versions older than Arduino 1.6.3)](#using-the-source-code-rather-than-release-archive-only-for-versions-older-than-arduino-163)
-- [Contributing](#contributing)
+- [Firmata](#firmata)
+- [Contents](#contents)
+  - [Usage](#usage)
+  - [Firmata Client Libraries](#firmata-client-libraries)
+  - [Updating Firmata in the Arduino IDE - Arduino 1.6.4 and higher](#updating-firmata-in-the-arduino-ide---arduino-164-and-higher)
+    - [Cloning Firmata](#cloning-firmata)
+  - [Updating Firmata in the Arduino IDE - older versions (<= 1.6.3 or 1.0.x)](#updating-firmata-in-the-arduino-ide---older-versions--163-or-10x)
+    - [Mac OSX:](#mac-osx)
+    - [Windows:](#windows)
+    - [Linux:](#linux)
+    - [Using the Source code rather than release archive (only for versions older than Arduino 1.6.3)](#using-the-source-code-rather-than-release-archive-only-for-versions-older-than-arduino-163)
+  - [Contributing](#contributing)
 
 ## Usage
 
@@ -73,6 +75,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/nfrancois/firmata](https://github.com/nfrancois/firmata)
 * Max/MSP
   * [http://www.maxuino.org/](http://www.maxuino.org/)
+  * [https://github.com/NullMember/MaxFirmata](https://github.com/NullMember/MaxFirmata)
 * Elixir
   * [https://github.com/kfatehi/firmata](https://github.com/kfatehi/firmata)
 * Modelica
@@ -85,6 +88,8 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [http://openframeworks.cc/documentation/communication/ofArduino/](http://openframeworks.cc/documentation/communication/ofArduino/)
 * Rust
   * [https://github.com/zankich/rust-firmata](https://github.com/zankich/rust-firmata)
+* Pure Data
+  * [https://github.com/NullMember/PDFirmata](https://github.com/NullMember/PDFirmata)
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all Arduino and Arduino-compatible boards. Refer to the respective projects for details.
 
