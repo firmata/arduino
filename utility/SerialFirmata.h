@@ -65,7 +65,7 @@
 #define HW_SERIAL4                  0x04
 #define HW_SERIAL5                  0x05
 #define HW_SERIAL6                  0x06
-// extensible up to 0x07
+#define HW_SERIAL7                  0x07
 
 #define SW_SERIAL0                  0x08
 #define SW_SERIAL1                  0x09
@@ -90,6 +90,8 @@
 #define RES_TX5                     0x0b
 #define RES_RX6                     0x0c
 #define RES_TX6                     0x0d
+#define RES_RX7                     0x0e
+#define RES_TX7                     0x0f
 
 // Serial command bytes
 #define SERIAL_CONFIG               0x10
@@ -143,6 +145,10 @@ namespace {
     if (pin == PIN_SERIAL6_RX) return RES_RX6;
     if (pin == PIN_SERIAL6_TX) return RES_TX6;
   #endif
+  #if defined(PIN_SERIAL7_RX)
+    if (pin == PIN_SERIAL7_RX) return RES_RX7;
+    if (pin == PIN_SERIAL7_TX) return RES_TX7;
+  #endif
     return 0;
   }
 
@@ -191,6 +197,12 @@ namespace {
       case HW_SERIAL6:
         pins.rx = PIN_SERIAL6_RX;
         pins.tx = PIN_SERIAL6_TX;
+        break;
+  #endif
+  #if defined(PIN_SERIAL7_RX)
+      case HW_SERIAL7:
+        pins.rx = PIN_SERIAL7_RX;
+        pins.tx = PIN_SERIAL7_TX;
         break;
   #endif
       default:
