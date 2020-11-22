@@ -84,6 +84,7 @@ FirmataClass::FirmataClass()
   firmwareVersionCount = 0;
   firmwareVersionVector = 0;
   blinkVersionDisabled = false;
+  extraPins = 0;
 
   // Establish callback translation to parser callbacks
   parser.attach(ANALOG_MESSAGE, (FirmataParser::callbackFunction)staticAnalogCallback, (void *)NULL);
@@ -141,6 +142,26 @@ void FirmataClass::begin(Stream &s)
   printFirmwareVersion(); // send the firmware name and version
 }
 
+/**
+ * Set the number of available pins.
+ * The default number of available pins is defined in Boards.h. The sketch can define
+ * virtual pins to send and receive additional data. If the number of required pins
+ * is higher than TOTAL_PINS from Boards.h, this can be called to increase the default.
+ */
+void FirmataClass::setTotalPins(byte pins)
+{
+  if (pins <= TOTAL_PINS) return; // no need for extra pins
+  if (extraPins > 0) return;      // already allocated
+
+  extraPins = pins - TOTAL_PINS;
+  extraPinConfig = (byte *)malloc(extraPins * sizeof(byte));
+  extraPinState = (int *)malloc(extraPins * sizeof(int));
+  byte i;
+  for (i = 0; i < extraPins; i++) {
+    extraPinConfig[i] = PIN_MODE_INPUT;
+    extraPinState[i] = 0;
+  }
+}
 /**
  * Send the Firmata protocol version to the Firmata host application.
  */
@@ -473,7 +494,10 @@ void FirmataClass::detach(uint8_t command)
  */
 byte FirmataClass::getPinMode(byte pin)
 {
-  return pinConfig[pin];
+  if (pin < TOTAL_PINS) return pinConfig[pin];
+  pin -= TOTAL_PINS;
+  if (pin < extraPins) return extraPinConfig[pin];
+  return PIN_MODE_IGNORE;
 }
 
 /**
@@ -485,10 +509,20 @@ byte FirmataClass::getPinMode(byte pin)
  */
 void FirmataClass::setPinMode(byte pin, byte config)
 {
-  if (pinConfig[pin] == PIN_MODE_IGNORE)
-    return;
+  if (pin < TOTAL_PINS) {
+    if (pinConfig[pin] == PIN_MODE_IGNORE)
+      return;
 
-  pinConfig[pin] = config;
+    pinConfig[pin] = config;
+    return;
+  }
+  pin -= TOTAL_PINS;
+  if (pin < extraPins) {
+    if (extraPinConfig[pin] == PIN_MODE_IGNORE)
+      return;
+
+    extraPinConfig[pin] = config;
+  }
 }
 
 /**
@@ -497,7 +531,10 @@ void FirmataClass::setPinMode(byte pin, byte config)
  */
 int FirmataClass::getPinState(byte pin)
 {
-  return pinState[pin];
+  if (pin < TOTAL_PINS) return pinState[pin];
+  pin -= TOTAL_PINS;
+  if (pin < extraPins) return extraPinState[pin];
+  return 0;
 }
 
 /**
@@ -508,7 +545,12 @@ int FirmataClass::getPinState(byte pin)
  */
 void FirmataClass::setPinState(byte pin, int state)
 {
-  pinState[pin] = state;
+  if (pin < TOTAL_PINS) {
+    pinState[pin] = state;
+    return;
+  }
+  pin -= TOTAL_PINS;
+  if (pin < extraPins) extraPinState[pin] = state;
 }
 
 // sysex callbacks
