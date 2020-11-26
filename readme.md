@@ -73,6 +73,7 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [https://github.com/nfrancois/firmata](https://github.com/nfrancois/firmata)
 * Max/MSP
   * [http://www.maxuino.org/](http://www.maxuino.org/)
+  * [https://github.com/NullMember/MaxFirmata](https://github.com/NullMember/MaxFirmata)
 * Elixir
   * [https://github.com/kfatehi/firmata](https://github.com/kfatehi/firmata)
 * Modelica
@@ -85,6 +86,8 @@ Most of the time you will be interacting with Arduino with a client library on t
   * [http://openframeworks.cc/documentation/communication/ofArduino/](http://openframeworks.cc/documentation/communication/ofArduino/)
 * Rust
   * [https://github.com/zankich/rust-firmata](https://github.com/zankich/rust-firmata)
+* Pure Data
+  * [https://github.com/NullMember/PDFirmata](https://github.com/NullMember/PDFirmata)
 
 Note: The above libraries may support various versions of the Firmata protocol and therefore may not support all features of the latest Firmata spec nor all Arduino and Arduino-compatible boards. Refer to the respective projects for details.
 
