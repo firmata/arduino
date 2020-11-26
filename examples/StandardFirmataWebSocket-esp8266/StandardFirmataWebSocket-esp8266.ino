@@ -45,7 +45,7 @@
 #include <WebSocketsServer.h>   // https://github.com/Links2004/arduinoWebSockets 
 #include <PipedStream.h>        // https://github.com/paulo-raca/ArduinoBufferedStreams
 
-#include <utility/ExampleStandardFirmataCommon.h>
+#include "ExampleStandardFirmataCommon.h"
 
 #if LOG_ENABLED
 #define LOG(x...) do { x; } while (0)
