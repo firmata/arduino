@@ -63,7 +63,7 @@ Most of the time you will be interacting with Arduino with a client library on t
 * Pharo
   * [https://github.com/pharo-iot/Firmata](https://github.com/pharo-iot/Firmata)
 * PHP
-  * [https://github.com/ThomasWeinert/carica-firmata]()
+  * [https://github.com/ThomasWeinert/carica-firmata](https://github.com/ThomasWeinert/carica-firmata)
   * [https://github.com/oasynnoum/phpmake_firmata](https://github.com/oasynnoum/phpmake_firmata)
 * Haskell
   * [http://hackage.haskell.org/package/hArduino](http://hackage.haskell.org/package/hArduino)
