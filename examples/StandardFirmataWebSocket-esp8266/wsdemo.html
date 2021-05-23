@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<script type = "text/javascript">
+
+// message command bytes (128-255/0x80-0xFF)
+
+const DIGITAL_MESSAGE =         0x90; // send data for a digital port (collection of 8 pins)
+const ANALOG_MESSAGE =          0xE0; // send data for an analog pin (or PWM)
+const REPORT_ANALOG =           0xC0; // enable analog input by pin #
+const REPORT_DIGITAL =          0xD0; // enable digital input by port pair
+//
+const SET_PIN_MODE =            0xF4; // set a pin to INPUT/OUTPUT/PWM/etc
+const SET_DIGITAL_PIN_VALUE =   0xF5; // set value of an individual digital pin
+//
+const REPORT_VERSION =          0xF9; // report protocol version
+const SYSTEM_RESET =            0xFF; // reset from MIDI
+//
+const START_SYSEX =             0xF0; // start a MIDI Sysex message
+const END_SYSEX =               0xF7; // end a MIDI Sysex message
+
+// extended command set using sysex (0-127/0x00-0x7F)
+/* 0x00-0x0F reserved for user-defined commands */
+
+const SERIAL_DATA =             0x60; // communicate with serial devices, including other boards
+const ENCODER_DATA =            0x61; // reply with encoders current positions
+const SERVO_CONFIG =            0x70; // set max angle, minPulse, maxPulse, freq
+const STRING_DATA =             0x71; // a string message with 14-bits per char
+const STEPPER_DATA =            0x72; // control a stepper motor
+const ONEWIRE_DATA =            0x73; // send an OneWire read/write/reset/select/skip/search request
+const SHIFT_DATA =              0x75; // a bitstream to/from a shift register
+const I2C_REQUEST =             0x76; // send an I2C read/write request
+const I2C_REPLY =               0x77; // a reply to an I2C read request
+const I2C_CONFIG =              0x78; // config I2C settings such as delay times and power pins
+const REPORT_FIRMWARE =         0x79; // report name and version of the firmware
+const EXTENDED_ANALOG =         0x6F; // analog write (PWM, Servo, etc) to any pin
+const PIN_STATE_QUERY =         0x6D; // ask for a pin's current mode and value
+const PIN_STATE_RESPONSE =      0x6E; // reply with pin's current mode and value
+const CAPABILITY_QUERY =        0x6B; // ask for supported modes and resolution of all pins
+const CAPABILITY_RESPONSE =     0x6C; // reply with supported modes and resolution
+const ANALOG_MAPPING_QUERY =    0x69; // ask for mapping of analog to pin numbers
+const ANALOG_MAPPING_RESPONSE = 0x6A; // reply with mapping info
+const SAMPLING_INTERVAL =       0x7A; // set the poll rate of the main loop
+const SCHEDULER_DATA =          0x7B; // send a createtask/deletetask/addtotask/schedule/querytasks/querytask request to the scheduler
+const SYSEX_NON_REALTIME =      0x7E; // MIDI Reserved for non-realtime messages
+const SYSEX_REALTIME =          0x7F; // MIDI Reserved for realtime messages
+
+// pin modes
+const PIN_MODE_INPUT =          0x00; // same as INPUT defined in Arduino.h
+const PIN_MODE_OUTPUT =         0x01; // same as OUTPUT defined in Arduino.h
+const PIN_MODE_ANALOG =         0x02; // analog pin in analogInput mode
+const PIN_MODE_PWM =            0x03; // digital pin in PWM output mode
+const PIN_MODE_SERVO =          0x04; // digital pin in Servo output mode
+const PIN_MODE_SHIFT =          0x05; // shiftIn/shiftOut mode
+const PIN_MODE_I2C =            0x06; // pin included in I2C setup
+const PIN_MODE_ONEWIRE =        0x07; // pin configured for 1-wire
+const PIN_MODE_STEPPER =        0x08; // pin configured for stepper motor
+const PIN_MODE_ENCODER =        0x09; // pin configured for rotary encoders
+const PIN_MODE_SERIAL =         0x0A; // pin configured for serial communication
+const PIN_MODE_PULLUP =         0x0B; // enable internal pull-up resistor for pin
+const PIN_MODE_IGNORE =         0x7F; // pin configured to be ignored by digitalWrite and capabilityResponse
+
+const TOTAL_PIN_MODES =         13;
+
+var server = "ws://firmata.local:3031";
+var ws = undefined;
+
+function WebSocketTest() {
+
+   console.log("hello");
+   document.body.addEventListener('click', clickEvent, true);
+
+   if (!("WebSocket" in window))
+   {
+       alert("WebSocket NOT supported by your Browser!");
+       return;
+   }
+
+   //var ws = new WebSocket("ws://firmata.local:3031");
+   ws = new WebSocket("ws://10.0.1.30:3031");
+   if (!ws)
+   {
+     alert("Cannot open WebSocket " + server);
+     return;
+   }
+
+   ws.onopen = function() {
+      console.log('connected to server\n');
+      ws.send("hello from ws");
+   };
+
+   ws.onmessage = function (evt) {
+      var len = evt.data.length;
+      console.log('type=' + typeof(evt.data));
+      if (evt.data instanceof ArrayBuffer)
+      {
+          console.log('receive binary event, len=' + evt.data.length + '\n');
+          for (var i = 0; i < evt.data.length; i++)
+             console.log(' 0x' + evt.data[i].toString(16));
+          console.log('\n');
+      }
+      else
+      {
+          console.log('receive text event len=' + evt.data.length + ': "' + evt.data + '"\n');
+      }
+      //ws.send(evt.data);
+   };
+
+   ws.onclose = function() {
+      console.log('ws closed\n');
+      ws = undefined;
+   };
+}
+
+function clickEvent (n)
+{
+    console.log("click" + n);
+    ws.send("click" + n.toString());
+    b = new Uint8Array(4);
+    b[0] = DIGITAL_MESSAGE;
+    b[1] = 1 << n;
+    b[2] = 1;
+    b[3] = 0;
+    console.log('length to send = ' + b.byteLength + ': ' + b);
+    ws.send(b);
+}
+
+
+</script>
+</head>
+
+<body onload="WebSocketTest()">
+<button onclick="clickEvent(0)">toggle 0</button>
+<button onclick="clickEvent(1)">toggle 1</button>
+<button onclick="clickEvent(2)">toggle 2</button>
+<button onclick="clickEvent(3)">toggle 3</button>
+<button onclick="clickEvent(4)">toggle 4</button>
+
+</body>
+
+</html>
