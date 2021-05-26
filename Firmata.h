@@ -65,6 +65,7 @@ class FirmataClass
     void begin();
     void begin(long);
     void begin(Stream &s);
+    void setTotalPins(byte total_pins);
 
     /* querying functions */
     void printVersion(void);
@@ -123,6 +124,10 @@ class FirmataClass
     /* pin configuration */
     byte pinConfig[TOTAL_PINS];
     int pinState[TOTAL_PINS];
+
+    byte extraPins;
+    byte *extraPinConfig;
+    int *extraPinState;
 
     boolean blinkVersionDisabled;
 
