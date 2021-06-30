@@ -13,6 +13,7 @@
  *
  * This example code is in the public domain.
  */
+#include <HardwareSerial.h> 
 #include <Firmata.h>
 
 void stringCallback(char *myString)
