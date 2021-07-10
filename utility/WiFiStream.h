@@ -15,7 +15,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated April 23rd, 2016
+  Last updated March 21st, 2020
  */
 
 #ifndef WIFI_STREAM_H
@@ -26,6 +26,17 @@
 
 #define HOST_CONNECTION_DISCONNECTED 0
 #define HOST_CONNECTION_CONNECTED    1
+
+// If defined and set to a value higher than 1 all single bytes writes
+// will be buffered until one of the following conditions is met:
+// 1) write buffer full
+// 2) any call to read(), available(), maintain(), peek() or flush()
+// By combining the buffered bytes into a single TCP frame this feature will significantly
+// reduce the network and receiver load by the factor 1/(1/20 + 1/bufferedSize).
+// Buffer sizes up to 80 have been tested successfully. Note that higher buffer values
+// may cause slight delays between an event and the network transmission.
+#define WRITE_BUFFER_SIZE 40
+
 
 extern "C" {
   // callback function types
@@ -38,6 +49,10 @@ protected:
   WiFiClient _client;
   bool _connected = false;
   hostConnectionCallbackFunction _currentHostConnectionCallback;
+#ifdef WRITE_BUFFER_SIZE
+  uint8_t writeBuffer[WRITE_BUFFER_SIZE];
+  uint8_t writeBufferLength;
+#endif
 
   //configuration members
   IPAddress _local_ip;                // DHCP
@@ -58,7 +73,11 @@ protected:
 
 public:
   /** constructor for TCP server */
-  WiFiStream(uint16_t server_port) : _port(server_port) {}
+  WiFiStream(uint16_t server_port) :
+#ifdef WRITE_BUFFER_SIZE
+    writeBufferLength(0),
+#endif
+    _port(server_port) {}
 
   /** constructor for TCP client */
   WiFiStream(IPAddress server_ip, uint16_t server_port) : _remote_ip(server_ip), _port(server_port) {}
@@ -218,7 +237,20 @@ public:
 
   inline size_t write(uint8_t byte)
   {
+#ifdef WRITE_BUFFER_SIZE
+    if (connect_client()) {
+      // buffer new byte and send buffer when full
+      writeBuffer[writeBufferLength++] = byte;
+      if (writeBufferLength >= WRITE_BUFFER_SIZE) {
+        return maintain()? 1 : 0;
+      }
+      return 1;
+    } else {
+      return 0;
+    }
+#else
     return connect_client() ? _client.write( byte ) : 0;
+#endif
   }
 
 };
