@@ -48,9 +48,9 @@
 //    a) continuous streaming at higher baud rates: enable but set to 0 (receive buffer store & forward)
 //    b) messages: set to a value below min. inter message delay (message store & forward)
 //    c) continuous streaming at lower baud rates or random characters: undefine or set to -1 (disable)
-// 3) Smaller delays may not have the desired effect, especially with less powerful CPUs, 
+// 3) Smaller delays may not have the desired effect, especially with less powerful CPUs,
 //    if set to a value near or below the average Firmata main loop duration.
-// 4) The Firmata stream write buffer size must be equal or greater than the max. 
+// 4) The Firmata stream write buffer size must be equal or greater than the max.
 //    serial buffer/message size and the Firmata frame size (4 bytes) to prevent fragmentation
 //    on the transport layer.
 //#define FIRMATA_SERIAL_RX_DELAY 50 // [ms]
@@ -78,6 +78,8 @@
 #define SERIAL_READ_ARR_LEN         12
 
 // map configuration query response resolution value to serial pin type
+#define RES_RX0                     0x00
+#define RES_TX0                     0x01
 #define RES_RX1                     0x02
 #define RES_TX1                     0x03
 #define RES_RX2                     0x04
@@ -121,6 +123,10 @@ namespace {
   #if defined(PIN_SERIAL_RX)
     // TODO when use of HW_SERIAL0 is enabled
   #endif
+  #if defined(PIN_SERIAL0_RX)
+    if (pin == PIN_SERIAL0_RX) return RES_RX0;
+    if (pin == PIN_SERIAL0_TX) return RES_TX0;
+  #endif
   #if defined(PIN_SERIAL1_RX)
     if (pin == PIN_SERIAL1_RX) return RES_RX1;
     if (pin == PIN_SERIAL1_TX) return RES_TX1;
@@ -162,6 +168,12 @@ namespace {
         // case HW_SERIAL0:
         //   // TODO when use of HW_SERIAL0 is enabled
         //   break;
+  #endif
+  #if defined(PIN_SERIAL0_RX)
+      case HW_SERIAL0:
+        pins.rx = PIN_SERIAL0_RX;
+        pins.tx = PIN_SERIAL0_TX;
+        break;
   #endif
   #if defined(PIN_SERIAL1_RX)
       case HW_SERIAL1:
