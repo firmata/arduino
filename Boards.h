@@ -675,7 +675,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // Sanguino/Melzi, e.g. Creality Ender-3
 #elif defined(__AVR_ATmega1284P__)
 #define TOTAL_ANALOG_PINS       8
-#define TOTAL_PINS              32 
+#define TOTAL_PINS              32
 #define VERSION_BLINK_PIN       13
 #define PIN_SERIAL1_RX          8 //PD0
 #define PIN_SERIAL1_TX          9 //PD1
@@ -998,6 +998,31 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p) // deprecated since v2.4
+
+//Arduino Uno Wifi Rev2
+#elif defined(__AVR_ATmega4809__)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS //6
+#define TOTAL_PINS              41 // 14 digital + 6 analog + 6 reserved + 10 internal used + 2 I2C + 3 SPI
+#define TOTAL_PORTS             3
+#define VERSION_BLINK_PIN       LED_BUILTIN //25
+#define PIN_SERIAL1_RX          0
+#define PIN_SERIAL1_TX          1
+#define PIN_SERIAL2_RX          23
+#define PIN_SERIAL2_TX          24
+#define PIN_SERIAL0_RX          26
+#define PIN_SERIAL0_TX          27
+#define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < 20) || (p) == 25)
+#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) < 19)
+#define IS_PIN_PWM(p)           digitalPinHasPWM(p)
+#define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
+#define IS_PIN_I2C(p)           ((p) == 20 || (p) == 21)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_SERIAL(p)        ((p) == 23 || (p) == 24 || (p) == 26 || (p) == 27)
+#define PIN_TO_DIGITAL(p)       (p)
+#define PIN_TO_ANALOG(p)        ((p) - 14)
+#define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
+#define PIN_TO_SERVO(p)         (p)
+
 
 // anything else
 #else
