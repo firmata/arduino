@@ -584,10 +584,23 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 
-// Teensy 4.0
+// Teensy 4.0 and Teensy 4.1
 #elif defined(__IMXRT1062__)
-#define TOTAL_ANALOG_PINS       14
-#define TOTAL_PINS              40
+#if !defined(TEENSY40) && !defined(TEENSY41)
+  #warning Assuming TEENSY40. Please #define TEENSY40 or TEENSY41.
+  #define TEENSY40
+#endif
+#if defined(TEENSY40)
+  #define TOTAL_PINS              40
+  #define TOTAL_ANALOG_PINS       14
+  #define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) <= 27)
+  #define PIN_TO_ANALOG(p)        ((p) - 14)
+#elif defined(TEENSY41)
+  #define TOTAL_PINS              55
+  #define TOTAL_ANALOG_PINS       18
+  #define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 27) || ((p) >= 38 && (p) <= 41))
+  #define PIN_TO_ANALOG(p)        (((p) <= 27) ? ((p) - 14 ) : ((p) - 24))
+#endif
 #define VERSION_BLINK_PIN       13
 #define PIN_SERIAL1_RX          0
 #define PIN_SERIAL1_TX          1
@@ -603,14 +616,64 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_SERIAL6_TX          24
 #define PIN_SERIAL7_RX          28
 #define PIN_SERIAL7_TX          29
+#if defined(TEENSY40)
+  #define IS_PIN_SERIAL(p)        (((p) == PIN_SERIAL1_RX) || \
+                                   ((p) == PIN_SERIAL1_TX) || \
+                                   ((p) == PIN_SERIAL2_RX) || \
+                                   ((p) == PIN_SERIAL2_TX) || \
+                                   ((p) == PIN_SERIAL3_RX) || \
+                                   ((p) == PIN_SERIAL3_TX) || \
+                                   ((p) == PIN_SERIAL4_RX) || \
+                                   ((p) == PIN_SERIAL4_TX) || \
+                                   ((p) == PIN_SERIAL5_RX) || \
+                                   ((p) == PIN_SERIAL5_TX) || \
+                                   ((p) == PIN_SERIAL6_RX) || \
+                                   ((p) == PIN_SERIAL6_TX) || \
+                                   ((p) == PIN_SERIAL7_RX) || \
+                                   ((p) == PIN_SERIAL7_TX))
+  #define IS_PIN_PWM(p)           (((p) >= 0 && (p) <= 16) || \
+                                   ((p) == 18) || \
+                                   ((p) == 19) || \
+                                   ((p) >= 22 && (p) <= 25) || \
+                                   ((p) == 28) || \
+                                   ((p) == 29) || \
+                                   ((p) >= 33 && (p) <= 39))
+#elif defined(TEENSY41)
+  #define PIN_SERIAL8_RX          34
+  #define PIN_SERIAL8_TX          35
+  #define IS_PIN_SERIAL(p)         (((p) == PIN_SERIAL1_RX) || \
+                                    ((p) == PIN_SERIAL1_TX) || \
+                                    ((p) == PIN_SERIAL2_RX) || \
+                                    ((p) == PIN_SERIAL2_TX) || \
+                                    ((p) == PIN_SERIAL3_RX) || \
+                                    ((p) == PIN_SERIAL3_TX) || \
+                                    ((p) == PIN_SERIAL4_RX) || \
+                                    ((p) == PIN_SERIAL4_TX) || \
+                                    ((p) == PIN_SERIAL5_RX) || \
+                                    ((p) == PIN_SERIAL5_TX) || \
+                                    ((p) == PIN_SERIAL6_RX) || \
+                                    ((p) == PIN_SERIAL6_TX) || \
+                                    ((p) == PIN_SERIAL7_RX) || \
+                                    ((p) == PIN_SERIAL7_TX) ||\
+                                    ((p) == PIN_SERIAL8_RX) || \
+                                    ((p) == PIN_SERIAL8_TX))
+  #define IS_PIN_PWM(p)           (((p) >= 0 && (p) <= 15)  || \
+                                   ((p) == 18) || \
+                                   ((p) == 19) || \
+                                   ((p) >= 22 && (p) <= 25) || \
+                                   ((p) == 28) || \
+                                   ((p) == 29) || \
+                                   ((p) == 33) || \
+                                   ((p) == 36) || \
+                                   ((p) == 37) || \
+                                   ((p) >= 42 && (p) <= 47) || \
+                                   ((p) == 51) || \
+                                   ((p) == 54))
+#endif
 #define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < TOTAL_PINS)
-#define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) <= 27)
-#define IS_PIN_PWM(p)           (((p) >= 0 && (p) <= 16) || ((p) >= 18 && (p) <= 19) || ((p) >= 22 && (p) <= 25) || ((p) >= 28 && (p) <= 29)|| ((p) >= 33 && (p) <= 39))
 #define IS_PIN_SERVO(p)         ((p) >= 0 && (p) < MAX_SERVOS)
 #define IS_PIN_I2C(p)           ((p) == 18 || (p) == 19)
-#define IS_PIN_SERIAL(p)        (((p) >= 0 && (p) <= 1) || ((p) >= 7 && (p) <= 8) || ((p) >= 14 && (p) <= 17) || ((p) >= 20 && (p) <= 21) || ((p) >= 24 && (p) <= 25) || ((p) >= 28 && (p) <= 29))
 #define PIN_TO_DIGITAL(p)       (p)
-#define PIN_TO_ANALOG(p)        ((p) - 14)
 #define PIN_TO_PWM(p)           (p)
 #define PIN_TO_SERVO(p)         (p)
 
