@@ -28,7 +28,6 @@ Most of the time you will be interacting with Arduino with a client library on t
 
 * processing
   * [https://github.com/firmata/processing](https://github.com/firmata/processing)
-  * [http://funnel.cc](http://funnel.cc)
 * python
   * [https://github.com/MrYsLab/pymata4](https://github.com/MrYsLab/pymata4)
   * [https://github.com/MrYsLab/pymata-express](https://github.com/MrYsLab/pymata-express)
