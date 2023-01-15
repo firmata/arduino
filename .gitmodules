@@ -1,0 +1,3 @@
+[submodule "modbus-arduino"]
+	path = modbus-arduino
+	url = git@github.com:shutch42/modbus-leonardo.git
