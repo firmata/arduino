@@ -11,8 +11,6 @@ void ModmataClass::begin(void)
 
   for(int addr = 0; addr < TOTAL_PINS; addr++) {
     mb.addHreg(addr);
-  }
-  for(int addr = 0; addr < TOTAL_PINS; addr++) {
     mb.addCoil(TOTAL_PINS+addr);
   }
 }
