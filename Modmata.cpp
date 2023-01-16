@@ -8,42 +8,44 @@ void ModmataClass::begin(void)
 {
   mb.config(&Serial, 9600, SERIAL_8N1);
   mb.setSlaveId(1);
-
-  for(int addr = 0; addr < TOTAL_PINS; addr++) {
+  
+  for(word addr = 0; addr < TOTAL_PINS; addr++) {
+    pinConfig[addr] = 0;
+    pinState[addr] = false;
     mb.addHreg(addr);
     mb.addCoil(TOTAL_PINS+addr);
   }
 }
 
-void ModmataClass::update()
+// Returns register of address being written
+word ModmataClass::update()
 {
-  mb.task();
-  checkPinMode();
-  checkDigitalWrite();
+  word addr = mb.task();
+  if(addr < TOTAL_PINS) {
+    checkPinMode(addr);
+  }
+  else if(addr < 2*TOTAL_PINS) {
+    checkDigitalWrite(addr);
+  }
+  return addr;
 }
 
-void ModmataClass::checkPinMode()
+void ModmataClass::checkPinMode(word addr)
 {
-  // TODO: Simplify this so that it only updates whenever a pinMode message is recieved,
-  // rather than repeatedly checking every address
-  for(int addr = 0; addr < TOTAL_PINS; addr++) {
-    uint8_t mode = mb.Hreg(addr);
-    if(pinConfig[addr] != mode) {
-      pinConfig[addr] = mode;
-      pinMode(addr, mode);
-    }
+  word mode = mb.Hreg(addr);
+  if(pinConfig[addr] != mode) {
+    pinConfig[addr] = mode;
+    pinMode(addr, mode);
   }
 }
 
-void ModmataClass::checkDigitalWrite()
+void ModmataClass::checkDigitalWrite(word addr)
 {
-  // TODO: Simplify to only check when digitalWrite message is recieved
-  for(int addr = 0; addr < TOTAL_PINS; addr++) {
-    int state = mb.Coil(TOTAL_PINS+addr);
-    if(pinState[addr] != state) {
-      pinState[addr] = state;
-      digitalWrite(addr, state);
-    }
-  }
+  bool state = mb.Coil(addr);
+  int pin = addr - TOTAL_PINS;
+  if(pinState[pin] != state) {
+    pinState[pin] = state;
+    digitalWrite(pin, state);
+  } 
 }
 

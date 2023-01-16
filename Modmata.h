@@ -1,5 +1,5 @@
 #include "Boards.h"
-#include "modbus-arduino/ModbusSerial.h"
+#include "ModbusSerial.h"
 
 namespace modmata {
 
@@ -7,14 +7,14 @@ class ModmataClass
 {
   public:
     void begin();
-    void update();
+    word update();
 
   private:
     ModbusSerial mb;
-    uint8_t pinConfig[TOTAL_PINS];
-    int pinState[TOTAL_PINS];
-    void checkPinMode();
-    void checkDigitalWrite();
+    word pinConfig[TOTAL_PINS];
+    bool pinState[TOTAL_PINS];
+    void checkPinMode(word addr);
+    void checkDigitalWrite(word addr);
 
 };
 
