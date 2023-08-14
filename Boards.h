@@ -586,16 +586,16 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 // Teensy 4.0 and Teensy 4.1
 #elif defined(__IMXRT1062__)
-#if !defined(TEENSY40) && !defined(TEENSY41)
-  #warning Assuming TEENSY40. Please #define TEENSY40 or TEENSY41.
-  #define TEENSY40
+#if !defined(ARDUINO_TEENSY40) && !defined(ARDUINO_TEENSY41)
+  #warning Assuming ARDUINO_TEENSY40. Please #define ARDUINO_TEENSY40 or ARDUINO_TEENSY41.
+  #define ARDUINO_TEENSY40
 #endif
-#if defined(TEENSY40)
+#if defined(ARDUINO_TEENSY40)
   #define TOTAL_PINS              40
   #define TOTAL_ANALOG_PINS       14
   #define IS_PIN_ANALOG(p)        ((p) >= 14 && (p) <= 27)
   #define PIN_TO_ANALOG(p)        ((p) - 14)
-#elif defined(TEENSY41)
+#elif defined(ARDUINO_TEENSY41)
   #define TOTAL_PINS              55
   #define TOTAL_ANALOG_PINS       18
   #define IS_PIN_ANALOG(p)        (((p) >= 14 && (p) <= 27) || ((p) >= 38 && (p) <= 41))
@@ -616,7 +616,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_SERIAL6_TX          24
 #define PIN_SERIAL7_RX          28
 #define PIN_SERIAL7_TX          29
-#if defined(TEENSY40)
+#if defined(ARDUINO_TEENSY40)
   #define IS_PIN_SERIAL(p)        (((p) == PIN_SERIAL1_RX) || \
                                    ((p) == PIN_SERIAL1_TX) || \
                                    ((p) == PIN_SERIAL2_RX) || \
@@ -638,7 +638,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
                                    ((p) == 28) || \
                                    ((p) == 29) || \
                                    ((p) >= 33 && (p) <= 39))
-#elif defined(TEENSY41)
+#elif defined(ARDUINO_TEENSY41)
   #define PIN_SERIAL8_RX          34
   #define PIN_SERIAL8_TX          35
   #define IS_PIN_SERIAL(p)         (((p) == PIN_SERIAL1_RX) || \
