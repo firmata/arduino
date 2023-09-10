@@ -22,7 +22,7 @@
   #include <stdint.h>
 #endif
 
-#include <Stream.h>
+#include <Arduino.h>
 
 namespace firmata {
 
