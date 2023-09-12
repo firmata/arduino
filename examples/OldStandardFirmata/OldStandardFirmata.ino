@@ -28,6 +28,7 @@
  */
 
 #include <EEPROM.h>
+#include <HardwareSerial.h> 
 #include <Firmata.h>
 
 /*==============================================================================

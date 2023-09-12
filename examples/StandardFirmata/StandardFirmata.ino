@@ -25,6 +25,7 @@
 
 #include <Servo.h>
 #include <Wire.h>
+#include <HardwareSerial.h>
 #include <Firmata.h>
 
 #define I2C_WRITE                   B00000000
