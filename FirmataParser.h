@@ -90,7 +90,7 @@ class FirmataParser
     stringCallbackFunction currentStringCallback;
     sysexCallbackFunction currentSysexCallback;
     versionCallbackFunction currentReportFirmwareCallback;
-    systemCallbackFunction currentReportVersionCallback;
+    versionCallbackFunction currentReportVersionCallback;
     systemCallbackFunction currentSystemResetCallback;
 
     /* private methods ------------------------------ */
