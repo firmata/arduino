@@ -8,8 +8,8 @@
  *============================================================================*/
 
 // STEP 1 [REQUIRED]
-// Uncomment / comment the appropriate set of includes for your hardware (OPTION A, B or C)
-// Arduino MKR1000 or ESP8266 are enabled by default if compiling for either of those boards.
+// Uncomment / comment the appropriate set of includes for your hardware (OPTION A ... F)
+// Arduino MKR1000, ESP8266 and ESP32 are enabled by default if compiling for either of those boards.
 
 /*
  * OPTION A: Configure for Arduino MKR1000 or Arduino WiFi Shield 101
@@ -134,6 +134,31 @@
   #define MULTIPLE_WIFI_LIB_INCLUDES
   #else
   #define WIFI_LIB_INCLUDED
+  #endif
+#endif
+
+/*
+ * OPTION F: Configure for ESP32
+ *
+ * This will configure StandardFirmataWiFi to use the ESP8266WiFi library for boards
+ * with an ESP32 chip.
+ *
+ * The appropriate libraries are included automatically when compiling for the ESP32 so
+ * continue on to STEP 2.
+ */
+
+#if defined(ARDUINO_ARCH_ESP32)
+  // automatically include if compiling for ESP32
+  #define ESP32_WIFI
+#endif
+#ifdef ESP32_WIFI
+  #include <WiFi.h>
+  #include "utility/WiFiClientStream.h"
+  #include "utility/WiFiServerStream.h"
+  #ifdef WIFI_LIB_INCLUDED
+    #define MULTIPLE_WIFI_LIB_INCLUDES
+  #else
+    #define WIFI_LIB_INCLUDED
   #endif
 #endif
 

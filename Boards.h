@@ -2,6 +2,7 @@
   Boards.h - Hardware Abstraction Layer for Firmata library
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2023 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -10,7 +11,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated April 15th, 2018
+  Last updated December 17th, 2023
 */
 
 #ifndef Firmata_Boards_h
@@ -29,7 +30,16 @@
 // compile, but without support for any Servos.  Hopefully that's what the
 // user intended by not including Servo.h
 #ifndef MAX_SERVOS
-#define MAX_SERVOS 0
+  #define MAX_SERVOS 0
+  class Servo
+  {
+    public:
+      uint8_t attach(int pin) { return 0; };
+      uint8_t attach(int pin, int min, int max) { return 0; };
+      void detach() {};
+      void write(int value) {};
+      bool attached() { return false; };
+  };
 #endif
 
 /*
@@ -1020,6 +1030,29 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           PIN_TO_DIGITAL(p)
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  10
+
+// XIAO ESP32C2
+// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number
+#elif defined(ARDUINO_XIAO_ESP32C3)
+#define TOTAL_ANALOG_PINS       (A2 + 1)          // (max GPIOx + 1), there are 4 physical analog pins but only 3 are supported by ESP32 SDK 2.0.14 via ADC1
+#define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 11 physical pins
+#define PIN_SERIAL_RX           RX
+#define PIN_SERIAL_TX           TX
+#define IS_PIN_DIGITAL(p)       (((p) >= D0 && (p) <= D10) || (p) == D6 || (p) == D7)
+#define IS_PIN_ANALOG(p)        ((p) >= A0 && (p) <= A2)
+#define IS_PIN_PWM(p)           0
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && MAX_SERVOS > 0)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL_RX || (p) == PIN_SERIAL_TX)
+#define PIN_TO_DIGITAL(p)       ((p) < 6? D0 + (p) : ((p) < 8? D6 + 6 - (p) : (p))) // Dx to GPIOy
+#define PIN_TO_ANALOG(p)        (p)                                                 // FIRMATAx to GPIOy
+#define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
+#define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
+
+#define DEFAULT_PWM_RESOLUTION     8  // see esp32-hal-led.c, analog_resolution
+#define DEFAULT_ANALOG_RESOLUTION 12  // see esp32-hal-adc.h, analogSetWidth()
 
 // STM32 based boards
 #elif defined(ARDUINO_ARCH_STM32)
