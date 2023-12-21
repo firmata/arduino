@@ -69,7 +69,7 @@ public:
  *           network configuration
  ******************************************************************************/
 
-#if (!ESP8266) && (!ARDUINO_ARCH_ESP32)
+#if !ESP8266 && !ESP32
   /**
    * configure a static local IP address without defining the local network
    * DHCP will be used as long as local IP address is not defined
@@ -90,7 +90,7 @@ public:
     _local_ip = local_ip;
     _subnet = subnet;
     _gateway = gateway;
-#if (!ESP8266) && (!ARDUINO_ARCH_ESP32)
+#if !ESP8266 && !ESP32
     WiFi.config( local_ip, IPAddress(0, 0, 0, 0), gateway, subnet );
 #else
     WiFi.config( local_ip, gateway, subnet );
@@ -115,7 +115,11 @@ public:
    */
   virtual bool maintain() = 0;
 
-#ifdef ESP8266
+#if ESP8266 || ESP32
+  enum ConnectionStatus { STATUS_CLOSED = 0,
+                          STATUS_ESTABLISHED = 4
+                        };
+
   /**
    * get status of TCP connection
    * @return status of TCP connection
@@ -133,15 +137,11 @@ public:
    */
   inline uint8_t status()
   {
+  #ifdef ESP8266
     return _client.status();
-  }
-#elif ARDUINO_ARCH_ESP32
-  /**
-   * check if TCP connection is established
-   */
-  inline uint8_t connected()
-  {
-    return _client.connected();
+  #elif ESP32
+    return _client.connected()? STATUS_ESTABLISHED : STATUS_CLOSED;
+  #endif
   }
 #endif
 
@@ -168,7 +168,7 @@ public:
     return result;
   }
 
-#if (!ESP8266) && (!ARDUINO_ARCH_ESP32)
+#if !ESP8266 && !ESP32
   /**
    * initialize WiFi with WEP security and initiate client connection
    * if WiFi connection is already established
