@@ -740,8 +740,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }
         if (IS_PIN_ANALOG(pin)) {
           Firmata.write(PIN_MODE_ANALOG);
-        #ifdef DEFAULT_ANALOG_RESOLUTION
-          Firmata.write(DEFAULT_ANALOG_RESOLUTION);
+        #ifdef DEFAULT_ADC_RESOLUTION
+          Firmata.write(DEFAULT_ADC_RESOLUTION);
         #else
           Firmata.write(10); // 10 = 10-bit resolution
         #endif

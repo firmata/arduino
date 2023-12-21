@@ -1043,7 +1043,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
 
 #define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
-#define DEFAULT_ANALOG_RESOLUTION 12  // see esp32-hal-adc.h, analogSetWidth()
+#define DEFAULT_ADC_RESOLUTION  12  // see esp32-hal-adc.h, analogSetWidth()
 
 // STM32 based boards
 #elif defined(ARDUINO_ARCH_STM32)
