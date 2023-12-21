@@ -74,9 +74,9 @@
   - Arduino Mega: (D5, D7, D10, D50, D52, D53)
 */
 
-#ifndef ARDUINO_ARCH_ESP32
-  // NOTE: ESP32 SKD does not provide an implementation for class Servo
-  //       -> requires a skeleton implementation for Servo in Boards.h to be able to compile
+#ifdef ARDUINO_ARCH_ESP32
+  #include <ESP32Servo.h>
+#else
   #include <Servo.h>
 #endif
 #include <Wire.h>

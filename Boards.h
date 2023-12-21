@@ -31,15 +31,6 @@
 // user intended by not including Servo.h
 #ifndef MAX_SERVOS
   #define MAX_SERVOS 0
-  class Servo
-  {
-    public:
-      uint8_t attach(int pin) { return 0; };
-      uint8_t attach(int pin, int min, int max) { return 0; };
-      void detach() {};
-      void write(int value) {};
-      bool attached() { return false; };
-  };
 #endif
 
 /*
@@ -1031,8 +1022,8 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_SERVO(p)         (p)
 #define DEFAULT_PWM_RESOLUTION  10
 
-// XIAO ESP32C2
-// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number
+// XIAO ESP32C3
+// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx, Dx to GPIOy)
 #elif defined(ARDUINO_XIAO_ESP32C3)
 #define TOTAL_ANALOG_PINS       (A2 + 1)          // (max GPIOx + 1), there are 4 physical analog pins but only 3 are supported by ESP32 SDK 2.0.14 via ADC1
 #define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 11 physical pins
@@ -1051,7 +1042,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
 #define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
 
-#define DEFAULT_PWM_RESOLUTION     8  // see esp32-hal-led.c, analog_resolution
+#define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
 #define DEFAULT_ANALOG_RESOLUTION 12  // see esp32-hal-adc.h, analogSetWidth()
 
 // STM32 based boards
