@@ -1070,6 +1070,29 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
 #define DEFAULT_ADC_RESOLUTION  12  // see esp32-hal-adc.h, analogSetWidth()
 
+// generic ESP32
+// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx = IOx = GPIOx)
+#elif defined(ARDUINO_ARCH_ESP32)
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS // (max GPIOx + 1), there are 4 physical analog pins but only 3 are supported by ESP32 SDK 2.0.14 via ADC1
+#define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 11 physical pins
+#define PIN_SERIAL_RX           RX
+#define PIN_SERIAL_TX           TX
+#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < NUM_DIGITAL_PINS)
+#define IS_PIN_ANALOG(p)        ((p) >= 0 && (p) < NUM_ANALOG_INPUTS)
+#define IS_PIN_PWM(p)           0
+#define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && MAX_SERVOS > 0)
+#define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
+#define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
+#define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
+#define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL_RX || (p) == PIN_SERIAL_TX)
+#define PIN_TO_DIGITAL(p)       (p)                                                 // FIRMATAx to GPIOy
+#define PIN_TO_ANALOG(p)        (p)                                                 // FIRMATAx to GPIOy
+#define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
+#define PIN_TO_SERVO(p)         (p)
+
+#define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
+#define DEFAULT_ADC_RESOLUTION  12  // see esp32-hal-adc.h, analogSetWidth()
+
 // STM32 based boards
 #elif defined(ARDUINO_ARCH_STM32)
 #define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS
