@@ -1023,7 +1023,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define DEFAULT_PWM_RESOLUTION  10
 
 // XIAO ESP32C3
-// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx, Dx to GPIOy)
+// note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx = GPIOx)
 #elif defined(ARDUINO_XIAO_ESP32C3)
 #define TOTAL_ANALOG_PINS       (A2 + 1)          // (max GPIOx + 1), there are 4 physical analog pins but only 3 are supported by ESP32 SDK 2.0.14 via ADC1
 #define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 11 physical pins
@@ -1037,7 +1037,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define IS_PIN_SPI(p)           ((p) == SS || (p) == MOSI || (p) == MISO || (p) == SCK)
 #define IS_PIN_INTERRUPT(p)     (digitalPinToInterrupt(p) > NOT_AN_INTERRUPT)
 #define IS_PIN_SERIAL(p)        ((p) == PIN_SERIAL_RX || (p) == PIN_SERIAL_TX)
-#define PIN_TO_DIGITAL(p)       ((p) < 6? D0 + (p) : ((p) < 8? D6 + 6 - (p) : (p))) // Dx to GPIOy
+#define PIN_TO_DIGITAL(p)       (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_ANALOG(p)        (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
 #define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
