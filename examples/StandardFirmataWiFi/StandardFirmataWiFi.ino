@@ -941,6 +941,8 @@ void initTransport()
   DEBUG_PRINTLN( "using the legacy WiFi library." );
 #elif defined(ESP8266_WIFI)
   DEBUG_PRINTLN( "using the ESP8266 WiFi library." );
+#elif defined(ESP32_WIFI)
+  DEBUG_PRINTLN( "using the ESP32 WiFi library." );
 #elif defined(HUZZAH_WIFI)
   DEBUG_PRINTLN( "using the HUZZAH WiFi library." );
 #elif defined(WIFI_NINA)

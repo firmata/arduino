@@ -262,7 +262,7 @@ char wep_key[] = "your_wep_key";
 #error "you must define a wifi security type in wifiConfig.h."
 #endif  //WIFI_* security define check
 
-#if (defined(ESP8266_WIFI) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
+#if ((defined(ESP8266_WIFI) || defined(ESP32_WIFI)) && !(defined(WIFI_NO_SECURITY) || (defined(WIFI_WPA_SECURITY))))
 #error "you must choose between WIFI_NO_SECURITY and WIFI_WPA_SECURITY"
 #endif
 
