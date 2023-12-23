@@ -1040,7 +1040,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_DIGITAL(p)       (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_ANALOG(p)        (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
-#define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
+#define PIN_TO_SERVO(p)         ((p) - D0)
 
 #define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
 #define DEFAULT_ADC_RESOLUTION  12  // see esp32-hal-adc.h, analogSetWidth()
@@ -1048,14 +1048,14 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // WT32-ETH01 (ESP32-S1)
 // note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx = IOx = GPIOx)
 #elif defined(ARDUINO_WT32_ETH01)
-#define TOTAL_ANALOG_PINS       (IO17 + 1)        // (max GPIOx + 1), there are 10 physical analog pins
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS // (max GPIOx + 1), there are 9 physical analog pins
 #define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 15 physical pins, 3 of them are input only
 #define PIN_SERIAL1_RX          RX
 #define PIN_SERIAL1_TX          TX
 #define PIN_SERIAL2_RX          TXD
 #define PIN_SERIAL2_TX          RXD
-#define IS_PIN_DIGITAL(p)       (((p) <= IO5) || (p) == IO12 || (p) == IO14 || (p) == IO15 || (p) == IO17 || (p) == IO32 || (p) == IO33 || (p) == IO35 || (p) == IO39)
-#define IS_PIN_ANALOG(p)        (((p) <= IO5) || (p) == IO12 || (p) == IO14 || (p) == IO15 || (p) == IO17)
+#define IS_PIN_DIGITAL(p)       (((p) <= IO5) || (p) == IO12 || (p) == IO14 || (p) == IO15 || (p) == IO17 || (p) == IO32 || (p) == IO33 || (p) == IO35 || (p) == IO36 || (p) == IO39)
+#define IS_PIN_ANALOG(p)        (((p) <= IO5) || (p) == IO12 || (p) == IO14 || (p) == IO15)
 #define IS_PIN_PWM(p)           0
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && MAX_SERVOS > 0)
 #define IS_PIN_I2C(p)           ((p) == SDA || (p) == SCL)
@@ -1065,7 +1065,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 #define PIN_TO_DIGITAL(p)       (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_ANALOG(p)        (p)                                                 // FIRMATAx to GPIOy
 #define PIN_TO_PWM(p)           127                                                 // @TODO ESP32 SDK does not support analogWrite()
-#define PIN_TO_SERVO(p)         127                                                 // @TODO ESP32 SDK does not support servos
+#define PIN_TO_SERVO(p)         (p)
 
 #define DEFAULT_PWM_RESOLUTION   8  // see esp32-hal-led.c, analog_resolution
 #define DEFAULT_ADC_RESOLUTION  12  // see esp32-hal-adc.h, analogSetWidth()
