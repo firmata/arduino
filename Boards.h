@@ -1073,11 +1073,19 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 // generic ESP32
 // note: Firmata pin numbering schema is by ESP32 GPIO -> IS_XXX checks GPIO number (Ax = Dx = IOx = GPIOx)
 #elif defined(ARDUINO_ARCH_ESP32)
-#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS // (max GPIOx + 1), there are 4 physical analog pins but only 3 are supported by ESP32 SDK 2.0.14 via ADC1
-#define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1), there are 11 physical pins
+#define TOTAL_ANALOG_PINS       NUM_ANALOG_INPUTS // (max GPIOx + 1)
+#define TOTAL_PINS              NUM_DIGITAL_PINS  // (max GPIOx + 1)
 #define PIN_SERIAL_RX           RX
 #define PIN_SERIAL_TX           TX
-#define IS_PIN_DIGITAL(p)       ((p) >= 0 && (p) < NUM_DIGITAL_PINS)
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  #define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < NUM_DIGITAL_PINS) && !((p) >= 6 && (p) <= 11))  // exclude SPI flash pins
+#elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+  #define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < NUM_DIGITAL_PINS) && !((p) >= 26 && (p) <= 32)) // exclude SPI flash pins
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+  #define IS_PIN_DIGITAL(p)       (((p) >= 0 && (p) < NUM_DIGITAL_PINS) && !((p) >= 11 && (p) <= 17)) // exclude SPI flash pins
+#else
+  #error "Please edit Boards.h with a hardware abstraction for this board"
+#endif
 #define IS_PIN_ANALOG(p)        ((p) >= 0 && (p) < NUM_ANALOG_INPUTS)
 #define IS_PIN_PWM(p)           0
 #define IS_PIN_SERVO(p)         (IS_PIN_DIGITAL(p) && MAX_SERVOS > 0)
