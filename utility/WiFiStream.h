@@ -138,7 +138,14 @@ public:
   inline uint8_t status()
   {
   #ifdef ESP8266
-    return _client.status();
+    uint8 cs = _client.status();
+    switch (cs)
+    {
+      case CLOSED:      cs = STATUS_CLOSED; break;
+      case ESTABLISHED: cs = STATUS_ESTABLISHED; break;
+      default: break;
+    }
+    return cs;
   #elif ESP32
     return _client.connected()? STATUS_ESTABLISHED : STATUS_CLOSED;
   #endif
