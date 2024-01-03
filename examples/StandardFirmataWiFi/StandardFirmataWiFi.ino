@@ -140,7 +140,7 @@ int connectionAttempts = 0;
 bool streamConnected = false;
 
 /* analog inputs */
-int analogInputsToReport = 0;      // bitwise array to store pin reporting
+int analogInputsToReport = 0;       // bitwise array to store pin reporting
 
 /* digital input ports */
 byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
@@ -152,7 +152,7 @@ byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything 
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19; // how often to sample analog inputs (in ms)
+unsigned int samplingInterval = 19; // how often to sample analog inputs and i2c (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -373,7 +373,8 @@ void setPinModeCallback(byte pin, int mode)
     }
   }
   if (IS_PIN_ANALOG(pin)) {
-    reportAnalogCallback(PIN_TO_ANALOG(pin), mode == PIN_MODE_ANALOG ? 1 : 0); // turn on/off reporting
+    // turn on/off reporting
+    reportAnalogCallback(PIN_TO_ANALOG(pin), mode == PIN_MODE_ANALOG ? 1 : 0);
   }
   if (IS_PIN_DIGITAL(pin)) {
     if (mode == PIN_MODE_INPUT || mode == PIN_MODE_PULLUP) {
