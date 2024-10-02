@@ -1,5 +1,5 @@
 /*
-  Firmata.h - Firmata library v2.5.8 - 2018-04-15
+  Firmata.h - Firmata library v2.5.10 - 2023-12-16
   Copyright (c) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2009-2017 Jeff Hoefs.  All rights reserved.
 
@@ -38,7 +38,9 @@
 //#define INPUT                 0x00 // defined in Arduino.h
 //#define OUTPUT                0x01 // defined in Arduino.h
 // DEPRECATED as of Firmata v2.5
-#define ANALOG                  0x02 // same as PIN_MODE_ANALOG
+#ifndef ARDUINO_ARCH_ESP32
+  #define ANALOG                0x02 // same as PIN_MODE_ANALOG
+#endif
 #define PWM                     0x03 // same as PIN_MODE_PWM
 #define SERVO                   0x04 // same as PIN_MODE_SERVO
 #define SHIFT                   0x05 // same as PIN_MODE_SHIFT

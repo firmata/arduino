@@ -6,7 +6,7 @@
   are compatible with the Arduino WiFi library.
 
   Copyright (C) 2015-2016 Jesse Frush. All rights reserved.
-  Copyright (C) 2016      Jens B. All rights reserved.
+  Copyright (C) 2016 Jens B. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -15,7 +15,7 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated April 23rd, 2016
+  Last updated December 17th, 2023
  */
 
 #ifndef WIFI_STREAM_H
@@ -69,7 +69,7 @@ public:
  *           network configuration
  ******************************************************************************/
 
-#ifndef ESP8266
+#if !ESP8266 && !ESP32
   /**
    * configure a static local IP address without defining the local network
    * DHCP will be used as long as local IP address is not defined
@@ -90,7 +90,7 @@ public:
     _local_ip = local_ip;
     _subnet = subnet;
     _gateway = gateway;
-#ifndef ESP8266
+#if !ESP8266 && !ESP32
     WiFi.config( local_ip, IPAddress(0, 0, 0, 0), gateway, subnet );
 #else
     WiFi.config( local_ip, gateway, subnet );
@@ -115,7 +115,11 @@ public:
    */
   virtual bool maintain() = 0;
 
-#ifdef ESP8266
+#if ESP8266 || ESP32
+  enum ConnectionStatus { STATUS_CLOSED = 0,
+                          STATUS_ESTABLISHED = 4
+                        };
+
   /**
    * get status of TCP connection
    * @return status of TCP connection
@@ -133,7 +137,18 @@ public:
    */
   inline uint8_t status()
   {
-    return _client.status();
+  #ifdef ESP8266
+    uint8 cs = _client.status();
+    switch (cs)
+    {
+      case CLOSED:      cs = STATUS_CLOSED; break;
+      case ESTABLISHED: cs = STATUS_ESTABLISHED; break;
+      default: break;
+    }
+    return cs;
+  #elif ESP32
+    return _client.connected()? STATUS_ESTABLISHED : STATUS_CLOSED;
+  #endif
   }
 #endif
 
@@ -157,10 +172,10 @@ public:
 
     WiFi.begin(ssid);
     int result = WiFi.status();
-    return WiFi.status();
+    return result;
   }
 
-#ifndef ESP8266
+#if !ESP8266 && !ESP32
   /**
    * initialize WiFi with WEP security and initiate client connection
    * if WiFi connection is already established
