@@ -13,6 +13,7 @@
  *
  * This example code is in the public domain.
  */
+#include <HardwareSerial.h> 
 #include <Firmata.h>
 
 byte previousPIN[TOTAL_PORTS];  // PIN means PORT for input

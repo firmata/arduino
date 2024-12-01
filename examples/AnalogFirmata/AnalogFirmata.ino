@@ -15,6 +15,7 @@
  * This example code is in the public domain.
  */
 #include <Servo.h>
+#include <HardwareSerial.h>
 #include <Firmata.h>
 
 /*==============================================================================

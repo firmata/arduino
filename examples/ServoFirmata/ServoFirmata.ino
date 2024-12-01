@@ -16,6 +16,7 @@
  */
 
 #include <Servo.h>
+#include <HardwareSerial.h> 
 #include <Firmata.h>
 
 Servo servos[MAX_SERVOS];
