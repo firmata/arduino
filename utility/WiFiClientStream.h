@@ -20,7 +20,7 @@
 
   published under the same license.
 
-  Last updated April 23rd, 2016
+  Last updated March 21st, 2020
  */
 
 #ifndef WIFI_CLIENT_STREAM_H
@@ -43,7 +43,17 @@ protected:
   {
     if ( _connected )
     {
-      if ( _client && _client.connected() ) return true;
+      if ( _client && _client.connected() )
+      {
+#ifdef WRITE_BUFFER_SIZE
+        // send buffered bytes
+        if (writeBufferLength) {
+          _client.write(writeBuffer, writeBufferLength);
+          writeBufferLength = 0;
+        }
+#endif
+        return true;
+      }
       stop();
     }
 
@@ -58,9 +68,15 @@ protected:
         {
           _time_connect = millis();
         }
-        else if ( _currentHostConnectionCallback )
+        else
         {
-          (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
+#ifdef WRITE_BUFFER_SIZE
+          writeBufferLength = 0;
+#endif
+          if ( _currentHostConnectionCallback )
+          {
+            (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
+          }
         }
       }
     }
@@ -97,6 +113,9 @@ public:
       }
     }
     _connected = false;
+#ifdef WRITE_BUFFER_SIZE
+    writeBufferLength = 0;
+#endif
     _time_connect = millis();
   }
 

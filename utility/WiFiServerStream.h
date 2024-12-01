@@ -42,7 +42,17 @@ protected:
   {
     if ( _connected )
     {
-      if ( _client && _client.connected() ) return true;
+      if ( _client && _client.connected() )
+      {
+#ifdef WRITE_BUFFER_SIZE
+        // send buffered bytes
+        if (writeBufferLength) {
+          _client.write(writeBuffer, writeBufferLength);
+          writeBufferLength = 0;
+        }
+#endif
+        return true;
+      }
       stop();
     }
 
@@ -51,6 +61,9 @@ protected:
     if ( !newClient ) return false;
     _client = newClient;
     _connected = true;
+#ifdef WRITE_BUFFER_SIZE
+    writeBufferLength = 0;
+#endif
     if ( _currentHostConnectionCallback )
     {
       (*_currentHostConnectionCallback)(HOST_CONNECTION_CONNECTED);
@@ -100,6 +113,9 @@ public:
       }
     }
     _connected = false;
+#ifdef WRITE_BUFFER_SIZE
+    writeBufferLength = 0;
+#endif
   }
 
 };
