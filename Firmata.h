@@ -127,7 +127,7 @@ class FirmataClass
     boolean blinkVersionDisabled;
 
     /* private methods ------------------------------ */
-    void strobeBlinkPin(byte pin, int count, int onInterval, int offInterval);
+    void strobeBlinkPin(byte pin, unsigned int count, uint32_t onInterval, uint32_t offInterval);
     friend void FirmataMarshaller::encodeByteStream (size_t bytec, uint8_t * bytev, size_t max_bytes) const;
 
     /* callback functions */
