@@ -541,10 +541,9 @@ void FirmataClass::setPinState(byte pin, int state)
  * @param onInterval The number of milliseconds for the LED to be ON during each interval.
  * @param offInterval The number of milliseconds for the LED to be OFF during each interval.
  */
-void FirmataClass::strobeBlinkPin(byte pin, int count, int onInterval, int offInterval)
+void FirmataClass::strobeBlinkPin(byte pin, unsigned int count, uint32_t onInterval, uint32_t offInterval)
 {
-  byte i;
-  for (i = 0; i < count; i++) {
+  for (unsigned int i = 0; i < count; ++i) {
     delay(offInterval);
     digitalWrite(pin, HIGH);
     delay(onInterval);
