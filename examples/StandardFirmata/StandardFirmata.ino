@@ -488,6 +488,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
   switch (command) {
     case I2C_REQUEST:
+      if (argc < 2) {
+        Firmata.sendString("I2C request requires address and configuration");
+        return;
+      }
       mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
       if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
         Firmata.sendString("10-bit addressing not supported");
@@ -508,6 +512,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
       switch (mode) {
         case I2C_WRITE:
+          if (argc <= 2) {
+            Firmata.sendString("I2C write requires data payload");
+            return;
+          }
           Wire.beginTransmission(slaveAddress);
           for (byte i = 2; i < argc; i += 2) {
             data = argv[i] + (argv[i + 1] << 7);
