@@ -436,7 +436,8 @@ void FirmataParser::processSysexMessage(void)
         if ( 3 > sysexBytesRead ) {
           (*currentReportFirmwareCallback)(currentReportFirmwareCallbackContext, 0, 0, (const char *)NULL);
         } else {
-          const size_t end_of_string = (string_offset + decodeByteStream((sysexBytesRead - string_offset), &dataBuffer[string_offset]));
+          const size_t bytec = min(sysexBytesRead - string_offset, dataBufferSize - string_offset);
+          const size_t end_of_string = (string_offset + decodeByteStream(bytec, &dataBuffer[string_offset]));
           bufferDataAtPosition('\0', end_of_string); // NULL terminate the string
           (*currentReportFirmwareCallback)(currentReportFirmwareCallbackContext, (size_t)dataBuffer[major_version_offset], (size_t)dataBuffer[minor_version_offset], (const char *)&dataBuffer[string_offset]);
         }
@@ -445,7 +446,8 @@ void FirmataParser::processSysexMessage(void)
     case STRING_DATA:
       if (currentStringCallback) {
         const size_t string_offset = 1;
-        const size_t end_of_string = (string_offset + decodeByteStream((sysexBytesRead - string_offset), &dataBuffer[string_offset]));
+        const size_t bytec = min(sysexBytesRead - string_offset, dataBufferSize - string_offset);
+        const size_t end_of_string = (string_offset + decodeByteStream(bytec, &dataBuffer[string_offset]));
         bufferDataAtPosition('\0', end_of_string); // NULL terminate the string
         (*currentStringCallback)(currentStringCallbackContext, (const char *)&dataBuffer[string_offset]);
       }
